@@ -37,28 +37,103 @@ Screenshot contract: `docs/screenshots.json`.
 
 ![Notes inbox page](docs/screenshots/notes-inbox-page.png)
 
-- User-menu notes item with attention badge (admin, required).
-- Notes inbox page (admin, required).
-- Record-level Add note modal (admin, required).
-- Empty notes inbox state (admin, required).
-- Notes inbox with assigned, mentioned, and lifecycle controls (admin, optional).
+- User-menu notes item with attention badge (admin, required evidence).
+- Notes inbox page (admin, required evidence).
+- Record-level Add note modal (admin, required evidence).
+- Empty notes inbox state (admin, required evidence).
+- Notes inbox with assigned, mentioned, and lifecycle controls (admin, supplementary evidence).
+- Notes inbox page with admin sidebar menu open (admin, supplementary evidence).
 
 ## Technical Shape
 
-- Service providers: `Capell\Notes\Providers\NotesServiceProvider`, `Capell\Notes\Providers\AdminServiceProvider`.
-- Config files: `packages/notes/config/capell-notes.php`.
-- Migrations: `packages/notes/database/migrations/2026_05_10_190862_01_create_notes_tables.php`, `packages/notes/database/migrations/2026_07_10_000002_encrypt_note_bodies.php`.
-- Models: `Note`, `NoteAssignment`, `NoteMention`, `NoteReminder`.
-- Filament classes: `CreateNoteResourceHeaderActionExtender`, `NotesInboxPage`.
-- Policies: `NotePolicy`.
-- Actions: `AssignNoteUsersAction`, `BuildSubjectNotesAction`, `BuildUserAttentionCountsAction`, `BuildUserInboxNotesAction`, `CanViewNoteAction`, `CompleteNoteAssignmentAction`, `CreateNoteAction`, `MarkNoteMentionsReadAction`, `MentionNoteUsersAction`, `PruneNotesForDeletedParticipantAction`, `PruneNotesForDeletedSubjectAction`, `ReopenNoteAction`, `and 6 more`.
-- Data objects: `CreateNoteData`, `NoteReminderData`, `UserAttentionCountData`.
-- Command signatures: `capell:notes-demo`, `capell:notes:send-due-reminders`.
-- Scheduled commands: `capell:notes:send-due-reminders (everyFiveMinutes)`.
-- Console command classes: `DemoCommand`, `SendDueNoteRemindersCommand`.
-- Manifest contributions: `admin-action-extender: Capell\Notes\Manifest\NotesAdminActionExtenderContribution`, `admin-page: Capell\Notes\Manifest\NotesAdminPageContribution`, `console-command: Capell\Notes\Manifest\NotesConsoleCommandsContribution`, `health-check: Capell\Notes\Manifest\NotesHealthContribution`, `model: Capell\Notes\Manifest\NotesModelsContribution`, `scheduled-job: Capell\Notes\Manifest\NotesReminderScheduleContribution`.
-- Health checks: `Capell\Notes\Health\NotesHealthCheck`.
-- Blade views: `packages/notes/resources/views/filament/pages/notes-inbox.blade.php`.
+### Service providers
+
+- `Capell\Notes\Providers\NotesServiceProvider`
+- `Capell\Notes\Providers\AdminServiceProvider`
+
+### Config files
+
+- `packages/notes/config/capell-notes.php`
+
+### Migrations
+
+- `packages/notes/database/migrations/2026_05_10_190862_01_create_notes_tables.php`
+- `packages/notes/database/migrations/2026_07_10_000002_encrypt_note_bodies.php`
+
+### Models
+
+- `Note`
+- `NoteAssignment`
+- `NoteMention`
+- `NoteReminder`
+
+### Filament classes
+
+- `CreateNoteResourceHeaderActionExtender`
+- `NotesInboxPage`
+
+### Policies
+
+- `NotePolicy`
+
+### Actions
+
+- `AssignNoteUsersAction`
+- `BuildSubjectNotesAction`
+- `BuildUserAttentionCountsAction`
+- `BuildUserInboxNotesAction`
+- `CanViewNoteAction`
+- `CompleteNoteAssignmentAction`
+- `CreateNoteAction`
+- `MarkNoteMentionsReadAction`
+- `MentionNoteUsersAction`
+- `PruneNotesForDeletedParticipantAction`
+- `PruneNotesForDeletedSubjectAction`
+- `ReopenNoteAction`
+- `ResolveNoteAction`
+- `ResolveNoteParticipantsAction`
+- `SendDueNoteReminderNotificationsAction`
+- `SendNoteAssignmentNotificationsAction`
+- `SendNoteMentionNotificationsAction`
+- `UpsertNoteReminderAction`
+
+### Data objects
+
+- `CreateNoteData`
+- `NoteReminderData`
+- `UserAttentionCountData`
+
+### Command signatures
+
+- `capell:notes-demo`
+- `capell:notes:send-due-reminders`
+
+### Scheduled commands
+
+- `capell:notes:send-due-reminders (everyFiveMinutes; package registered)`
+
+### Console command classes
+
+- `DemoCommand`
+- `SendDueNoteRemindersCommand`
+
+### Manifest contributions
+
+- `admin-action-extender: Capell\Notes\Manifest\NotesAdminActionExtenderContribution`
+- `admin-page: Capell\Notes\Manifest\NotesAdminPageContribution`
+- `console-command: Capell\Notes\Manifest\NotesConsoleCommandsContribution`
+- `health-check: Capell\Notes\Manifest\NotesHealthContribution`
+- `model: Capell\Notes\Manifest\NotesModelsContribution`
+- `scheduled-job: Capell\Notes\Manifest\NotesReminderScheduleContribution`
+
+### Health checks
+
+- `Capell\Notes\Health\NotesHealthCheck`
+
+### Blade views
+
+- `packages/notes/resources/views/filament/pages/notes-inbox.blade.php`
+
 
 ## Data Model
 
@@ -73,12 +148,12 @@ Screenshot contract: `docs/screenshots.json`.
 - Required packages: `capell-app/admin`.
 - Admin navigation: declares `admin-page: NotesAdminPageContribution`; each Filament page or resource controls its own navigation visibility.
 - Admin/editor extensions: `admin-action-extender: NotesAdminActionExtenderContribution`.
-- Permissions: `View:Note`, `Resolve:Note`, `Reopen:Note`, `CompleteAssignment:Note`.
+- Permissions: `View:Note`, `Resolve:Note`, `Reopen:Note`, `CompleteAssignment:Note`; access also governed by package policies: `NotePolicy`.
 - Public routes: none declared.
 - Database changes: package migrations are declared.
 - Config: `config/capell-notes.php`.
 - Settings: no package settings declared.
-- Queues or schedules: scheduled commands `capell:notes:send-due-reminders (everyFiveMinutes)`.
+- Queues or schedules: scheduled commands `capell:notes:send-due-reminders (everyFiveMinutes; package registered)`.
 - Cache tags: none declared.
 - Commands: `capell:notes-demo`, `capell:notes:send-due-reminders`.
 
@@ -87,7 +162,7 @@ Screenshot contract: `docs/screenshots.json`.
 - Keep required Capell packages on compatible v4 releases: `capell-app/admin`.
 - Run migrations before opening package resources or public routes.
 - Review package configuration before production-like verification: `config/capell-notes.php`.
-- Register the host scheduler so these declared commands run at their documented frequencies: `capell:notes:send-due-reminders (everyFiveMinutes)`.
+- Keep the host Laravel scheduler running so package-registered schedules can execute: `capell:notes:send-due-reminders (everyFiveMinutes; package registered)`.
 
 ## Troubleshooting
 
@@ -100,8 +175,8 @@ Screenshot contract: `docs/screenshots.json`.
 ## Quick Start
 
 1. Install the package: `composer require capell-app/notes`.
-2. Run the required setup: `php artisan migrate`.
-3. Open the User-menu notes item with attention badge and confirm the admin workflow loads.
+2. See it working: run `php artisan capell:notes-demo`.
+3. Open the package admin surface at `/notes` and confirm Notes is available.
 
 ## Next Steps
 
