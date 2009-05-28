@@ -9,12 +9,22 @@ use Capell\Core\Facades\CapellCore;
 use Capell\Notes\Data\UserAttentionCountData;
 use Capell\Notes\Filament\Pages\NotesInboxPage;
 use Capell\Notes\Support\UserAttentionCountsCache;
+use Filament\PanelRegistry;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\ServiceProvider;
+use Override;
 
 class AdminServiceProvider extends ServiceProvider
 {
+    #[Override]
+    public function register(): void
+    {
+        // Installation state can still be unavailable during app booting.
+        // Register when Filament resolves panels, before it snapshots menu keys.
+        $this->app->beforeResolving(PanelRegistry::class, $this->registerUserMenuItem(...));
+    }
+
     public function boot(): void
     {
         if (! $this->isPackageInstalled()) {
@@ -22,6 +32,20 @@ class AdminServiceProvider extends ServiceProvider
         }
 
         CapellAdmin::registerExtensionPage(NotesServiceProvider::$packageName, NotesInboxPage::class);
+        $this->registerUserMenuItem();
+    }
+
+    protected function isPackageInstalled(): bool
+    {
+        return CapellCore::isPackageInstalled(NotesServiceProvider::$packageName);
+    }
+
+    private function registerUserMenuItem(): void
+    {
+        if (! $this->isPackageInstalled()) {
+            return;
+        }
+
         CapellAdmin::registerUserMenuItem(
             key: 'capell-notes.inbox',
             label: fn (): string => (string) __('capell-notes::navigation.notes'),
@@ -31,11 +55,6 @@ class AdminServiceProvider extends ServiceProvider
             badgeColor: fn (): string => $this->attentionBadgeColor(),
             sort: 70,
         );
-    }
-
-    protected function isPackageInstalled(): bool
-    {
-        return CapellCore::isPackageInstalled(NotesServiceProvider::$packageName);
     }
 
     private function attentionBadgeCount(): int
