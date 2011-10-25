@@ -54,7 +54,14 @@ final class NotesServiceProvider extends AbstractPackageServiceProvider
         $this->app->singleton(NotesManager::class);
         $this->app->scoped(UserAttentionCountsCache::class);
         $this->app->register(AdminServiceProvider::class);
-        $this->app->tag([CreateNoteResourceHeaderActionExtender::class], ResourceHeaderActionExtender::TAG);
+
+        $this->app->booted(function (): void {
+            if (! $this->isPackageInstalled()) {
+                return;
+            }
+
+            $this->app->tag([CreateNoteResourceHeaderActionExtender::class], ResourceHeaderActionExtender::TAG);
+        });
     }
 
     public function packageRegistered(): void

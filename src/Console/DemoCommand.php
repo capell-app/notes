@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Capell\Notes\Console;
 
 use Capell\Core\Models\Page;
+use Capell\Notes\Actions\PrepareEmptyNotesScreenshotInboxAction;
 use Capell\Notes\Enums\NoteReminderRecurrence;
 use Capell\Notes\Enums\NoteStatus;
 use Capell\Notes\Enums\NoteVisibility;
@@ -21,6 +22,7 @@ final class DemoCommand extends Command
 {
     protected $signature = 'capell:notes-demo
         {--force : Replace existing Notes demo records}
+        {--empty : Prepare an empty inbox in the disposable screenshot application}
         {--allow-production : Allow demo notes to be seeded in production}';
 
     protected $description = 'Seed demo notes for Capell Notes screenshots.';
@@ -31,7 +33,27 @@ final class DemoCommand extends Command
             return self::FAILURE;
         }
 
-        $user = $this->firstUser();
+        if ($this->option('empty') === true) {
+            if ($this->option('force') !== true) {
+                $this->components->error('Empty Notes inbox preparation requires --force.');
+
+                return self::FAILURE;
+            }
+
+            try {
+                app(PrepareEmptyNotesScreenshotInboxAction::class)->handle();
+            } catch (RuntimeException $exception) {
+                $this->components->error($exception->getMessage());
+
+                return self::FAILURE;
+            }
+
+            $this->components->info('Prepared an empty Notes inbox.');
+
+            return self::SUCCESS;
+        }
+
+        $user = $this->recipientUser();
         $author = $this->authorUser($user);
         $page = Page::query()->first();
 
@@ -42,9 +64,11 @@ final class DemoCommand extends Command
         }
 
         if ($this->option('force') === true) {
+            // The body column is encrypted, so a SQL LIKE never matches the
+            // demo prefix; compare decrypted bodies instead.
             Note::query()
-                ->where('body', 'like', '[Notes demo]%')
-                ->get()
+                ->lazyById()
+                ->filter(static fn (Note $note): bool => str_starts_with((string) $note->body, '[Notes demo]'))
                 ->each(static function (Note $note): void {
                     $note->delete();
                 });
@@ -62,7 +86,7 @@ final class DemoCommand extends Command
 
         $resolvedNote = $this->note(
             page: $page,
-            author: $author,
+            author: $user,
             body: '[Notes demo] Resolved editorial question kept for workflow proof.',
             status: NoteStatus::Resolved,
         );
@@ -90,10 +114,17 @@ final class DemoCommand extends Command
         return false;
     }
 
-    private function firstUser(): Model
+    private function recipientUser(): Model
     {
         $userModel = $this->userModel();
-        $user = $userModel::query()->first();
+        // Match the runner's administrator identity. Seeding the first database
+        // user can leave the authenticated screenshot inbox completely empty.
+        $email = in_array(getenv('CAPELL_SCREENSHOT_FIXTURE'), ['1', 'true', 'record-state'], true)
+            ? (getenv('CAPELL_SCREENSHOT_USER_ADMIN_EMAIL') ?: getenv('CAPELL_SCREENSHOT_ADMIN_EMAIL') ?: getenv('CAPELL_ADMIN_EMAIL') ?: 'admin@example.com')
+            : null;
+        $user = is_string($email)
+            ? $userModel::query()->where('email', $email)->first()
+            : $userModel::query()->first();
 
         throw_unless($user instanceof Model, RuntimeException::class, 'A user is required before seeding Notes demo records.');
 

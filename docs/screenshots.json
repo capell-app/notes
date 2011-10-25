@@ -4,6 +4,7 @@
     "generatedFor": "deployment-screenshot-runner",
     "requiresInstalledPackage": true,
     "outputDirectory": "packages/notes/docs/screenshots",
+    "fixtureCommands": ["capell:notes-demo"],
     "entries": [
         {
             "id": "notes-user-menu-badge",
@@ -28,11 +29,23 @@
             "targetType": "admin-surface",
             "target": "NotesInboxPage",
             "url": "/notes",
-            "waitFor": "[data-capell-notes-inbox]",
+            "waitFor": "body:has(article:has-text(\"[Notes demo] Resolved editorial question kept for workflow proof.\")) article:has-text(\"[Notes demo] Confirm the revised sitemap copy before launch.\")",
             "required": true,
-            "notes": "Shows the main inbox at /admin/notes.",
+            "notes": "Use a disposable local/testing screenshot App and set CAPELL_SCREENSHOT_USER_ADMIN_EMAIL (or CAPELL_SCREENSHOT_ADMIN_EMAIL) to the authenticated capture administrator. Entry setup prepares assigned, mentioned and overdue demo notes for that administrator. Capture fails if the seeded note is not visible.",
             "useCase": "An administrator reviews assigned notes, mentions, and lifecycle actions from the inbox.",
-            "screenshotPath": "packages/notes/docs/screenshots/notes-inbox-page.png"
+            "screenshotPath": "packages/notes/docs/screenshots/notes-inbox-page.png",
+            "entryState": {
+                "state": "populated",
+                "setup": {
+                    "command": "capell:notes-demo",
+                    "args": ["--force"]
+                },
+                "restore": {
+                    "command": "capell:notes-demo",
+                    "args": ["--force"]
+                },
+                "tokenPlaceholder": "{attempt-token}"
+            }
         },
         {
             "id": "notes-record-add-note-modal",
@@ -58,11 +71,23 @@
             "targetType": "admin-surface",
             "target": "NotesInboxPage",
             "url": "/notes",
-            "waitFor": "[data-capell-notes-inbox]",
+            "waitFor": "text=No notes match this view.",
             "required": true,
-            "notes": "Shows the default inbox state for a user with no notes requiring attention.",
+            "notes": "Use a disposable local/testing screenshot App and set CAPELL_SCREENSHOT_USER_ADMIN_EMAIL (or CAPELL_SCREENSHOT_ADMIN_EMAIL) to the authenticated capture administrator. Entry setup prepares an empty inbox, refusing non-demo notes; teardown re-seeds demo notes.",
             "useCase": "An administrator sees the default empty inbox state when no notes need attention.",
-            "screenshotPath": "packages/notes/docs/screenshots/notes-empty-inbox.png"
+            "screenshotPath": "packages/notes/docs/screenshots/notes-empty-inbox.png",
+            "entryState": {
+                "state": "empty",
+                "setup": {
+                    "command": "capell:notes-demo",
+                    "args": ["--force", "--empty"]
+                },
+                "restore": {
+                    "command": "capell:notes-demo",
+                    "args": ["--force"]
+                },
+                "tokenPlaceholder": "{attempt-token}"
+            }
         },
         {
             "id": "notes-attention-counts",
@@ -72,12 +97,30 @@
             "targetType": "admin-surface",
             "target": "NotesInboxPage",
             "url": "/notes",
-            "waitFor": "[data-capell-notes-inbox]",
+            "waitFor": "body:not(:has(article:has-text(\"[Notes demo] Resolved editorial question kept for workflow proof.\"))) article:has-text(\"[Notes demo] Confirm the revised sitemap copy before launch.\")",
             "required": false,
-            "notes": "Optional Beta evidence target. The current file duplicates the Notes inbox capture; replace it with an independently captured populated attention-count state before using it as release or Marketplace evidence.",
-            "useCase": "An administrator reviews seeded assigned and mentioned notes with resolve, reopen, and complete-assignment controls.",
+            "notes": "Use a disposable local/testing screenshot App and set CAPELL_SCREENSHOT_USER_ADMIN_EMAIL (or CAPELL_SCREENSHOT_ADMIN_EMAIL) to the authenticated capture administrator. Entry setup prepares assigned, mentioned and overdue demo notes for that administrator. Capture fails if the seeded note is not visible. Filter to Open so this evidence differs from the unfiltered inbox. The unfiltered inbox also contains a resolved note authored by the capture administrator; Open excludes it.",
+            "useCase": "An administrator filters to open assigned and mentioned notes, resolves notes, and completes assignments.",
             "screenshotPath": "packages/notes/docs/screenshots/notes-attention-counts.png",
-            "darkScreenshotPath": "packages/notes/docs/screenshots/notes-attention-counts-dark.png"
+            "darkScreenshotPath": "packages/notes/docs/screenshots/notes-attention-counts-dark.png",
+            "entryState": {
+                "state": "populated",
+                "setup": {
+                    "command": "capell:notes-demo",
+                    "args": ["--force"]
+                },
+                "restore": {
+                    "command": "capell:notes-demo",
+                    "args": ["--force"]
+                },
+                "tokenPlaceholder": "{attempt-token}"
+            },
+            "beforeWait": [
+                {
+                    "type": "click",
+                    "selector": "button:has-text(\"Open\"):text-is(\"Open\")"
+                }
+            ]
         },
         {
             "id": "notes-admin-sidebar-menu-open",
