@@ -8,29 +8,12 @@ use Capell\Admin\Providers\AdminServiceProvider;
 use Capell\Admin\Providers\Filament\AdminPanelProvider;
 use Capell\Core\Facades\CapellCore;
 use Capell\Notes\Providers\NotesServiceProvider;
+use Capell\Notes\Support\NotesManager;
 use Capell\Tests\AbstractTestCase;
+use Capell\Tests\Fixtures\Models\User;
 use Illuminate\Foundation\Application;
 use Livewire\LivewireServiceProvider;
 use Override;
-
-spl_autoload_register(function (string $class): void {
-    $prefixes = [
-        'Capell\\Notes\\Database\\Factories\\' => __DIR__ . '/../database/factories/',
-        'Capell\\Notes\\' => __DIR__ . '/../src/',
-    ];
-
-    foreach ($prefixes as $prefix => $basePath) {
-        if (! str_starts_with($class, $prefix)) {
-            continue;
-        }
-
-        $path = $basePath . str_replace('\\', '/', substr($class, strlen($prefix))) . '.php';
-
-        if (file_exists($path)) {
-            require_once $path;
-        }
-    }
-});
 
 class NotesTestCase extends AbstractTestCase
 {
@@ -42,6 +25,11 @@ class NotesTestCase extends AbstractTestCase
             CapellCore::getSettingMigrations(),
             __DIR__ . '/../../../vendor/capell-app/core/database/settings',
         );
+
+        $notes = resolve(NotesManager::class);
+        $notes->clear();
+        $notes->registerSubject(User::class);
+        $notes->registerParticipant(User::class);
     }
 
     protected function getPackageServiceName(): string

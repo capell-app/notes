@@ -82,6 +82,15 @@ class Note extends Model
         return $this->hasOne(NoteReminder::class);
     }
 
+    protected static function booted(): void
+    {
+        static::deleting(function (Note $note): void {
+            $note->assignments()->delete();
+            $note->mentions()->delete();
+            $note->reminder()->delete();
+        });
+    }
+
     /**
      * @return array<string, string>
      */

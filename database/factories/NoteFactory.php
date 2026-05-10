@@ -26,6 +26,8 @@ class NoteFactory extends Factory
         $userModel = $this->userModel();
 
         return [
+            'subject_type' => (new $userModel)->getMorphClass(),
+            'subject_id' => $this->userFactory(),
             'author_type' => (new $userModel)->getMorphClass(),
             'author_id' => $this->userFactory(),
             'body' => $this->faker->paragraph(),

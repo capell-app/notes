@@ -9,13 +9,10 @@ use Capell\Notes\Models\Note;
 use Capell\Notes\Models\NoteAssignment;
 use Capell\Notes\Models\NoteMention;
 use Capell\Notes\Models\NoteReminder;
-use Capell\Notes\Tests\NotesTestCase;
 use Capell\Tests\Fixtures\Models\User;
 use Carbon\CarbonImmutable;
 
 require_once dirname(__DIR__) . '/NotesTestCase.php';
-
-uses(NotesTestCase::class);
 
 it('casts note enums and immutable dates', function (): void {
     $note = Note::factory()->create([

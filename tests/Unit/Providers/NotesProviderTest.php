@@ -2,20 +2,19 @@
 
 declare(strict_types=1);
 
+use Capell\Admin\Facades\CapellAdmin;
 use Capell\Core\Facades\CapellCore;
 use Capell\Core\Support\Packages\AbstractPackageServiceProvider;
+use Capell\Notes\Filament\Pages\NotesInboxPage;
 use Capell\Notes\Models\Note;
 use Capell\Notes\Models\NoteAssignment;
 use Capell\Notes\Models\NoteMention;
 use Capell\Notes\Models\NoteReminder;
 use Capell\Notes\Providers\AdminServiceProvider;
 use Capell\Notes\Providers\NotesServiceProvider;
-use Capell\Notes\Tests\NotesTestCase;
 use Illuminate\Support\ServiceProvider;
 
 require_once dirname(__DIR__, 2) . '/NotesTestCase.php';
-
-uses(NotesTestCase::class);
 
 it('declares provider classes and package metadata', function (): void {
     $package = CapellCore::getPackage(NotesServiceProvider::$packageName);
@@ -43,6 +42,11 @@ it('registers notes metadata, models, and protected tables when installed', func
         ->and(CapellCore::getProtectedTables())->toContain('note_assignments')
         ->and(CapellCore::getProtectedTables())->toContain('note_mentions')
         ->and(CapellCore::getProtectedTables())->toContain('note_reminders');
+});
+
+it('registers the notes admin page and user menu item', function (): void {
+    expect(CapellAdmin::getAdminSurfaceRegistry()->pages())->toContain(NotesInboxPage::class)
+        ->and(CapellAdmin::getUserMenuItemDefinitions())->toHaveKey('capell-notes.inbox');
 });
 
 it('keeps admin provider boot guarded when notes is not installed', function (): void {

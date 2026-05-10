@@ -16,8 +16,8 @@ return new class extends Migration
         if (! Schema::hasTable('notes')) {
             Schema::create('notes', function (Blueprint $table): void {
                 $table->id();
-                $table->nullableMorphs('subject');
-                $table->nullableMorphs('author');
+                $table->morphs('subject');
+                $table->morphs('author');
                 $table->text('body');
                 $table->string('status')->default(NoteStatus::Open->value)->index();
                 $table->string('visibility')->default(NoteVisibility::RecordEditors->value)->index();
@@ -71,6 +71,8 @@ return new class extends Migration
                 $table->timestamps();
 
                 $table->unique('note_id', 'note_reminder_note_unique');
+                $table->index(['next_due_at', 'completed_at', 'cancelled_at'], 'note_reminder_next_due_active_index');
+                $table->index(['due_at', 'completed_at', 'cancelled_at'], 'note_reminder_due_active_index');
             });
         }
     }
