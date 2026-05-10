@@ -1,0 +1,46 @@
+{
+    "manifest-version": 2,
+    "name": "capell-app/notes",
+    "kind": "package",
+    "capell-version": "^4.0",
+    "productGroup": "Capell Collaboration",
+    "tier": "premium",
+    "bundle": "collaboration",
+    "description": "Notes adds contextual notes, assignments, mentions, and reminders to supported Capell admin records.",
+    "surfaces": ["admin"],
+    "dependencies": {
+        "requires": ["capell-app/admin"],
+        "optional": [],
+        "conflicts": []
+    },
+    "lifecycle": {
+        "activation": "manual",
+        "defaultStatus": "available",
+        "requiresInstallCommand": false
+    },
+    "providers": {
+        "metadata": [],
+        "install": [],
+        "runtime": ["Capell\\Notes\\Providers\\NotesServiceProvider"],
+        "admin": ["Capell\\Notes\\Providers\\AdminServiceProvider"],
+        "frontend": []
+    },
+    "database": {
+        "migrations": true,
+        "settings": false,
+        "requiredTables": []
+    },
+    "commands": {
+        "install": null,
+        "setup": null,
+        "setupParams": [],
+        "demo": null,
+        "demoParams": [],
+        "health": null
+    },
+    "settings": [],
+    "permissions": [],
+    "capabilities": [],
+    "assets": [],
+    "healthChecks": []
+}
