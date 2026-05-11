@@ -26,7 +26,7 @@ class NotesServiceProvider extends AbstractPackageServiceProvider
             ->name(self::$name)
             ->hasTranslations()
             ->hasViews()
-            ->hasMigrations(['create_notes_tables']);
+            ->hasMigrations(['2026_05_10_190862_01_create_notes_tables']);
     }
 
     public function registeringPackage(): void

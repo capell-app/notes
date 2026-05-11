@@ -27,7 +27,7 @@ it('creates the expected notes schema with guarded migrations', function (): voi
     Schema::dropIfExists('note_assignments');
     Schema::dropIfExists('notes');
 
-    $migration = include dirname(__DIR__, 3) . '/database/migrations/create_notes_tables.php';
+    $migration = include dirname(__DIR__, 3) . '/database/migrations/2026_05_10_190862_01_create_notes_tables.php';
 
     $migration->up();
     $migration->up();
@@ -163,7 +163,7 @@ it('continues creating dependent tables when the notes table already exists', fu
         $table->timestamps();
     });
 
-    $migration = include dirname(__DIR__, 3) . '/database/migrations/create_notes_tables.php';
+    $migration = include dirname(__DIR__, 3) . '/database/migrations/2026_05_10_190862_01_create_notes_tables.php';
 
     $migration->up();
 
