@@ -26,7 +26,7 @@ it('declares provider classes and package metadata', function (): void {
         ->and($package->name)->toBe('capell-app/notes')
         ->and($package->serviceProviderClass)->toBe(NotesServiceProvider::class)
         ->and($package->path)->toBe(realpath(__DIR__ . '/../../../'))
-        ->and($package->getDescription())->toBe('Contextual notes, assignments, mentions, and reminders for Capell admin records.');
+        ->and($package->getDescription())->toBe('Notes adds contextual notes, assignments, mentions, and reminders to supported Capell admin records.');
 });
 
 it('registers notes metadata, models, and protected tables when installed', function (): void {
