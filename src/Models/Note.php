@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
+use Override;
 
 /**
  * @property int $id
@@ -82,6 +83,7 @@ class Note extends Model
         return $this->hasOne(NoteReminder::class);
     }
 
+    #[Override]
     protected static function booted(): void
     {
         static::deleting(function (Note $note): void {
@@ -94,6 +96,7 @@ class Note extends Model
     /**
      * @return array<string, string>
      */
+    #[Override]
     protected function casts(): array
     {
         return [
