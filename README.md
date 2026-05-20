@@ -50,7 +50,8 @@ Contextual notes, assignments, mentions, and reminders for Capell.
 
 ## Docs
 
-No deeper package docs are currently published under `docs/`. Add design notes there when the README would become too long.
+- [overview.md](docs/overview.md)
+- [screenshots.json](docs/screenshots.json)
 
 ## Testing
 
