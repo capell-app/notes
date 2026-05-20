@@ -1,0 +1,57 @@
+{
+    "package": "notes",
+    "composerName": "capell-app/notes",
+    "generatedFor": "deployment-screenshot-runner",
+    "requiresInstalledPackage": true,
+    "outputDirectory": "public/docs/screenshots/packages/notes",
+    "entries": [
+        {
+            "id": "notes-inbox-page",
+            "title": "Notes inbox page.",
+            "package": "notes",
+            "surface": "admin",
+            "targetType": "admin-surface",
+            "target": "NotesInboxPage",
+            "required": true,
+            "notes": "Shows the main inbox at /admin/notes.",
+            "useCase": "An administrator reviews notes assigned to them, mentions, and reminders from the inbox.",
+            "screenshotPath": "public/docs/screenshots/packages/notes/notes-inbox-page.png"
+        },
+        {
+            "id": "notes-user-menu-badge",
+            "title": "User-menu notes item with attention badge.",
+            "package": "notes",
+            "surface": "admin",
+            "targetType": "admin-surface",
+            "target": "AdminServiceProvider::registerUserMenuItem",
+            "required": true,
+            "notes": "Requires seeded assigned, mentioned, or overdue note attention counts.",
+            "useCase": "An administrator sees the user-menu notes item with an attention badge.",
+            "screenshotPath": "public/docs/screenshots/packages/notes/notes-user-menu-badge.png"
+        },
+        {
+            "id": "notes-empty-inbox",
+            "title": "Empty notes inbox state.",
+            "package": "notes",
+            "surface": "admin",
+            "targetType": "admin-surface",
+            "target": "NotesInboxPage",
+            "required": true,
+            "notes": "Shows the default inbox state for a user with no notes requiring attention.",
+            "useCase": "An administrator sees the default empty inbox state when no notes need attention.",
+            "screenshotPath": "public/docs/screenshots/packages/notes/notes-empty-inbox.png"
+        },
+        {
+            "id": "notes-attention-counts",
+            "title": "Notes inbox with assigned, mentioned, and overdue reminder counts.",
+            "package": "notes",
+            "surface": "admin",
+            "targetType": "admin-surface",
+            "target": "NotesInboxPage",
+            "required": true,
+            "notes": "Requires seeded notes covering assignment, mention, and reminder states.",
+            "useCase": "An administrator reviews seeded assigned, mentioned, and overdue reminder counts.",
+            "screenshotPath": "public/docs/screenshots/packages/notes/notes-attention-counts.png"
+        }
+    ]
+}
