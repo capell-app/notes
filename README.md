@@ -13,6 +13,8 @@ Contextual notes, assignments, mentions, and reminders for Capell.
 ## What It Adds
 
 - Contextual notes, assignments, mentions, and reminders for Capell.
+- An admin inbox for operational follow-up that stays separate from public page output.
+- Package-owned note, assignment, mention, and reminder records.
 
 ## Code Map
 
