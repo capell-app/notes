@@ -13,17 +13,25 @@
         "bundle": "collaboration"
     },
     "namespace": "Capell\\Notes",
-    "surfaces": ["admin"],
+    "surfaces": [
+        "admin"
+    ],
     "dependencies": {
-        "requires": ["capell-app/admin"],
+        "requires": [
+            "capell-app/admin"
+        ],
         "optional": [],
         "conflicts": []
     },
     "providers": {
         "metadata": [],
         "install": [],
-        "runtime": ["Capell\\Notes\\Providers\\NotesServiceProvider"],
-        "admin": ["Capell\\Notes\\Providers\\AdminServiceProvider"],
+        "runtime": [
+            "Capell\\Notes\\Providers\\NotesServiceProvider"
+        ],
+        "admin": [
+            "Capell\\Notes\\Providers\\AdminServiceProvider"
+        ],
         "frontend": []
     },
     "contributes": [],
@@ -40,7 +48,10 @@
     },
     "settings": [],
     "permissions": [],
-    "capabilities": ["notes", "notes-admin"],
+    "capabilities": [
+        "notes",
+        "notes-admin"
+    ],
     "performance": {
         "frontendRenderBudgetMs": 0,
         "adminQueryBudget": 40,
@@ -70,10 +81,22 @@
     },
     "marketplace": {
         "summary": "Notes adds contextual notes, assignments, mentions, and reminders to supported Capell admin records.",
-        "screenshots": [],
-        "categories": ["admin", "collaboration"]
+        "screenshots": [
+            {
+                "path": "docs/assets/marketplace/extension-card.jpg",
+                "alt": "Notes extension preview image",
+                "caption": "Notes extension preview"
+            }
+        ],
+        "categories": [
+            "admin",
+            "collaboration"
+        ]
     },
     "contributionTraceability": {
-        "deferredContributions": ["admin-page", "model"]
+        "deferredContributions": [
+            "admin-page",
+            "model"
+        ]
     }
 }
