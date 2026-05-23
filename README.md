@@ -10,6 +10,18 @@ Contextual notes, assignments, mentions, and reminders for Capell.
 - Service providers: `packages/notes/src/Providers/AdminServiceProvider.php`, `packages/notes/src/Providers/NotesServiceProvider.php`
 - Capell dependencies: `capell-app/admin`
 
+## Why It Helps Your Capell Workflow
+
+- Adds contextual notes, assignments, mentions, and reminders to supported Capell admin records.
+- Helps editors coordinate review work inside the CMS instead of moving comments into chat or spreadsheets.
+- Fits publishing and operations workflows where the record itself should carry the next action and accountability.
+
+## Best Used With
+
+- [Publishing Studio](../publishing-studio/README.md)
+- [Diagnostics](../diagnostics/README.md)
+- [Welcome Tour](../welcome-tour/README.md)
+
 ## What It Adds
 
 - Contextual notes, assignments, mentions, and reminders for Capell.
@@ -52,6 +64,7 @@ Contextual notes, assignments, mentions, and reminders for Capell.
 
 ## Docs
 
+- [docs index](docs/README.md)
 - [overview.md](docs/overview.md)
 - [screenshots.json](docs/screenshots.json)
 
