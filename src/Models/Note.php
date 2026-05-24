@@ -49,11 +49,17 @@ class Note extends Model
         'archived_at',
     ];
 
+    /**
+     * @return MorphTo<Model, $this>
+     */
     public function subject(): MorphTo
     {
         return $this->morphTo();
     }
 
+    /**
+     * @return MorphTo<Model, $this>
+     */
     public function author(): MorphTo
     {
         return $this->morphTo();

@@ -57,6 +57,9 @@ final class BuildUserAttentionCountsAction
         );
     }
 
+    /**
+     * @return Builder<NoteReminder>
+     */
     private function activeReminderQuery(Model $user): Builder
     {
         return NoteReminder::query()
