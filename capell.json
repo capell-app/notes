@@ -13,25 +13,17 @@
         "bundle": "collaboration"
     },
     "namespace": "Capell\\Notes",
-    "surfaces": [
-        "admin"
-    ],
+    "surfaces": ["admin"],
     "dependencies": {
-        "requires": [
-            "capell-app/admin"
-        ],
-        "optional": [],
+        "requires": ["capell-app/admin"],
+        "supports": [],
         "conflicts": []
     },
     "providers": {
         "metadata": [],
         "install": [],
-        "runtime": [
-            "Capell\\Notes\\Providers\\NotesServiceProvider"
-        ],
-        "admin": [
-            "Capell\\Notes\\Providers\\AdminServiceProvider"
-        ],
+        "runtime": ["Capell\\Notes\\Providers\\NotesServiceProvider"],
+        "admin": ["Capell\\Notes\\Providers\\AdminServiceProvider"],
         "frontend": []
     },
     "contributes": [],
@@ -48,10 +40,7 @@
     },
     "settings": [],
     "permissions": [],
-    "capabilities": [
-        "notes",
-        "notes-admin"
-    ],
+    "capabilities": ["notes", "notes-admin"],
     "performance": {
         "frontendRenderBudgetMs": 0,
         "adminQueryBudget": 40,
@@ -88,15 +77,9 @@
                 "caption": "Notes extension preview"
             }
         ],
-        "categories": [
-            "admin",
-            "collaboration"
-        ]
+        "categories": ["admin", "collaboration"]
     },
     "contributionTraceability": {
-        "deferredContributions": [
-            "admin-page",
-            "model"
-        ]
+        "deferredContributions": ["admin-page", "model"]
     }
 }

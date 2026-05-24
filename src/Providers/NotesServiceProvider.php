@@ -48,6 +48,11 @@ class NotesServiceProvider extends AbstractPackageServiceProvider
         });
     }
 
+    protected function isPackageInstalled(): bool
+    {
+        return CapellCore::isPackageInstalled(static::$packageName);
+    }
+
     private function registerModels(): self
     {
         CapellCore::registerModels([
@@ -79,10 +84,5 @@ class NotesServiceProvider extends AbstractPackageServiceProvider
         }
 
         return $this;
-    }
-
-    private function isPackageInstalled(): bool
-    {
-        return CapellCore::isPackageInstalled(static::$packageName);
     }
 }
