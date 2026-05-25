@@ -4,8 +4,11 @@ declare(strict_types=1);
 
 namespace Capell\Notes\Providers;
 
+use Capell\Admin\Contracts\Extenders\ResourceHeaderActionExtender;
 use Capell\Core\Facades\CapellCore;
+use Capell\Core\Models\Page;
 use Capell\Core\Support\Packages\AbstractPackageServiceProvider;
+use Capell\Notes\Filament\Extenders\Page\CreateNoteResourceHeaderActionExtender;
 use Capell\Notes\Models\Note;
 use Capell\Notes\Models\NoteAssignment;
 use Capell\Notes\Models\NoteMention;
@@ -34,6 +37,7 @@ class NotesServiceProvider extends AbstractPackageServiceProvider
     {
         $this->app->singleton(NotesManager::class);
         $this->app->register(AdminServiceProvider::class);
+        $this->app->tag([CreateNoteResourceHeaderActionExtender::class], ResourceHeaderActionExtender::TAG);
     }
 
     public function packageRegistered(): void
@@ -44,6 +48,7 @@ class NotesServiceProvider extends AbstractPackageServiceProvider
             }
 
             $this->registerModels();
+            $this->registerDefaultSubjects();
             $this->registerDefaultParticipants();
             $this->registerProtectedTables();
         });
@@ -84,6 +89,13 @@ class NotesServiceProvider extends AbstractPackageServiceProvider
         if (is_string($userModel) && is_a($userModel, Model::class, true)) {
             resolve(NotesManager::class)->registerParticipant($userModel);
         }
+
+        return $this;
+    }
+
+    private function registerDefaultSubjects(): self
+    {
+        resolve(NotesManager::class)->registerSubject(Page::class);
 
         return $this;
     }
