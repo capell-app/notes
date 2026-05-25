@@ -12,6 +12,7 @@ use Capell\Notes\Models\NoteMention;
 use Capell\Notes\Models\NoteReminder;
 use Capell\Notes\Support\NotesManager;
 use Illuminate\Database\Eloquent\Model;
+use Override;
 use Spatie\LaravelPackageTools\Package;
 
 class NotesServiceProvider extends AbstractPackageServiceProvider
@@ -48,6 +49,7 @@ class NotesServiceProvider extends AbstractPackageServiceProvider
         });
     }
 
+    #[Override]
     protected function isPackageInstalled(): bool
     {
         return CapellCore::isPackageInstalled(static::$packageName);
