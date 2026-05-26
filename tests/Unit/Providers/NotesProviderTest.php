@@ -45,7 +45,9 @@ it('registers notes metadata, models, and protected tables when installed', func
         ->and(CapellCore::getProtectedTables())->toContain('note_mentions')
         ->and(CapellCore::getProtectedTables())->toContain('note_reminders');
 
-    expect(fn (): mixed => resolve(NotesManager::class)->ensureSubject(new Page))->not->toThrow(Exception::class);
+    expect(function (): void {
+        resolve(NotesManager::class)->ensureSubject(new Page);
+    })->not->toThrow(Exception::class);
 });
 
 it('registers the notes admin page and user menu item', function (): void {

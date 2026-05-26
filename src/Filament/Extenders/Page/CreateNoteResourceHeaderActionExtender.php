@@ -57,9 +57,7 @@ final class CreateNoteResourceHeaderActionExtender implements ResourceHeaderActi
                 ->action(function (Page $record, array $data): void {
                     $author = auth()->user();
 
-                    if (! $author instanceof Model) {
-                        throw new AuthorizationException;
-                    }
+                    throw_unless($author instanceof Model, AuthorizationException::class);
 
                     CreateNoteAction::run(new CreateNoteData(
                         subject: $record,
