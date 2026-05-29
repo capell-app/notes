@@ -16,7 +16,7 @@
     "surfaces": ["admin"],
     "dependencies": {
         "requires": ["capell-app/admin"],
-        "optional": [],
+        "supports": [],
         "conflicts": []
     },
     "providers": {
@@ -70,7 +70,13 @@
     },
     "marketplace": {
         "summary": "Notes adds contextual notes, assignments, mentions, and reminders to supported Capell admin records.",
-        "screenshots": [],
+        "screenshots": [
+            {
+                "path": "docs/assets/marketplace/extension-card.jpg",
+                "alt": "Notes extension preview image",
+                "caption": "Notes extension preview"
+            }
+        ],
         "categories": ["admin", "collaboration"]
     },
     "contributionTraceability": {

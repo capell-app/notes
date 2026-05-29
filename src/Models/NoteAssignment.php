@@ -48,11 +48,17 @@ class NoteAssignment extends Model
         return $this->belongsTo(Note::class);
     }
 
+    /**
+     * @return MorphTo<Model, $this>
+     */
     public function assignee(): MorphTo
     {
         return $this->morphTo();
     }
 
+    /**
+     * @return MorphTo<Model, $this>
+     */
     public function assignedBy(): MorphTo
     {
         return $this->morphTo();

@@ -48,11 +48,17 @@ class NoteMention extends Model
         return $this->belongsTo(Note::class);
     }
 
+    /**
+     * @return MorphTo<Model, $this>
+     */
     public function mentioned(): MorphTo
     {
         return $this->morphTo();
     }
 
+    /**
+     * @return MorphTo<Model, $this>
+     */
     public function mentionedBy(): MorphTo
     {
         return $this->morphTo();

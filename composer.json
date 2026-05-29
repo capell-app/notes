@@ -13,7 +13,7 @@
     "license": "proprietary",
     "require": {
         "php": "^8.3",
-        "capell-app/admin": "*"
+        "capell-app/admin": "^4.0 || 4.x-dev"
     },
     "autoload": {
         "psr-4": {
@@ -31,5 +31,17 @@
     "config": {
         "sort-packages": true
     },
-    "prefer-stable": true
+    "prefer-stable": true,
+    "type": "library",
+    "authors": [
+        {
+            "name": "Capell Team",
+            "email": "team@capell.app",
+            "role": "Developer"
+        }
+    ],
+    "support": {
+        "source": "https://github.com/capell-app/capell-packages",
+        "docs": "https://docs.capell.app/packages/notes"
+    }
 }

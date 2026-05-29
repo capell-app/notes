@@ -4,14 +4,18 @@ declare(strict_types=1);
 
 namespace Capell\Notes\Providers;
 
+use Capell\Admin\Contracts\Extenders\ResourceHeaderActionExtender;
 use Capell\Core\Facades\CapellCore;
+use Capell\Core\Models\Page;
 use Capell\Core\Support\Packages\AbstractPackageServiceProvider;
+use Capell\Notes\Filament\Extenders\Page\CreateNoteResourceHeaderActionExtender;
 use Capell\Notes\Models\Note;
 use Capell\Notes\Models\NoteAssignment;
 use Capell\Notes\Models\NoteMention;
 use Capell\Notes\Models\NoteReminder;
 use Capell\Notes\Support\NotesManager;
 use Illuminate\Database\Eloquent\Model;
+use Override;
 use Spatie\LaravelPackageTools\Package;
 
 class NotesServiceProvider extends AbstractPackageServiceProvider
@@ -33,6 +37,7 @@ class NotesServiceProvider extends AbstractPackageServiceProvider
     {
         $this->app->singleton(NotesManager::class);
         $this->app->register(AdminServiceProvider::class);
+        $this->app->tag([CreateNoteResourceHeaderActionExtender::class], ResourceHeaderActionExtender::TAG);
     }
 
     public function packageRegistered(): void
@@ -43,9 +48,16 @@ class NotesServiceProvider extends AbstractPackageServiceProvider
             }
 
             $this->registerModels();
+            $this->registerDefaultSubjects();
             $this->registerDefaultParticipants();
             $this->registerProtectedTables();
         });
+    }
+
+    #[Override]
+    protected function isPackageInstalled(): bool
+    {
+        return CapellCore::isPackageInstalled(static::$packageName);
     }
 
     private function registerModels(): self
@@ -81,8 +93,10 @@ class NotesServiceProvider extends AbstractPackageServiceProvider
         return $this;
     }
 
-    private function isPackageInstalled(): bool
+    private function registerDefaultSubjects(): self
     {
-        return CapellCore::isPackageInstalled(static::$packageName);
+        resolve(NotesManager::class)->registerSubject(Page::class);
+
+        return $this;
     }
 }

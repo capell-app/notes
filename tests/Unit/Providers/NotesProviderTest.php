@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use Capell\Admin\Facades\CapellAdmin;
 use Capell\Core\Facades\CapellCore;
+use Capell\Core\Models\Page;
 use Capell\Core\Support\Packages\AbstractPackageServiceProvider;
 use Capell\Notes\Filament\Pages\NotesInboxPage;
 use Capell\Notes\Models\Note;
@@ -12,6 +13,7 @@ use Capell\Notes\Models\NoteMention;
 use Capell\Notes\Models\NoteReminder;
 use Capell\Notes\Providers\AdminServiceProvider;
 use Capell\Notes\Providers\NotesServiceProvider;
+use Capell\Notes\Support\NotesManager;
 use Illuminate\Support\ServiceProvider;
 
 require_once dirname(__DIR__, 2) . '/NotesTestCase.php';
@@ -42,6 +44,10 @@ it('registers notes metadata, models, and protected tables when installed', func
         ->and(CapellCore::getProtectedTables())->toContain('note_assignments')
         ->and(CapellCore::getProtectedTables())->toContain('note_mentions')
         ->and(CapellCore::getProtectedTables())->toContain('note_reminders');
+
+    expect(function (): void {
+        resolve(NotesManager::class)->ensureSubject(new Page);
+    })->not->toThrow(Exception::class);
 });
 
 it('registers the notes admin page and user menu item', function (): void {
