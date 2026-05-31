@@ -58,7 +58,11 @@ class NoteMentionFactory extends Factory
      */
     private function userFactory(): Factory
     {
-        $factory = forward_static_call([$this->userModel(), 'factory']);
+        $factoryCallable = [$this->userModel(), 'factory'];
+
+        throw_unless(is_callable($factoryCallable), RuntimeException::class, 'The configured auth user provider model must expose an Eloquent factory.');
+
+        $factory = $factoryCallable();
 
         throw_unless($factory instanceof Factory, RuntimeException::class, 'The configured auth user provider model must expose an Eloquent factory.');
 
