@@ -16,6 +16,7 @@ use Filament\Forms\Components\Textarea;
 use Filament\Notifications\Notification;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Gate;
 
 final class CreateNoteResourceHeaderActionExtender implements ResourceHeaderActionExtender
 {
@@ -54,7 +55,10 @@ final class CreateNoteResourceHeaderActionExtender implements ResourceHeaderActi
                         ->searchable(),
                 ])
                 ->modalSubmitActionLabel(__('capell-notes::note.actions.create'))
+                ->authorize(fn (Page $record): bool => Gate::allows('update', $record))
                 ->action(function (Page $record, array $data): void {
+                    Gate::authorize('update', $record);
+
                     $author = auth()->user();
 
                     throw_unless($author instanceof Model, AuthorizationException::class);
@@ -112,11 +116,11 @@ final class CreateNoteResourceHeaderActionExtender implements ResourceHeaderActi
             return [];
         }
 
-        return $userModel::query()
+        return array_values($userModel::query()
             ->whereKey($ids)
             ->get()
             ->values()
-            ->all();
+            ->all());
     }
 
     /** @return class-string<Model>|null */
