@@ -64,8 +64,10 @@ it('creates a note from the page header action with selected assignees and menti
 
     $note = Note::query()->firstOrFail();
 
-    expect($note->subject->is($page))->toBeTrue()
-        ->and($note->author->is($author))->toBeTrue()
+    expect($note->subject)->not->toBeNull()
+        ->and($note->subject?->is($page))->toBeTrue()
+        ->and($note->author)->not->toBeNull()
+        ->and($note->author?->is($author))->toBeTrue()
         ->and($note->body)->toBe('Please check this draft.')
         ->and($note->visibility)->toBe(NoteVisibility::Private)
         ->and($note->assignments()->whereMorphedTo('assignee', $assignee)->exists())->toBeTrue()
