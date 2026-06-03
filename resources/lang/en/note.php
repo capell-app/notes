@@ -21,6 +21,7 @@ return [
     ],
     'overdue' => 'Overdue',
     'validation' => [
+        'body_max' => 'Keep the note to :max characters or fewer.',
         'body_required' => 'Enter a note before saving.',
     ],
     'visibility' => [

@@ -6,7 +6,7 @@
     "kind": "package",
     "capellApiVersion": "^4.0",
     "version": "4.x-dev",
-    "description": "Notes adds contextual notes, assignments, mentions, and reminders to supported Capell admin records.",
+    "description": "Add private, assignable notes and @mentions to any Capell admin record so editors can leave context, hand off work, and never lose track of what needs attention.",
     "product": {
         "group": "Capell Collaboration",
         "tier": "premium",
@@ -56,7 +56,7 @@
     "healthChecks": [
         {
             "key": "notes.package-health",
-            "label": "Notes package surfaces, providers, and install health are discoverable by Diagnostics.",
+            "label": "Notes storage tables and model morph aliases are present and registered.",
             "class": "Capell\\Notes\\Health\\NotesHealthCheck",
             "severity": "critical",
             "surface": "admin"
@@ -69,7 +69,8 @@
         "privateDocsRequested": true
     },
     "marketplace": {
-        "summary": "Notes adds contextual notes, assignments, mentions, and reminders to supported Capell admin records.",
+        "summary": "Add private, assignable notes and @mentions to any Capell admin record so editors can leave context, hand off work, and never lose track of what needs attention.",
+        "description": "Notes turns Capell admin records into a collaboration surface: leave a contextual note on a page (or any opted-in record), assign it to teammates, and mention people who need to weigh in. A per-user inbox and user-menu badge surface what's assigned to you and where you've been mentioned, so nothing slips between editors. Notes are strictly admin-internal with per-note visibility (record-editors or private) and are never exposed on the public site. Built the Capell way — domain logic in Actions, polymorphic attachment to any registered subject — so it extends cleanly into your own resources.",
         "screenshots": [
             {
                 "path": "docs/assets/marketplace/extension-card.jpg",
