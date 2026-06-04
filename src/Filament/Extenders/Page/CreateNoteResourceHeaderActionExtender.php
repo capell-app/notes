@@ -33,7 +33,7 @@ final class CreateNoteResourceHeaderActionExtender implements ResourceHeaderActi
                 ->label(__('capell-notes::note.actions.create'))
                 ->icon('heroicon-o-chat-bubble-left-ellipsis')
                 ->color('gray')
-                ->form([
+                ->schema([
                     Textarea::make('body')
                         ->label(__('capell-notes::note.fields.body'))
                         ->rows(5)

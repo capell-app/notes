@@ -104,10 +104,10 @@ final class NotesHealthCheck implements ChecksExtensionHealth
      */
     public function missingTables(): array
     {
-        return collect(self::REQUIRED_TABLE_NAMES)
-            ->reject(static fn (string $tableName): bool => Schema::hasTable($tableName))
-            ->values()
-            ->all();
+        return array_values(array_filter(
+            self::REQUIRED_TABLE_NAMES,
+            static fn (string $tableName): bool => ! Schema::hasTable($tableName),
+        ));
     }
 
     /**
@@ -115,10 +115,14 @@ final class NotesHealthCheck implements ChecksExtensionHealth
      */
     public function unregisteredMorphAliases(): array
     {
-        return collect(self::MODELS_BY_MORPH_ALIAS)
-            ->reject(static fn (string $modelClass, string $morphAlias): bool => Relation::getMorphedModel($morphAlias) === $modelClass)
-            ->keys()
-            ->values()
-            ->all();
+        $aliases = [];
+
+        foreach (self::MODELS_BY_MORPH_ALIAS as $morphAlias => $modelClass) {
+            if (Relation::getMorphedModel($morphAlias) !== $modelClass) {
+                $aliases[] = $morphAlias;
+            }
+        }
+
+        return $aliases;
     }
 }
