@@ -77,9 +77,9 @@ Manifest advertises `capabilities: ["notes", "notes-admin"]` and the summary pro
 
 | Item                                                                          | Bucket | Effort | Impact | Section ref |
 | ----------------------------------------------------------------------------- | ------ | ------ | ------ | ----------- |
-| Render notes list in inbox (view/open notes)                                  | Now    | L      | High   | §2.1        |
+| Render notes list in inbox (view/open notes)                                  | Done   | L      | High   | §2.1        |
 | Wire resolve/reopen/complete actions into UI                                  | Now    | M      | High   | §2.2        |
-| Mark mentions read (clear the badge)                                          | Now    | S      | High   | §2.3, §3    |
+| Mark mentions read (clear the badge)                                          | Done   | S      | High   | §2.3, §3    |
 | Reconcile reminders: build producer OR drop from copy/summary                 | Now    | S–L    | High   | §3, §4, §5  |
 | Visibility scoping + anon/non-admin safety test before any read surface ships | Now    | M      | High   | §4          |
 | Body max-length validation + sanitization on display                          | Now    | S      | Med    | §4          |
