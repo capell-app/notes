@@ -11,6 +11,9 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Lorisleiva\Actions\Concerns\AsObject;
 
+/**
+ * @method static Collection<int, Note> run(Model $user, ?NoteStatus $status = null, int $limit = 25)
+ */
 final class BuildUserInboxNotesAction
 {
     use AsObject;

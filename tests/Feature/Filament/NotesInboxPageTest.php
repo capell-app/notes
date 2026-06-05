@@ -7,6 +7,7 @@ use Capell\Notes\Actions\BuildUserAttentionCountsAction;
 use Capell\Notes\Actions\MentionNoteUsersAction;
 use Capell\Notes\Filament\Pages\NotesInboxPage;
 use Capell\Notes\Models\Note;
+use Capell\Notes\Models\NoteMention;
 use Capell\Tests\Fixtures\Models\User;
 use Livewire\Livewire;
 
@@ -30,9 +31,11 @@ it('renders inbox notes and marks displayed mentions read after preserving initi
         ->assertSee('1');
 
     $counts = BuildUserAttentionCountsAction::run($user);
+    $mention = $mentionedNote->mentions()->whereMorphedTo('mentioned', $user)->first();
+    throw_unless($mention instanceof NoteMention, RuntimeException::class, 'Expected note mention to exist.');
 
     expect($counts->mentions)->toBe(0)
-        ->and($mentionedNote->mentions()->whereMorphedTo('mentioned', $user)->first()->read_at)->not->toBeNull();
+        ->and($mention->read_at)->not->toBeNull();
 });
 
 it('does not render another participant private note in the inbox', function (): void {

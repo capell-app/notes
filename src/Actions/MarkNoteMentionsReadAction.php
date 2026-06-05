@@ -9,6 +9,9 @@ use Capell\Notes\Models\NoteMention;
 use Illuminate\Database\Eloquent\Model;
 use Lorisleiva\Actions\Concerns\AsObject;
 
+/**
+ * @method static int run(Model $user, iterable<int, Note> $notes)
+ */
 final class MarkNoteMentionsReadAction
 {
     use AsObject;
@@ -22,7 +25,7 @@ final class MarkNoteMentionsReadAction
 
         foreach ($notes as $note) {
             if ($note instanceof Note && $note->exists) {
-                $noteIds[] = (int) $note->getKey();
+                $noteIds[] = $note->id;
             }
         }
 

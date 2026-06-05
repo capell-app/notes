@@ -12,6 +12,9 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Lorisleiva\Actions\Concerns\AsObject;
 
+/**
+ * @method static UserAttentionCountData run(Model $user)
+ */
 final class BuildUserAttentionCountsAction
 {
     use AsObject;
