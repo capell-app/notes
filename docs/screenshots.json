@@ -14,7 +14,7 @@
             "target": "NotesInboxPage",
             "required": true,
             "notes": "Shows the main inbox at /admin/notes.",
-            "useCase": "An administrator reviews notes assigned to them, mentions, and reminders from the inbox.",
+            "useCase": "An administrator reviews assigned notes, mentions, and lifecycle actions from the inbox.",
             "screenshotPath": "packages/notes/docs/screenshots/notes-inbox-page.png"
         },
         {
@@ -43,14 +43,14 @@
         },
         {
             "id": "notes-attention-counts",
-            "title": "Notes inbox with assigned, mentioned, and overdue reminder counts.",
+            "title": "Notes inbox with assigned, mentioned, and lifecycle controls.",
             "package": "notes",
             "surface": "admin",
             "targetType": "admin-surface",
             "target": "NotesInboxPage",
             "required": true,
-            "notes": "Requires seeded notes covering assignment, mention, and reminder states.",
-            "useCase": "An administrator reviews seeded assigned, mentioned, and overdue reminder counts.",
+            "notes": "Requires seeded notes covering assignment, mention, resolved, and open states.",
+            "useCase": "An administrator reviews seeded assigned and mentioned notes with resolve, reopen, and complete-assignment controls.",
             "screenshotPath": "packages/notes/docs/screenshots/notes-attention-counts.png"
         }
     ]

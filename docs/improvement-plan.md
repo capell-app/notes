@@ -4,17 +4,17 @@
 
 ## 1. Snapshot
 
-Notes is an admin-only collaboration package that attaches contextual notes to Capell admin records via a polymorphic `subject` morph (default subject: `Capell\Core\Models\Page`). It owns four tables (`notes`, `note_assignments`, `note_mentions`, `note_reminders`) and four models, all morph-based for both subject and participant (`author`, `assignee`, `mentioned`, `assigned_by`, `mentioned_by`). Surfaces are limited to a single Filament `NotesInboxPage` (4 count tiles) plus a user-menu badge, and a "Add note" header action contributed onto the page `EditPage` via the admin `ResourceHeaderActionExtender` tag. Key Actions: `CreateNoteAction`, `AssignNoteUsersAction`, `MentionNoteUsersAction`, `BuildUserAttentionCountsAction`; dep is `capell-app/admin`. Current marketplace summary (verbatim): _"Notes adds contextual notes, assignments, mentions, and reminders to supported Capell admin records."_ — `capell.json` declares **1** screenshot (`docs/assets/marketplace/extension-card.jpg`) while `docs/screenshots.json` and `docs/overview.md` plan **4**; the `docs/screenshots/` directory does not exist (mismatch).
+Notes is an admin-only collaboration package that attaches contextual notes to Capell admin records via a polymorphic `subject` morph (default subject: `Capell\Core\Models\Page`). It owns four tables (`notes`, `note_assignments`, `note_mentions`, `note_reminders`) and four models, all morph-based for both subject and participant (`author`, `assignee`, `mentioned`, `assigned_by`, `mentioned_by`). Surfaces include a Filament `NotesInboxPage` with attention tiles, a filterable note list, resolve/reopen/complete controls, a user-menu badge, and a "Add note" header action contributed onto the page `EditPage` via the admin `ResourceHeaderActionExtender` tag. Key Actions: `CreateNoteAction`, `AssignNoteUsersAction`, `MentionNoteUsersAction`, `BuildUserAttentionCountsAction`, `BuildUserInboxNotesAction`, `MarkNoteMentionsReadAction`; dep is `capell-app/admin`. Current marketplace summary is now honest about shipped scope: _"Add private, assignable notes and @mentions to any Capell admin record so editors can leave context, hand off work, and never lose track of what needs attention."_ — `capell.json` declares **1** screenshot (`docs/assets/marketplace/extension-card.jpg`) while `docs/screenshots.json` and `docs/overview.md` plan **4**; the `docs/screenshots/` directory does not exist (mismatch).
 
 ## 2. Improvements (existing functionality)
 
 Prioritized.
 
-1. **Surface actual notes in the inbox, not just counts** — `NotesInboxPage` renders 4 tiles (`assigned`, `mentions`, `due_today`, `overdue`) and nothing else; an admin cannot see, open, resolve, or read any note from the inbox. This is the headline product surface and it is currently a dead-end dashboard. Add a notes table/list (assigned-to-me, mentioned-me, filterable by status) below the tiles. — `src/Filament/Pages/NotesInboxPage.php`, `resources/views/filament/pages/notes-inbox.blade.php` — **L**
+1. **Done/Shipped: Surface actual notes in the inbox, not just counts** — `NotesInboxPage` renders attention tiles plus a filterable note list that shows body excerpts, subject, author, assignments, and mentions. Displayed mentions are marked read after preserving the initial badge counts. Evidence: `tests/Feature/Filament/NotesInboxPageTest.php` covers render, private-note scoping, and status-filter mention reads. — `src/Filament/Pages/NotesInboxPage.php`, `resources/views/filament/pages/notes-inbox.blade.php` — **L**
 
-2. **Wire resolve/reopen/complete into the UI** — `ResolveNoteAction`, `ReopenNoteAction`, `CompleteNoteAssignmentAction` exist and are tested but have **zero callers** outside tests (verified by grep across `src/`). The status lifecycle is unreachable in production. Add row/record actions on the inbox list (and/or on the subject record) to resolve/reopen a note and complete an assignment. — `src/Actions/ResolveNoteAction.php`, `src/Actions/ReopenNoteAction.php`, `src/Actions/CompleteNoteAssignmentAction.php` — **M**
+2. **Done/Shipped: Wire resolve/reopen/complete into the UI** — the inbox list now calls `ResolveNoteAction`, `ReopenNoteAction`, and `CompleteNoteAssignmentAction` through current-user-scoped Livewire methods. Evidence: `NotesInboxPageTest` asserts the buttons render and the page delegates each lifecycle operation. — `src/Filament/Pages/NotesInboxPage.php`, `resources/views/filament/pages/notes-inbox.blade.php` — **M**
 
-3. **Mark mentions read** — `note_mentions.read_at` is written as `null` on create and counted in `mentions` attention, but nothing ever sets `read_at`. The mention badge can only grow, never clear. Add a `MarkMentionReadAction` and call it when a user views the note/inbox. — `src/Actions/MentionNoteUsersAction.php` (sibling), `src/Actions/BuildUserAttentionCountsAction.php:52` — **S**
+3. **Done/Shipped: Mark mentions read** — `MarkNoteMentionsReadAction` marks only displayed notes for the current user, and the inbox calls it on mount/status-filter changes so the mention badge can clear. Evidence: `tests/Integration/Actions/UserInboxNotesActionTest.php` and `NotesInboxPageTest`. — `src/Actions/MarkNoteMentionsReadAction.php`, `src/Filament/Pages/NotesInboxPage.php` — **S**
 
 4. **Cache attention counts across the request lifecycle** — `AdminServiceProvider` memoizes per request, but `NotesInboxPage::counts()` re-runs `BuildUserAttentionCountsAction` independently, so the badge and the page each issue the same 4 aggregate queries (the page does not reuse the provider memo). The action runs 4 counts plus 2 `whereHas` subqueries against `note_reminders`→`note_assignments`. Consolidate on one cached path and consider a short TTL cache keyed by user morph. — `src/Providers/AdminServiceProvider.php:66`, `src/Filament/Pages/NotesInboxPage.php:43` — **S**
 
@@ -28,33 +28,33 @@ Prioritized.
 
 ## 3. Missing Features (gaps)
 
-Manifest advertises `capabilities: ["notes", "notes-admin"]` and the summary promises _notes, assignments, mentions, and reminders_. Against that and internal-notes norms:
+Manifest advertises `capabilities: ["notes", "notes-admin"]` and the summary now promises private notes, assignments, and mentions. Against that and internal-notes norms:
 
 - **Reminders are entirely non-functional (table-stakes vs advertised).** `NoteReminder` model, `note_reminders` table, `NoteReminderData`, and `NoteReminderRecurrence` exist, and `BuildUserAttentionCountsAction` reads `due_today`/`overdue` from reminders — but there is **no Action, Filament form, command, or any write path that creates or schedules a reminder** (grep of `src/` shows only reads + the cascade delete). The "Due today" and "Overdue" inbox tiles are therefore permanently `0`, and the user-menu badge can never turn `danger`. Either build the reminder create/schedule/notify flow (recurrence advance of `next_due_at`, a scheduled notifier writing `last_notified_at`) or remove "reminders" from the summary until shipped. **Differentiator** if delivered well (most internal-notes tools lack scheduled reminders); **false advertising** until then.
-- **No note body display / rich text.** Body is a plain `text` column rendered nowhere. No rich text, no markdown, no @mention autocomplete inside the body (mentions are a separate multi-select, not inline). Table-stakes for a "notes" product.
+- **Rich text remains absent.** Body is a plain `text` column and now renders as an escaped inbox excerpt, but there is no rich text, markdown, or @mention autocomplete inside the body (mentions are a separate multi-select, not inline). Table-stakes for a fuller "notes" product.
 - **No activity feed / threaded replies / comments on a note.** A note is a single immutable body with no follow-ups. Internal-notes norms expect a thread. Gap vs the sibling `comments` package — consider cross-linking.
 - **No attachments.** No file/image attachment to a note despite "contextual notes" framing. Table-stakes.
 - **No pinning / ordering.** No way to pin an important note to the top of a record. Table-stakes.
 - **`Dismissed` and `Archived` statuses + `archived_at` are dead.** Defined in `NoteStatus` and the schema but never written or surfaced. Either implement archive/dismiss actions or trim the enum/column.
-- **Per-note visibility is under-enforced.** `NoteVisibility::Private` and `RecordEditors` are stored but no read path filters on them yet (because there is no read surface). When the inbox list lands, `Private` notes must be scoped to author/assignee/mention only — this is the core admin-only safety contract and currently untested because unreachable.
+- **Per-note visibility needs record-editor semantics.** The inbox read path now scopes private notes to the current author/assignee/mention and has regression coverage, but `RecordEditors` still behaves like an attention inbox rather than a full subject-editor visibility rule. If record-level note display lands, add policy-backed editor scoping there.
 - **No notifications.** No email/database notification on assignment or mention; the only feedback is the in-page badge. `assigned_by`/`mentioned_by` are captured but never used to notify.
 - **No roles/permissions.** `capell.json` declares `permissions: []`; note creation is gated only by the subject's `update` policy. No dedicated capability to view/manage notes, no admin override.
 
 ## 4. Issues / Risks
 
 - **Advertised capability unreachable (dead feature).** Reminders ship as schema + data + read-side aggregation with no producer — see §3. Highest-credibility risk for a paid tier. — `src/Actions/BuildUserAttentionCountsAction.php:63`, `src/Models/NoteReminder.php`, `capell.json` marketplace.summary.
-- **Dead Actions.** `ResolveNoteAction`, `ReopenNoteAction`, `CompleteNoteAssignmentAction` have no production caller (only tests). Either wire up (§2.2) or they are untested-in-context risk. — `src/Actions/`.
-- **Admin-only visibility is asserted in docs but not test-proven.** `docs/overview.md` and the boost guideline state notes must stay admin-only and never add public surface, but there is **no test** proving anonymous/non-admin cannot read note bodies — acceptable today only because there is no read surface at all. The moment the inbox list (§2.1) or any record-level note display lands, add a public-safety / visibility-scoping test before merge (Capell convention: rendering changes need anon + non-admin safety tests). — `docs/overview.md:38`, `resources/boost/guidelines/core.blade.php`.
-- **No content sanitization.** `CreateNoteAction` only `trim()`s the body; no length cap, no HTML/script handling. Plain `text` storage is safe at rest, but any future rich-text or record-level rendering must escape/sanitize. Add a max-length validation now and a sanitization step when display lands. — `src/Actions/CreateNoteAction.php:49`.
+- **Closed: lifecycle Actions now have a production caller.** `ResolveNoteAction`, `ReopenNoteAction`, and `CompleteNoteAssignmentAction` are reachable from the inbox list and covered by `NotesInboxPageTest`. Remaining lifecycle gaps are the unimplemented dismiss/archive statuses. — `src/Filament/Pages/NotesInboxPage.php`.
+- **Admin-only visibility is partially test-proven.** The inbox render is authenticated-admin-only through Filament and `NotesInboxPageTest` proves another participant's private note is not shown. Still add a public-output safety assertion if a future public route, frontend hook, or record-level rendered component is introduced. — `docs/overview.md:38`, `resources/boost/guidelines/core.blade.php`.
+- **Closed for plain text: body length and escaped display.** `CreateNoteAction` caps body length at 5,000 characters and the inbox renders escaped excerpts. If rich-text display lands, add sanitizer coverage at that boundary. — `src/Actions/CreateNoteAction.php`, `resources/views/filament/pages/notes-inbox.blade.php`.
 - **Polymorphic integrity.** Children cascade on DB FK (`note_id` → `cascadeOnDelete`) and the model `deleting` hook also deletes children — belt-and-braces, fine. But `subject`/`author`/`assignee`/`mentioned` morphs have **no cleanup** when the _target_ (e.g. a Page or User) is deleted: notes orphan with dangling `subject_id`/`author_id`. No `morphMap` alias is registered for the note models' own morph type beyond `registerModels()`, and there is no subject-deletion subscriber. Add orphan handling (nullable author display fallback already exists via `userLabel`, but subject orphans will break the inbox list). — `database/migrations/2026_05_10_190862_01_create_notes_tables.php`, `src/Models/Note.php:92`.
 - **Performance budget cited, partially at risk.** Manifest `performance.adminQueryBudget: 40`, `frontendRenderBudgetMs: 0` (admin-only, correct). `cacheSafety.cacheable: false`. The badge + page double-run the 4-count action (§2.4); once the inbox lists notes with morph eager-loads it must stay within budget — add a query-count assertion test. — `capell.json` performance.
-- **Test gaps.** Covered: CreateNote (+rollback), assign/mention upsert + reactivate, complete-assignment, resolve/reopen, attention counts, model casts/relations, migrations (guarded + cascade), manager registration, data objects, provider registration, the header-action extender. **Not covered:** reminder lifecycle (none exists), mention `read_at` clearing, visibility scoping on read, public/non-admin safety, the inbox page render itself (`NotesInboxPage` has no Livewire/page test), orphaned-morph behavior, body max-length. — `tests/`.
+- **Test gaps.** Covered: CreateNote (+rollback + max length), assign/mention upsert + reactivate, complete-assignment, resolve/reopen, attention counts, mention `read_at` clearing, inbox page render/lifecycle delegation/private-note scoping, model casts/relations, migrations (guarded + cascade), manager registration, data objects, provider registration, the header-action extender. **Not covered:** reminder lifecycle (none exists), record-editor visibility semantics outside the attention inbox, public-output safety for any future public surface, orphaned-morph behavior. — `tests/`.
 - **i18n.** `note.php` + `navigation.php` + `package.php` exist for `en` only; strings are translated (good), but `class_basename` fallback label in `userLabel()` and the hard-coded `'UTC'` reminder timezone default are not localized/configurable. — `resources/lang/en/`, `src/Filament/Extenders/Page/CreateNoteResourceHeaderActionExtender.php:148`.
 - **`php: ^8.3` in composer vs PHP 8.4 house standard.** Minor: package allows 8.3 while the platform targets 8.4; uses `#[Override]` and typed properties that are 8.3-safe, so fine, but confirm intended floor. — `composer.json`.
 
 ## 5. Marketplace & Selling
 
-**Current `summary`:** _"Notes adds contextual notes, assignments, mentions, and reminders to supported Capell admin records."_ — accurate on notes/assignments/mentions but **reminders are not functional** (§3), so the summary over-promises a paid capability. **Composer `description`:** _"Contextual notes, assignments, mentions, and reminders for Capell"_ — same reminder problem, and it differs in wording from the manifest summary (keep them consistent or intentionally distinct). Both lead with mechanics, not buyer value.
+**Current `summary`:** _"Add private, assignable notes and @mentions to any Capell admin record so editors can leave context, hand off work, and never lose track of what needs attention."_ This now matches the shipped notes/assignments/mentions scope and avoids the unbuilt reminder producer. **Composer `description`:** _"Private, assignable notes and @mentions for any Capell admin record"_ — aligned in scope, intentionally shorter for package-manager listings.
 
 **Improved 1-sentence summary:**
 
@@ -71,25 +71,25 @@ Manifest advertises `capabilities: ["notes", "notes-admin"]` and the summary pro
 
 **Differentiators / value props / target buyer:** Differentiator = admin-internal, per-record, per-note-visibility collaboration native to Capell (not a bolt-on). Target buyer = teams with multiple editors/reviewers doing editorial or content-ops handoffs. Value props: contextual handoff, mention-driven attention, zero public leakage.
 
-**Keywords/tags (8–12):** `notes`, `internal-notes`, `collaboration`, `mentions`, `assignments`, `admin`, `editorial-workflow`, `content-ops`, `reminders`, `team`, `filament`, `polymorphic`.
+**Keywords/tags (8–12):** `notes`, `internal-notes`, `collaboration`, `mentions`, `assignments`, `admin`, `editorial-workflow`, `content-ops`, `team`, `filament`, `polymorphic`.
 
 ## 6. Prioritized Roadmap
 
-| Item                                                                          | Bucket | Effort | Impact | Section ref |
-| ----------------------------------------------------------------------------- | ------ | ------ | ------ | ----------- |
-| Render notes list in inbox (view/open notes)                                  | Done   | L      | High   | §2.1        |
-| Wire resolve/reopen/complete actions into UI                                  | Now    | M      | High   | §2.2        |
-| Mark mentions read (clear the badge)                                          | Done   | S      | High   | §2.3, §3    |
-| Reconcile reminders: build producer OR drop from copy/summary                 | Now    | S–L    | High   | §3, §4, §5  |
-| Visibility scoping + anon/non-admin safety test before any read surface ships | Now    | M      | High   | §4          |
-| Body max-length validation + sanitization on display                          | Now    | S      | Med    | §4          |
-| Consolidate/cache attention counts (badge + page)                             | Next   | S      | Med    | §2.4        |
-| Searchable user selects (drop limit(100))                                     | Next   | S      | Med    | §2.6        |
-| Adopt enum labels (status/visibility/recurrence)                              | Next   | S      | Med    | §2.5        |
-| Generalize "Add note" beyond page EditPage to any subject                     | Next   | M      | High   | §2.7        |
-| Notifications on assign/mention (database/email)                              | Next   | M      | Med    | §3          |
-| Orphaned-morph cleanup on subject/author delete                               | Next   | M      | Med    | §4          |
-| Generate 4 planned screenshots + fix manifest count                           | Next   | S      | Med    | §5          |
-| Note threads/replies + attachments                                            | Later  | L      | Med    | §3          |
-| Pinning + dismiss/archive lifecycle (use dead enum cases)                     | Later  | M      | Low    | §3          |
-| Per-note view/manage permissions (manifest permissions: [])                   | Later  | M      | Med    | §3          |
+| Item                                                                        | Bucket | Effort | Impact | Section ref |
+| --------------------------------------------------------------------------- | ------ | ------ | ------ | ----------- |
+| Render notes list in inbox (view/open notes)                                | Done   | L      | High   | §2.1        |
+| Wire resolve/reopen/complete actions into UI                                | Done   | M      | High   | §2.2        |
+| Mark mentions read (clear the badge)                                        | Done   | S      | High   | §2.3, §3    |
+| Reconcile reminders: build producer before re-advertising reminders         | Next   | M–L    | High   | §3, §4, §5  |
+| Add record-editor visibility semantics for future record-level note display | Next   | M      | High   | §4          |
+| Body rich-text sanitization if/when rich text ships                         | Later  | S      | Med    | §4          |
+| Consolidate/cache attention counts (badge + page)                           | Next   | S      | Med    | §2.4        |
+| Searchable user selects (drop limit(100))                                   | Next   | S      | Med    | §2.6        |
+| Adopt enum labels (status/visibility/recurrence)                            | Next   | S      | Med    | §2.5        |
+| Generalize "Add note" beyond page EditPage to any subject                   | Next   | M      | High   | §2.7        |
+| Notifications on assign/mention (database/email)                            | Next   | M      | Med    | §3          |
+| Orphaned-morph cleanup on subject/author delete                             | Next   | M      | Med    | §4          |
+| Generate 4 planned screenshots + fix manifest count                         | Next   | S      | Med    | §5          |
+| Note threads/replies + attachments                                          | Later  | L      | Med    | §3          |
+| Pinning + dismiss/archive lifecycle (use dead enum cases)                   | Later  | M      | Low    | §3          |
+| Per-note view/manage permissions (manifest permissions: [])                 | Later  | M      | Med    | §3          |

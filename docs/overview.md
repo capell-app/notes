@@ -2,7 +2,7 @@
 
 Status: **Available, schema-owning** · Kind: **package** · Tier: **premium** · Bundle: **collaboration** · Contexts: **admin** · Product group: **Capell Collaboration**
 
-Notes adds contextual notes, assignments, mentions, reminders, attention counts, and a user inbox to supported Capell admin records.
+Notes adds contextual notes, assignments, mentions, attention counts, and a user inbox to supported Capell admin records.
 
 ## Install
 
@@ -16,8 +16,8 @@ The package requires `capell-app/admin`.
 
 - `NotesInboxPage` at `/admin/notes`.
 - Admin user-menu item with attention badge.
-- Package models for notes, assignments, mentions, and reminders.
-- Actions for creating notes, assigning users, and calculating attention counts.
+- Package models for notes, assignments, mentions, and dormant reminder records.
+- Actions for creating notes, assigning users, marking mentions read, and calculating attention counts.
 
 ## Frontend Surfaces
 
@@ -28,7 +28,7 @@ This package has no public frontend routes or Blade output. It should not add an
 - Notes inbox page.
 - User-menu notes item with attention badge.
 - Empty inbox state.
-- Inbox with assigned, mentioned, and overdue reminder counts.
+- Inbox with assigned, mentioned, and lifecycle action states.
 
 ## Verification
 
@@ -37,5 +37,5 @@ This package has no public frontend routes or Blade output. It should not add an
 
 ## Known Risks
 
-- Screenshots need seeded assigned notes, mentions, and reminders to show the real collaboration workflow.
+- Screenshots need seeded assigned notes, mentions, and lifecycle states to show the real collaboration workflow.
 - The package has no public frontend surface; future render hooks should include public-safety tests before documentation screenshots are added.

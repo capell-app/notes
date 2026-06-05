@@ -130,6 +130,36 @@
                                 </span>
                             @endif
                         </div>
+
+                        <div class="flex flex-wrap items-center gap-2">
+                            @if ($note->status === NoteStatus::Resolved)
+                                <x-filament::button
+                                    color="gray"
+                                    size="xs"
+                                    wire:click="reopenNote({{ $note->id }})"
+                                >
+                                    {{ __('capell-notes::note.actions.reopen') }}
+                                </x-filament::button>
+                            @else
+                                <x-filament::button
+                                    color="gray"
+                                    size="xs"
+                                    wire:click="resolveNote({{ $note->id }})"
+                                >
+                                    {{ __('capell-notes::note.actions.resolve') }}
+                                </x-filament::button>
+                            @endif
+
+                            @if ($this->hasIncompleteAssignmentForCurrentUser($note))
+                                <x-filament::button
+                                    color="gray"
+                                    size="xs"
+                                    wire:click="completeAssignment({{ $note->id }})"
+                                >
+                                    {{ __('capell-notes::note.actions.complete_assignment') }}
+                                </x-filament::button>
+                            @endif
+                        </div>
                     </article>
                 @endforeach
             </div>

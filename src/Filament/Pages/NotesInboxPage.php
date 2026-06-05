@@ -7,10 +7,14 @@ namespace Capell\Notes\Filament\Pages;
 use BackedEnum;
 use Capell\Notes\Actions\BuildUserAttentionCountsAction;
 use Capell\Notes\Actions\BuildUserInboxNotesAction;
+use Capell\Notes\Actions\CompleteNoteAssignmentAction;
 use Capell\Notes\Actions\MarkNoteMentionsReadAction;
+use Capell\Notes\Actions\ReopenNoteAction;
+use Capell\Notes\Actions\ResolveNoteAction;
 use Capell\Notes\Data\UserAttentionCountData;
 use Capell\Notes\Enums\NoteStatus;
 use Capell\Notes\Models\Note;
+use Capell\Notes\Models\NoteAssignment;
 use Filament\Pages\Page;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Database\Eloquent\Collection;
@@ -53,7 +57,7 @@ final class NotesInboxPage extends Page
             return;
         }
 
-        $counts = BuildUserAttentionCountsAction::run($user);
+        $counts = (new BuildUserAttentionCountsAction)->handle($user);
 
         $this->initialCounts = [
             'assigned' => $counts->assigned,
@@ -62,7 +66,7 @@ final class NotesInboxPage extends Page
             'mentions' => $counts->mentions,
         ];
 
-        MarkNoteMentionsReadAction::run($user, $this->inboxNotes());
+        (new MarkNoteMentionsReadAction)->handle($user, $this->inboxNotes());
     }
 
     #[Override]
@@ -88,7 +92,7 @@ final class NotesInboxPage extends Page
             return new UserAttentionCountData;
         }
 
-        return BuildUserAttentionCountsAction::run($user);
+        return (new BuildUserAttentionCountsAction)->handle($user);
     }
 
     /**
@@ -102,7 +106,7 @@ final class NotesInboxPage extends Page
             return new Collection;
         }
 
-        return BuildUserInboxNotesAction::run(
+        return (new BuildUserInboxNotesAction)->handle(
             user: $user,
             status: $this->selectedStatus(),
         );
@@ -118,8 +122,45 @@ final class NotesInboxPage extends Page
         $user = $this->user();
 
         if ($user instanceof Model) {
-            MarkNoteMentionsReadAction::run($user, $this->inboxNotes());
+            (new MarkNoteMentionsReadAction)->handle($user, $this->inboxNotes());
         }
+    }
+
+    public function resolveNote(int $noteId): void
+    {
+        $note = $this->noteVisibleToCurrentUser($noteId);
+
+        if (! $note instanceof Note || $note->status === NoteStatus::Resolved) {
+            return;
+        }
+
+        (new ResolveNoteAction)->handle($note);
+        $this->initialCounts = null;
+    }
+
+    public function reopenNote(int $noteId): void
+    {
+        $note = $this->noteVisibleToCurrentUser($noteId);
+
+        if (! $note instanceof Note || $note->status === NoteStatus::Open) {
+            return;
+        }
+
+        (new ReopenNoteAction)->handle($note);
+        $this->initialCounts = null;
+    }
+
+    public function completeAssignment(int $noteId): void
+    {
+        $user = $this->user();
+        $note = $this->noteVisibleToCurrentUser($noteId);
+
+        if (! $user instanceof Model || ! $note instanceof Note) {
+            return;
+        }
+
+        (new CompleteNoteAssignmentAction)->handle($note, $user);
+        $this->initialCounts = null;
     }
 
     public function userLabel(?Model $user): string
@@ -136,7 +177,7 @@ final class NotesInboxPage extends Page
 
         return (string) __('capell-notes::note.labels.record_fallback', [
             'record' => class_basename($user),
-            'id' => (string) $user->getKey(),
+            'id' => $this->modelKeyLabel($user),
         ]);
     }
 
@@ -154,7 +195,7 @@ final class NotesInboxPage extends Page
 
         return (string) __('capell-notes::note.labels.record_fallback', [
             'record' => class_basename($subject),
-            'id' => (string) $subject->getKey(),
+            'id' => $this->modelKeyLabel($subject),
         ]);
     }
 
@@ -166,6 +207,28 @@ final class NotesInboxPage extends Page
     public function excerpt(Note $note): string
     {
         return Str::limit($note->body, 220);
+    }
+
+    public function hasIncompleteAssignmentForCurrentUser(Note $note): bool
+    {
+        $user = $this->user();
+
+        if (! $user instanceof Model) {
+            return false;
+        }
+
+        $userKey = $user->getKey();
+
+        if (! is_scalar($userKey)) {
+            return false;
+        }
+
+        return $note->assignments->contains(
+            static fn (mixed $assignment): bool => $assignment instanceof NoteAssignment
+                && $assignment->completed_at === null
+                && $assignment->assignee_type === $user->getMorphClass()
+                && (string) $assignment->assignee_id === (string) $userKey,
+        );
     }
 
     private function selectedStatus(): ?NoteStatus
@@ -182,6 +245,17 @@ final class NotesInboxPage extends Page
         $user = auth()->user();
 
         return $user instanceof Model ? $user : null;
+    }
+
+    private function modelKeyLabel(Model $model): string
+    {
+        $key = $model->getKey();
+
+        if (is_scalar($key)) {
+            return (string) $key;
+        }
+
+        return '';
     }
 
     /**
@@ -204,5 +278,13 @@ final class NotesInboxPage extends Page
         }
 
         return null;
+    }
+
+    private function noteVisibleToCurrentUser(int $noteId): ?Note
+    {
+        /** @var Note|null $note */
+        $note = $this->inboxNotes()->firstWhere('id', $noteId);
+
+        return $note;
     }
 }

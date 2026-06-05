@@ -4,7 +4,10 @@ declare(strict_types=1);
 
 return [
     'actions' => [
+        'complete_assignment' => 'Complete assignment',
         'create' => 'Add note',
+        'reopen' => 'Reopen',
+        'resolve' => 'Resolve',
     ],
     'assigned_to_me' => 'Assigned to me',
     'due_today' => 'Due today',

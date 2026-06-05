@@ -75,3 +75,37 @@ it('marks mentions read when a status filter displays new notes', function (): v
 
     expect($resolvedNote->mentions()->whereMorphedTo('mentioned', $user)->first()->read_at)->not->toBeNull();
 });
+
+it('delegates note lifecycle actions from the inbox', function (): void {
+    $user = User::factory()->create();
+    $assignedNote = Note::factory()->create(['body' => 'Lifecycle controls are available.']);
+
+    AssignNoteUsersAction::run($assignedNote, [$user], assignedBy: null);
+
+    test()->actingAs($user);
+
+    Livewire::test(NotesInboxPage::class)
+        ->assertSuccessful()
+        ->assertSee((string) __('capell-notes::note.actions.resolve'))
+        ->assertSee((string) __('capell-notes::note.actions.complete_assignment'))
+        ->call('resolveNote', $assignedNote->id);
+
+    expect($assignedNote->refresh()->status->value)->toBe('resolved')
+        ->and($assignedNote->resolved_at)->not->toBeNull();
+
+    Livewire::test(NotesInboxPage::class)
+        ->set('statusFilter', 'resolved')
+        ->assertSee((string) __('capell-notes::note.actions.reopen'))
+        ->call('reopenNote', $assignedNote->id)
+        ->assertSuccessful();
+
+    Livewire::test(NotesInboxPage::class)
+        ->assertSee((string) __('capell-notes::note.actions.complete_assignment'))
+        ->call('completeAssignment', $assignedNote->id)
+        ->assertSuccessful();
+
+    $assignment = $assignedNote->assignments()->whereMorphedTo('assignee', $user)->first();
+
+    expect($assignedNote->refresh()->status->value)->toBe('open')
+        ->and($assignment?->completed_at)->not->toBeNull();
+});
