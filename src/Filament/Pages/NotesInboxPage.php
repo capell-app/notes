@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Capell\Notes\Filament\Pages;
 
 use BackedEnum;
-use Capell\Notes\Actions\BuildUserAttentionCountsAction;
 use Capell\Notes\Actions\BuildUserInboxNotesAction;
 use Capell\Notes\Actions\CompleteNoteAssignmentAction;
 use Capell\Notes\Actions\MarkNoteMentionsReadAction;
@@ -15,6 +14,7 @@ use Capell\Notes\Data\UserAttentionCountData;
 use Capell\Notes\Enums\NoteStatus;
 use Capell\Notes\Models\Note;
 use Capell\Notes\Models\NoteAssignment;
+use Capell\Notes\Support\UserAttentionCountsCache;
 use Filament\Pages\Page;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Database\Eloquent\Collection;
@@ -57,7 +57,7 @@ final class NotesInboxPage extends Page
             return;
         }
 
-        $counts = (new BuildUserAttentionCountsAction)->handle($user);
+        $counts = $this->attentionCountsCache()->forUser($user);
 
         $this->initialCounts = [
             'assigned' => $counts->assigned,
@@ -92,7 +92,7 @@ final class NotesInboxPage extends Page
             return new UserAttentionCountData;
         }
 
-        return (new BuildUserAttentionCountsAction)->handle($user);
+        return $this->attentionCountsCache()->forUser($user);
     }
 
     /**
@@ -135,7 +135,7 @@ final class NotesInboxPage extends Page
         }
 
         (new ResolveNoteAction)->handle($note);
-        $this->initialCounts = null;
+        $this->forgetAttentionCounts();
     }
 
     public function reopenNote(int $noteId): void
@@ -147,7 +147,7 @@ final class NotesInboxPage extends Page
         }
 
         (new ReopenNoteAction)->handle($note);
-        $this->initialCounts = null;
+        $this->forgetAttentionCounts();
     }
 
     public function completeAssignment(int $noteId): void
@@ -160,7 +160,7 @@ final class NotesInboxPage extends Page
         }
 
         (new CompleteNoteAssignmentAction)->handle($note, $user);
-        $this->initialCounts = null;
+        $this->forgetAttentionCounts();
     }
 
     public function userLabel(?Model $user): string
@@ -286,5 +286,21 @@ final class NotesInboxPage extends Page
         $note = $this->inboxNotes()->firstWhere('id', $noteId);
 
         return $note;
+    }
+
+    private function attentionCountsCache(): UserAttentionCountsCache
+    {
+        return resolve(UserAttentionCountsCache::class);
+    }
+
+    private function forgetAttentionCounts(): void
+    {
+        $this->initialCounts = null;
+
+        $user = $this->user();
+
+        if ($user instanceof Model) {
+            $this->attentionCountsCache()->forgetUser($user);
+        }
     }
 }

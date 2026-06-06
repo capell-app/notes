@@ -16,7 +16,7 @@ Prioritized.
 
 3. **Done/Shipped: Mark mentions read** — `MarkNoteMentionsReadAction` marks only displayed notes for the current user, and the inbox calls it on mount/status-filter changes so the mention badge can clear. Evidence: `tests/Integration/Actions/UserInboxNotesActionTest.php` and `NotesInboxPageTest`. — `src/Actions/MarkNoteMentionsReadAction.php`, `src/Filament/Pages/NotesInboxPage.php` — **S**
 
-4. **Cache attention counts across the request lifecycle** — `AdminServiceProvider` memoizes per request, but `NotesInboxPage::counts()` re-runs `BuildUserAttentionCountsAction` independently, so the badge and the page each issue the same 4 aggregate queries (the page does not reuse the provider memo). The action runs 4 counts plus 2 `whereHas` subqueries against `note_reminders`→`note_assignments`. Consolidate on one cached path and consider a short TTL cache keyed by user morph. — `src/Providers/AdminServiceProvider.php:66`, `src/Filament/Pages/NotesInboxPage.php:43` — **S**
+4. **Shipped 2026-06-06: attention counts share a request-scoped cache.** `UserAttentionCountsCache` now owns per-user request memoization for `BuildUserAttentionCountsAction`, and both the admin user-menu badge and `NotesInboxPage` resolve counts through that cache. Inbox lifecycle actions clear the cached entry before re-rendering counts. — `src/Support/UserAttentionCountsCache.php`, `src/Providers/AdminServiceProvider.php`, `src/Filament/Pages/NotesInboxPage.php` — **S**
 
 5. **Shipped 2026-06-06: note enums implement Filament labels.** `NoteStatus`, `NoteVisibility`, and `NoteReminderRecurrence` now implement `HasLabel`, and the page header action derives visibility options from the enum instead of hand-building translated arrays. — `src/Enums/NoteStatus.php`, `src/Enums/NoteVisibility.php`, `src/Enums/NoteReminderRecurrence.php`, `src/Filament/Extenders/Page/CreateNoteResourceHeaderActionExtender.php` — **S**
 
@@ -83,7 +83,7 @@ Manifest advertises `capabilities: ["notes", "notes-admin"]` and the summary now
 | Reconcile reminders: build producer before re-advertising reminders         | Next   | M–L    | High   | §3, §4, §5  |
 | Add record-editor visibility semantics for future record-level note display | Next   | M      | High   | §4          |
 | Body rich-text sanitization if/when rich text ships                         | Later  | S      | Med    | §4          |
-| Consolidate/cache attention counts (badge + page)                           | Next   | S      | Med    | §2.4        |
+| Consolidate/cache attention counts (badge + page)                           | Done   | S      | Med    | §2.4        |
 | Searchable user selects (drop limit(100))                                   | Done   | S      | Med    | §2.6        |
 | Adopt enum labels (status/visibility/recurrence)                            | Done   | S      | Med    | §2.5        |
 | Generalize "Add note" beyond page EditPage to any subject                   | Next   | M      | High   | §2.7        |

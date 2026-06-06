@@ -14,6 +14,7 @@ use Capell\Notes\Models\NoteAssignment;
 use Capell\Notes\Models\NoteMention;
 use Capell\Notes\Models\NoteReminder;
 use Capell\Notes\Support\NotesManager;
+use Capell\Notes\Support\UserAttentionCountsCache;
 use Illuminate\Database\Eloquent\Model;
 use Override;
 use Spatie\LaravelPackageTools\Package;
@@ -36,6 +37,7 @@ class NotesServiceProvider extends AbstractPackageServiceProvider
     public function registeringPackage(): void
     {
         $this->app->singleton(NotesManager::class);
+        $this->app->scoped(UserAttentionCountsCache::class);
         $this->app->register(AdminServiceProvider::class);
         $this->app->tag([CreateNoteResourceHeaderActionExtender::class], ResourceHeaderActionExtender::TAG);
     }

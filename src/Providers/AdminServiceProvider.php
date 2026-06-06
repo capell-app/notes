@@ -6,18 +6,15 @@ namespace Capell\Notes\Providers;
 
 use Capell\Admin\Facades\CapellAdmin;
 use Capell\Core\Facades\CapellCore;
-use Capell\Notes\Actions\BuildUserAttentionCountsAction;
 use Capell\Notes\Data\UserAttentionCountData;
 use Capell\Notes\Filament\Pages\NotesInboxPage;
+use Capell\Notes\Support\UserAttentionCountsCache;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\ServiceProvider;
 
 class AdminServiceProvider extends ServiceProvider
 {
-    /** @var array<string, UserAttentionCountData> */
-    private array $attentionCounts = [];
-
     public function boot(): void
     {
         if (! $this->isPackageInstalled()) {
@@ -65,12 +62,6 @@ class AdminServiceProvider extends ServiceProvider
 
     private function attentionCounts(Model $user): UserAttentionCountData
     {
-        $cacheKey = $user->getMorphClass() . ':' . $user->getKey();
-
-        if (! isset($this->attentionCounts[$cacheKey])) {
-            $this->attentionCounts[$cacheKey] = BuildUserAttentionCountsAction::run($user);
-        }
-
-        return $this->attentionCounts[$cacheKey];
+        return resolve(UserAttentionCountsCache::class)->forUser($user);
     }
 }
