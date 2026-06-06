@@ -2,7 +2,7 @@
     @php($counts = $this->counts())
     @php($notes = $this->inboxNotes())
 
-    <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+    <div data-capell-notes-inbox class="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         <x-filament::section>
             <div class="text-sm font-medium text-gray-500 dark:text-gray-400">
                 {{ __('capell-notes::note.assigned_to_me') }}
