@@ -36,7 +36,7 @@ Manifest advertises `capabilities: ["notes", "notes-admin"]` and the summary now
 - **No attachments.** No file/image attachment to a note despite "contextual notes" framing. Table-stakes.
 - **No pinning / ordering.** No way to pin an important note to the top of a record. Table-stakes.
 - **`Dismissed` and `Archived` statuses + `archived_at` are dead.** Defined in `NoteStatus` and the schema but never written or surfaced. Either implement archive/dismiss actions or trim the enum/column.
-- **Per-note visibility needs record-editor semantics.** The inbox read path now scopes private notes to the current author/assignee/mention and has regression coverage, but `RecordEditors` still behaves like an attention inbox rather than a full subject-editor visibility rule. If record-level note display lands, add policy-backed editor scoping there.
+- **Shipped 2026-06-06: per-note visibility has record-editor semantics.** `CanViewNoteAction` allows authors, active assignees, and mentioned users to see their notes, keeps private notes restricted to those participants, and treats `RecordEditors` notes as visible to users who can `update` the subject record. `BuildSubjectNotesAction` exposes that policy-backed rule for future record-level note display.
 - **No notifications.** No email/database notification on assignment or mention; the only feedback is the in-page badge. `assigned_by`/`mentioned_by` are captured but never used to notify.
 - **No roles/permissions.** `capell.json` declares `permissions: []`; note creation is gated only by the subject's `update` policy. No dedicated capability to view/manage notes, no admin override.
 
@@ -81,7 +81,7 @@ Manifest advertises `capabilities: ["notes", "notes-admin"]` and the summary now
 | Wire resolve/reopen/complete actions into UI                                | Done   | M      | High   | §2.2        |
 | Mark mentions read (clear the badge)                                        | Done   | S      | High   | §2.3, §3    |
 | Reconcile reminders: build producer before re-advertising reminders         | Next   | M–L    | High   | §3, §4, §5  |
-| Add record-editor visibility semantics for future record-level note display | Next   | M      | High   | §4          |
+| Add record-editor visibility semantics for future record-level note display | Done   | M      | High   | §4          |
 | Body rich-text sanitization if/when rich text ships                         | Later  | S      | Med    | §4          |
 | Consolidate/cache attention counts (badge + page)                           | Done   | S      | Med    | §2.4        |
 | Searchable user selects (drop limit(100))                                   | Done   | S      | Med    | §2.6        |
