@@ -76,6 +76,26 @@
                 "path": "docs/assets/marketplace/extension-card.jpg",
                 "alt": "Notes extension preview image",
                 "caption": "Notes extension preview"
+            },
+            {
+                "path": "docs/screenshots/notes-inbox-page.png",
+                "alt": "Notes inbox with assigned notes, mentions, and lifecycle controls",
+                "caption": "Review assigned notes, mentions, reminders, and open lifecycle actions from the Capell admin inbox."
+            },
+            {
+                "path": "docs/screenshots/notes-attention-counts.png",
+                "alt": "Populated Notes inbox with attention counts and note actions",
+                "caption": "See assigned work, overdue reminders, mentioned records, and resolve or complete notes without leaving Capell Admin."
+            },
+            {
+                "path": "docs/screenshots/notes-empty-inbox.png",
+                "alt": "Empty Notes inbox state",
+                "caption": "A quiet empty state keeps the Notes inbox clear when no collaboration items need attention."
+            },
+            {
+                "path": "docs/screenshots/notes-attention-counts-dark.png",
+                "alt": "Dark mode Notes inbox with populated collaboration records",
+                "caption": "The same Notes workflow is captured in Capell Admin dark mode for marketplace parity."
             }
         ],
         "categories": ["admin", "collaboration"]

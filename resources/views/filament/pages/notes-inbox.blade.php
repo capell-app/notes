@@ -119,20 +119,20 @@
                             @if ($note->assignments->isNotEmpty())
                                 <span>
                                     {{ __('capell-notes::note.labels.assigned') }}:
-                                    {{ $note->assignments->map(fn (NoteAssignment $assignment): string => $this->userLabel($assignment->assignee))->implode(', ') }}
+                                    {{ $note->assignments->map(fn (\Capell\Notes\Models\NoteAssignment $assignment): string => $this->userLabel($assignment->assignee))->implode(', ') }}
                                 </span>
                             @endif
 
                             @if ($note->mentions->isNotEmpty())
                                 <span>
                                     {{ __('capell-notes::note.labels.mentioned') }}:
-                                    {{ $note->mentions->map(fn (NoteMention $mention): string => $this->userLabel($mention->mentioned))->implode(', ') }}
+                                    {{ $note->mentions->map(fn (\Capell\Notes\Models\NoteMention $mention): string => $this->userLabel($mention->mentioned))->implode(', ') }}
                                 </span>
                             @endif
                         </div>
 
                         <div class="flex flex-wrap items-center gap-2">
-                            @if ($note->status === NoteStatus::Resolved)
+                            @if ($note->status === \Capell\Notes\Enums\NoteStatus::Resolved)
                                 <x-filament::button
                                     color="gray"
                                     size="xs"
