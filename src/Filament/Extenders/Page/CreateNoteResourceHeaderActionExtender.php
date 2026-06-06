@@ -83,10 +83,9 @@ final class CreateNoteResourceHeaderActionExtender implements ResourceHeaderActi
     /** @return array<string, string> */
     private function visibilityOptions(): array
     {
-        return [
-            NoteVisibility::RecordEditors->value => __('capell-notes::note.visibility.record_editors'),
-            NoteVisibility::Private->value => __('capell-notes::note.visibility.private'),
-        ];
+        return collect(NoteVisibility::cases())
+            ->mapWithKeys(fn (NoteVisibility $visibility): array => [$visibility->value => $visibility->getLabel()])
+            ->all();
     }
 
     /** @return array<int|string, string> */

@@ -18,7 +18,7 @@ Prioritized.
 
 4. **Cache attention counts across the request lifecycle** — `AdminServiceProvider` memoizes per request, but `NotesInboxPage::counts()` re-runs `BuildUserAttentionCountsAction` independently, so the badge and the page each issue the same 4 aggregate queries (the page does not reuse the provider memo). The action runs 4 counts plus 2 `whereHas` subqueries against `note_reminders`→`note_assignments`. Consolidate on one cached path and consider a short TTL cache keyed by user morph. — `src/Providers/AdminServiceProvider.php:66`, `src/Filament/Pages/NotesInboxPage.php:43` — **S**
 
-5. **Add enum labels via Capell/host `HasLabels` convention** — `NoteStatus`, `NoteVisibility`, `NoteReminderRecurrence` are bare backed enums; the Filament visibility options are hand-built in `visibilityOptions()`. Adopt enum labels so options, table badges, and filters derive from the enum. — `src/Enums/NoteStatus.php`, `src/Enums/NoteVisibility.php`, `src/Filament/Extenders/Page/CreateNoteResourceHeaderActionExtender.php:84` — **S**
+5. **Shipped 2026-06-06: note enums implement Filament labels.** `NoteStatus`, `NoteVisibility`, and `NoteReminderRecurrence` now implement `HasLabel`, and the page header action derives visibility options from the enum instead of hand-building translated arrays. — `src/Enums/NoteStatus.php`, `src/Enums/NoteVisibility.php`, `src/Enums/NoteReminderRecurrence.php`, `src/Filament/Extenders/Page/CreateNoteResourceHeaderActionExtender.php` — **S**
 
 6. **Replace unbounded user dropdowns with searchable queries** — `userOptions()` does `->limit(100)->get()` for both the assignee and mention selects, eagerly loading up to 100 users twice per modal open and silently truncating larger installs. Use `->getSearchResultsUsing()` / `->getOptionLabelsUsing()` so it scales. — `src/Filament/Extenders/Page/CreateNoteResourceHeaderActionExtender.php:93-106` — **S**
 
@@ -85,7 +85,7 @@ Manifest advertises `capabilities: ["notes", "notes-admin"]` and the summary now
 | Body rich-text sanitization if/when rich text ships                         | Later  | S      | Med    | §4          |
 | Consolidate/cache attention counts (badge + page)                           | Next   | S      | Med    | §2.4        |
 | Searchable user selects (drop limit(100))                                   | Next   | S      | Med    | §2.6        |
-| Adopt enum labels (status/visibility/recurrence)                            | Next   | S      | Med    | §2.5        |
+| Adopt enum labels (status/visibility/recurrence)                            | Done   | S      | Med    | §2.5        |
 | Generalize "Add note" beyond page EditPage to any subject                   | Next   | M      | High   | §2.7        |
 | Notifications on assign/mention (database/email)                            | Next   | M      | Med    | §3          |
 | Orphaned-morph cleanup on subject/author delete                             | Next   | M      | Med    | §4          |

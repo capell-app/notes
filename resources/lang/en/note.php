@@ -38,6 +38,13 @@ return [
     ],
     'overdue' => 'Overdue',
     'recent_notes' => 'Recent notes',
+    'recurrence' => [
+        'daily' => 'Daily',
+        'monthly' => 'Monthly',
+        'none' => 'None',
+        'weekly' => 'Weekly',
+        'yearly' => 'Yearly',
+    ],
     'status' => [
         'archived' => 'Archived',
         'dismissed' => 'Dismissed',
