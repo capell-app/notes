@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Capell\Notes\Support;
 
+use Capell\Notes\Actions\PruneNotesForDeletedParticipantAction;
+use Capell\Notes\Actions\PruneNotesForDeletedSubjectAction;
 use Illuminate\Database\Eloquent\Model;
 use InvalidArgumentException;
 
@@ -15,6 +17,12 @@ final class NotesManager
     /** @var array<class-string<Model>, true> */
     private array $participantClasses = [];
 
+    /** @var array<class-string<Model>, true> */
+    private array $observedSubjectClasses = [];
+
+    /** @var array<class-string<Model>, true> */
+    private array $observedParticipantClasses = [];
+
     /**
      * @param  class-string<Model>  $modelClass
      * @param  list<class-string>  $resourcePageClasses
@@ -25,6 +33,8 @@ final class NotesManager
             ...($this->subjectClasses[$modelClass] ?? []),
             ...$resourcePageClasses,
         ]));
+
+        $this->observeSubjectDeletion($modelClass);
     }
 
     /**
@@ -33,6 +43,8 @@ final class NotesManager
     public function registerParticipant(string $modelClass): void
     {
         $this->participantClasses[$modelClass] = true;
+
+        $this->observeParticipantDeletion($modelClass);
     }
 
     public function ensureSubject(Model $subject): void
@@ -99,5 +111,37 @@ final class NotesManager
         }
 
         return false;
+    }
+
+    /**
+     * @param  class-string<Model>  $modelClass
+     */
+    private function observeSubjectDeletion(string $modelClass): void
+    {
+        if (isset($this->observedSubjectClasses[$modelClass])) {
+            return;
+        }
+
+        $modelClass::deleting(static function (Model $subject): void {
+            PruneNotesForDeletedSubjectAction::run($subject);
+        });
+
+        $this->observedSubjectClasses[$modelClass] = true;
+    }
+
+    /**
+     * @param  class-string<Model>  $modelClass
+     */
+    private function observeParticipantDeletion(string $modelClass): void
+    {
+        if (isset($this->observedParticipantClasses[$modelClass])) {
+            return;
+        }
+
+        $modelClass::deleting(static function (Model $participant): void {
+            PruneNotesForDeletedParticipantAction::run($participant);
+        });
+
+        $this->observedParticipantClasses[$modelClass] = true;
     }
 }
