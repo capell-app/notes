@@ -20,7 +20,7 @@ Prioritized.
 
 5. **Shipped 2026-06-06: note enums implement Filament labels.** `NoteStatus`, `NoteVisibility`, and `NoteReminderRecurrence` now implement `HasLabel`, and the page header action derives visibility options from the enum instead of hand-building translated arrays. — `src/Enums/NoteStatus.php`, `src/Enums/NoteVisibility.php`, `src/Enums/NoteReminderRecurrence.php`, `src/Filament/Extenders/Page/CreateNoteResourceHeaderActionExtender.php` — **S**
 
-6. **Replace unbounded user dropdowns with searchable queries** — `userOptions()` does `->limit(100)->get()` for both the assignee and mention selects, eagerly loading up to 100 users twice per modal open and silently truncating larger installs. Use `->getSearchResultsUsing()` / `->getOptionLabelsUsing()` so it scales. — `src/Filament/Extenders/Page/CreateNoteResourceHeaderActionExtender.php:93-106` — **S**
+6. **Shipped 2026-06-06: user dropdowns use lazy searchable queries.** Assignee and mention selects now use `getSearchResultsUsing()` and `getOptionLabelsUsing()` so the Add note modal no longer eager-loads two separate `limit(100)` user lists on open. Selected labels remain resolvable by key. — `src/Filament/Extenders/Page/CreateNoteResourceHeaderActionExtender.php` — **S**
 
 7. **Generalize the "Add note" action beyond the page EditPage** — the extender `supports()` only returns true for `Capell\Admin\Filament\Resources\Pages\Pages\EditPage`, and the only registered subject is `Page`. The polymorphic schema supports any record, but no other edit screen can add notes. Provide a reusable extender (or trait/contract) host packages can opt records into. — `src/Filament/Extenders/Page/CreateNoteResourceHeaderActionExtender.php:23`, `src/Providers/NotesServiceProvider.php:96` — **M**
 
@@ -84,7 +84,7 @@ Manifest advertises `capabilities: ["notes", "notes-admin"]` and the summary now
 | Add record-editor visibility semantics for future record-level note display | Next   | M      | High   | §4          |
 | Body rich-text sanitization if/when rich text ships                         | Later  | S      | Med    | §4          |
 | Consolidate/cache attention counts (badge + page)                           | Next   | S      | Med    | §2.4        |
-| Searchable user selects (drop limit(100))                                   | Next   | S      | Med    | §2.6        |
+| Searchable user selects (drop limit(100))                                   | Done   | S      | Med    | §2.6        |
 | Adopt enum labels (status/visibility/recurrence)                            | Done   | S      | Med    | §2.5        |
 | Generalize "Add note" beyond page EditPage to any subject                   | Next   | M      | High   | §2.7        |
 | Notifications on assign/mention (database/email)                            | Next   | M      | Med    | §3          |

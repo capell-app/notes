@@ -45,14 +45,16 @@ final class CreateNoteResourceHeaderActionExtender implements ResourceHeaderActi
                         ->required(),
                     Select::make('assignee_ids')
                         ->label(__('capell-notes::note.fields.assignees'))
-                        ->options(fn (): array => $this->userOptions())
                         ->multiple()
-                        ->searchable(),
+                        ->searchable()
+                        ->getSearchResultsUsing(fn (string $search): array => $this->searchUsers($search))
+                        ->getOptionLabelsUsing(fn (array $values): array => $this->userLabelsForIds($values)),
                     Select::make('mention_ids')
                         ->label(__('capell-notes::note.fields.mentions'))
-                        ->options(fn (): array => $this->userOptions())
                         ->multiple()
-                        ->searchable(),
+                        ->searchable()
+                        ->getSearchResultsUsing(fn (string $search): array => $this->searchUsers($search))
+                        ->getOptionLabelsUsing(fn (array $values): array => $this->userLabelsForIds($values)),
                 ])
                 ->modalSubmitActionLabel(__('capell-notes::note.actions.create'))
                 ->authorize(fn (Page $record): bool => Gate::allows('update', $record))
@@ -89,7 +91,7 @@ final class CreateNoteResourceHeaderActionExtender implements ResourceHeaderActi
     }
 
     /** @return array<int|string, string> */
-    private function userOptions(): array
+    private function searchUsers(string $search): array
     {
         $userModel = $this->userModel();
 
@@ -97,8 +99,32 @@ final class CreateNoteResourceHeaderActionExtender implements ResourceHeaderActi
             return [];
         }
 
+        $query = $userModel::query();
+
+        if ($search !== '') {
+            $query
+                ->where('name', 'like', '%' . $search . '%')
+                ->orWhere('email', 'like', '%' . $search . '%');
+        }
+
+        return $query
+            ->limit(50)
+            ->get()
+            ->mapWithKeys(fn (Model $user): array => [$user->getKey() => $this->userLabel($user)])
+            ->all();
+    }
+
+    /** @return array<int|string, string> */
+    private function userLabelsForIds(array $ids): array
+    {
+        $userModel = $this->userModel();
+
+        if ($userModel === null || $ids === []) {
+            return [];
+        }
+
         return $userModel::query()
-            ->limit(100)
+            ->whereKey($ids)
             ->get()
             ->mapWithKeys(fn (Model $user): array => [$user->getKey() => $this->userLabel($user)])
             ->all();
