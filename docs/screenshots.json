@@ -76,7 +76,8 @@
             "required": true,
             "notes": "Requires seeded notes covering assignment, mention, resolved, and open states.",
             "useCase": "An administrator reviews seeded assigned and mentioned notes with resolve, reopen, and complete-assignment controls.",
-            "screenshotPath": "packages/notes/docs/screenshots/notes-attention-counts.png"
+            "screenshotPath": "packages/notes/docs/screenshots/notes-attention-counts.png",
+            "darkScreenshotPath": "packages/notes/docs/screenshots/notes-attention-counts-dark.png"
         }
     ]
 }
