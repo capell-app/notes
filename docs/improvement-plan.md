@@ -37,7 +37,7 @@ Manifest advertises `capabilities: ["notes", "notes-admin"]` and the summary now
 - **No pinning / ordering.** No way to pin an important note to the top of a record. Table-stakes.
 - **`Dismissed` and `Archived` statuses + `archived_at` are dead.** Defined in `NoteStatus` and the schema but never written or surfaced. Either implement archive/dismiss actions or trim the enum/column.
 - **Shipped 2026-06-06: per-note visibility has record-editor semantics.** `CanViewNoteAction` allows authors, active assignees, and mentioned users to see their notes, keeps private notes restricted to those participants, and treats `RecordEditors` notes as visible to users who can `update` the subject record. `BuildSubjectNotesAction` exposes that policy-backed rule for future record-level note display.
-- **No notifications.** No email/database notification on assignment or mention; the only feedback is the in-page badge. `assigned_by`/`mentioned_by` are captured but never used to notify.
+- **Shipped 2026-06-06: assignment and mention notifications.** `AssignNoteUsersAction` and `MentionNoteUsersAction` now send queued `NoteAttentionNotification` messages after persistence, skipping self-notifications. Delivery channels are configurable through `capell-notes.notifications.channels` and default to database notifications, with mail rendering available when `mail` is enabled. `assigned_by`/`mentioned_by` actor metadata now drives notification suppression.
 - **No roles/permissions.** `capell.json` declares `permissions: []`; note creation is gated only by the subject's `update` policy. No dedicated capability to view/manage notes, no admin override.
 
 ## 4. Issues / Risks
@@ -87,7 +87,7 @@ Manifest advertises `capabilities: ["notes", "notes-admin"]` and the summary now
 | Searchable user selects (drop limit(100))                                   | Done   | S      | Med    | §2.6        |
 | Adopt enum labels (status/visibility/recurrence)                            | Done   | S      | Med    | §2.5        |
 | Generalize "Add note" beyond page EditPage to any subject                   | Done   | M      | High   | §2.7        |
-| Notifications on assign/mention (database/email)                            | Next   | M      | Med    | §3          |
+| Notifications on assign/mention (database/email)                            | Done   | M      | Med    | §3          |
 | Orphaned-morph cleanup on subject/author delete                             | Next   | M      | Med    | §4          |
 | Promote dedicated user-menu badge and record-level Add note modal captures | Next   | S      | Med    | §5          |
 | Note threads/replies + attachments                                          | Later  | L      | Med    | §3          |

@@ -30,6 +30,7 @@ class NotesServiceProvider extends AbstractPackageServiceProvider
     {
         $package
             ->name(self::$name)
+            ->hasConfigFile()
             ->hasTranslations()
             ->hasViews()
             ->hasMigrations(['2026_05_10_190862_01_create_notes_tables']);

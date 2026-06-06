@@ -36,6 +36,16 @@ return [
     'notifications' => [
         'created' => 'Note added.',
     ],
+    'notification_mail' => [
+        'assigned' => [
+            'line' => 'You have been assigned a Capell note.',
+            'subject' => 'You have a new Capell note assignment',
+        ],
+        'mentioned' => [
+            'line' => 'You have been mentioned in a Capell note.',
+            'subject' => 'You were mentioned in a Capell note',
+        ],
+    ],
     'overdue' => 'Overdue',
     'recent_notes' => 'Recent notes',
     'recurrence' => [

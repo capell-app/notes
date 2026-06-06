@@ -60,5 +60,7 @@ class AssignNoteUsersAction
                 ],
             );
         });
+
+        SendNoteAssignmentNotificationsAction::run($note, $assignees, $assignedBy);
     }
 }
