@@ -26,7 +26,7 @@ Private, assignable notes and @mentions for Capell admin records.
 
 - Contextual notes, assignments, and mentions for Capell.
 - An admin inbox for operational follow-up that stays separate from public page output.
-- Package-owned note, assignment, mention, and dormant reminder records.
+- Package-owned note, assignment, mention, and scheduled reminder records.
 
 ## Code Map
 

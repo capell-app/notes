@@ -6,4 +6,7 @@ return [
     'notifications' => [
         'channels' => ['database'],
     ],
+    'reminders' => [
+        'schedule_enabled' => true,
+    ],
 ];

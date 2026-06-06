@@ -16,8 +16,8 @@ The package requires `capell-app/admin`.
 
 - `NotesInboxPage` at `/admin/notes`.
 - Admin user-menu item with attention badge.
-- Package models for notes, assignments, mentions, and dormant reminder records.
-- Actions for creating notes, assigning users, marking mentions read, and calculating attention counts.
+- Package models for notes, assignments, mentions, and scheduled reminder records.
+- Actions for creating notes, assigning users, marking mentions read, calculating attention counts, and sending due reminder notifications.
 
 ## Frontend Surfaces
 

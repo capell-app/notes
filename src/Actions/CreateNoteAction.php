@@ -42,6 +42,7 @@ class CreateNoteAction
 
             AssignNoteUsersAction::run($note, $data->assignees, assignedBy: $data->author);
             MentionNoteUsersAction::run($note, $data->mentions, mentionedBy: $data->author);
+            UpsertNoteReminderAction::run($note, $data->reminder);
 
             return $note->load([
                 'assignments.assignee',
@@ -49,6 +50,7 @@ class CreateNoteAction
                 'author',
                 'mentions.mentioned',
                 'mentions.mentionedBy',
+                'reminder',
                 'subject',
             ]);
         });

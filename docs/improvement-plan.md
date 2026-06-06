@@ -30,7 +30,7 @@ Prioritized.
 
 Manifest advertises `capabilities: ["notes", "notes-admin"]` and the summary now promises private notes, assignments, and mentions. Against that and internal-notes norms:
 
-- **Reminders are entirely non-functional (table-stakes vs advertised).** `NoteReminder` model, `note_reminders` table, `NoteReminderData`, and `NoteReminderRecurrence` exist, and `BuildUserAttentionCountsAction` reads `due_today`/`overdue` from reminders — but there is **no Action, Filament form, command, or any write path that creates or schedules a reminder** (grep of `src/` shows only reads + the cascade delete). The "Due today" and "Overdue" inbox tiles are therefore permanently `0`, and the user-menu badge can never turn `danger`. Either build the reminder create/schedule/notify flow (recurrence advance of `next_due_at`, a scheduled notifier writing `last_notified_at`) or remove "reminders" from the summary until shipped. **Differentiator** if delivered well (most internal-notes tools lack scheduled reminders); **false advertising** until then.
+- **Shipped 2026-06-06: reminders have a create/schedule/notify path.** The Add note modal now accepts due time, recurrence, and timezone fields, `CreateNoteAction` persists them through `UpsertNoteReminderAction`, and `capell:notes:send-due-reminders` runs `SendDueNoteReminderNotificationsAction` on a five-minute schedule. Due reminders notify active assignees, write `last_notified_at`, and advance `next_due_at` for recurring reminders. — `src/Filament/Extenders/Page/CreateNoteResourceHeaderActionExtender.php`, `src/Actions/UpsertNoteReminderAction.php`, `src/Actions/SendDueNoteReminderNotificationsAction.php`, `src/Console/SendDueNoteRemindersCommand.php`
 - **Rich text remains absent.** Body is a plain `text` column and now renders as an escaped inbox excerpt, but there is no rich text, markdown, or @mention autocomplete inside the body (mentions are a separate multi-select, not inline). Table-stakes for a fuller "notes" product.
 - **No activity feed / threaded replies / comments on a note.** A note is a single immutable body with no follow-ups. Internal-notes norms expect a thread. Gap vs the sibling `comments` package — consider cross-linking.
 - **No attachments.** No file/image attachment to a note despite "contextual notes" framing. Table-stakes.
@@ -80,7 +80,7 @@ Manifest advertises `capabilities: ["notes", "notes-admin"]` and the summary now
 | Render notes list in inbox (view/open notes)                                | Done   | L      | High   | §2.1        |
 | Wire resolve/reopen/complete actions into UI                                | Done   | M      | High   | §2.2        |
 | Mark mentions read (clear the badge)                                        | Done   | S      | High   | §2.3, §3    |
-| Reconcile reminders: build producer before re-advertising reminders         | Next   | M–L    | High   | §3, §4, §5  |
+| Reconcile reminders: build producer before re-advertising reminders         | Done   | M–L    | High   | §3, §4, §5  |
 | Add record-editor visibility semantics for future record-level note display | Done   | M      | High   | §4          |
 | Body rich-text sanitization if/when rich text ships                         | Later  | S      | Med    | §4          |
 | Consolidate/cache attention counts (badge + page)                           | Done   | S      | Med    | §2.4        |

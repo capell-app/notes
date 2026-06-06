@@ -26,7 +26,15 @@
         "admin": ["Capell\\Notes\\Providers\\AdminServiceProvider"],
         "frontend": []
     },
-    "contributes": [],
+    "contributes": [
+        {
+            "type": "scheduled-job",
+            "class": "Capell\\Notes\\Manifest\\NotesReminderScheduleContribution",
+            "name": "capell-notes-send-due-reminders",
+            "command": "capell:notes:send-due-reminders",
+            "frequency": "everyFiveMinutes"
+        }
+    ],
     "database": {
         "migrations": true,
         "settings": false,
