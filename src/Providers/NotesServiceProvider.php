@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Capell\Notes\Providers;
 
 use Capell\Admin\Contracts\Extenders\ResourceHeaderActionExtender;
+use Capell\Admin\Filament\Resources\Pages\Pages\EditPage;
 use Capell\Core\Facades\CapellCore;
 use Capell\Core\Models\Page;
 use Capell\Core\Support\Packages\AbstractPackageServiceProvider;
@@ -97,7 +98,7 @@ class NotesServiceProvider extends AbstractPackageServiceProvider
 
     private function registerDefaultSubjects(): self
     {
-        resolve(NotesManager::class)->registerSubject(Page::class);
+        resolve(NotesManager::class)->registerSubject(Page::class, [EditPage::class]);
 
         return $this;
     }

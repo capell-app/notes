@@ -9,7 +9,7 @@ use InvalidArgumentException;
 
 final class NotesManager
 {
-    /** @var array<class-string<Model>, true> */
+    /** @var array<class-string<Model>, list<class-string>> */
     private array $subjectClasses = [];
 
     /** @var array<class-string<Model>, true> */
@@ -17,10 +17,14 @@ final class NotesManager
 
     /**
      * @param  class-string<Model>  $modelClass
+     * @param  list<class-string>  $resourcePageClasses
      */
-    public function registerSubject(string $modelClass): void
+    public function registerSubject(string $modelClass, array $resourcePageClasses = []): void
     {
-        $this->subjectClasses[$modelClass] = true;
+        $this->subjectClasses[$modelClass] = array_values(array_unique([
+            ...($this->subjectClasses[$modelClass] ?? []),
+            ...$resourcePageClasses,
+        ]));
     }
 
     /**
@@ -33,7 +37,7 @@ final class NotesManager
 
     public function ensureSubject(Model $subject): void
     {
-        if ($this->isRegistered($subject, $this->subjectClasses)) {
+        if ($this->isSubjectRegistered($subject)) {
             return;
         }
 
@@ -61,12 +65,34 @@ final class NotesManager
         $this->participantClasses = [];
     }
 
+    public function supportsResourcePage(string $pageClass): bool
+    {
+        foreach ($this->subjectClasses as $resourcePageClasses) {
+            if (in_array($pageClass, $resourcePageClasses, true)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     /**
      * @param  array<class-string<Model>, true>  $registeredClasses
      */
     private function isRegistered(Model $model, array $registeredClasses): bool
     {
         foreach (array_keys($registeredClasses) as $registeredClass) {
+            if ($model instanceof $registeredClass) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private function isSubjectRegistered(Model $model): bool
+    {
+        foreach (array_keys($this->subjectClasses) as $registeredClass) {
             if ($model instanceof $registeredClass) {
                 return true;
             }

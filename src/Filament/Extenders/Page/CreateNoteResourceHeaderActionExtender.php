@@ -5,11 +5,10 @@ declare(strict_types=1);
 namespace Capell\Notes\Filament\Extenders\Page;
 
 use Capell\Admin\Contracts\Extenders\ResourceHeaderActionExtender;
-use Capell\Admin\Filament\Resources\Pages\Pages\EditPage;
-use Capell\Core\Models\Page;
 use Capell\Notes\Actions\CreateNoteAction;
 use Capell\Notes\Data\CreateNoteData;
 use Capell\Notes\Enums\NoteVisibility;
+use Capell\Notes\Support\NotesManager;
 use Filament\Actions\Action;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
@@ -22,7 +21,7 @@ final class CreateNoteResourceHeaderActionExtender implements ResourceHeaderActi
 {
     public function supports(string $pageClass): bool
     {
-        return $pageClass === EditPage::class;
+        return resolve(NotesManager::class)->supportsResourcePage($pageClass);
     }
 
     /** @return array<int, Action> */
@@ -57,8 +56,8 @@ final class CreateNoteResourceHeaderActionExtender implements ResourceHeaderActi
                         ->getOptionLabelsUsing(fn (array $values): array => $this->userLabelsForIds($values)),
                 ])
                 ->modalSubmitActionLabel(__('capell-notes::note.actions.create'))
-                ->authorize(fn (Page $record): bool => Gate::allows('update', $record))
-                ->action(function (Page $record, array $data): void {
+                ->authorize(fn (Model $record): bool => $this->canCreateFor($record))
+                ->action(function (Model $record, array $data): void {
                     Gate::authorize('update', $record);
 
                     $author = auth()->user();
@@ -80,6 +79,17 @@ final class CreateNoteResourceHeaderActionExtender implements ResourceHeaderActi
                         ->send();
                 }),
         ];
+    }
+
+    private function canCreateFor(Model $record): bool
+    {
+        try {
+            resolve(NotesManager::class)->ensureSubject($record);
+        } catch (\InvalidArgumentException) {
+            return false;
+        }
+
+        return Gate::allows('update', $record);
     }
 
     /** @return array<string, string> */

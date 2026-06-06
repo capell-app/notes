@@ -22,7 +22,7 @@ Prioritized.
 
 6. **Shipped 2026-06-06: user dropdowns use lazy searchable queries.** Assignee and mention selects now use `getSearchResultsUsing()` and `getOptionLabelsUsing()` so the Add note modal no longer eager-loads two separate `limit(100)` user lists on open. Selected labels remain resolvable by key. — `src/Filament/Extenders/Page/CreateNoteResourceHeaderActionExtender.php` — **S**
 
-7. **Generalize the "Add note" action beyond the page EditPage** — the extender `supports()` only returns true for `Capell\Admin\Filament\Resources\Pages\Pages\EditPage`, and the only registered subject is `Page`. The polymorphic schema supports any record, but no other edit screen can add notes. Provide a reusable extender (or trait/contract) host packages can opt records into. — `src/Filament/Extenders/Page/CreateNoteResourceHeaderActionExtender.php:23`, `src/Providers/NotesServiceProvider.php:96` — **M**
+7. **Shipped 2026-06-06: Add note can be opted into beyond page EditPage.** `NotesManager::registerSubject()` now accepts resource header page classes, `CreateNoteResourceHeaderActionExtender::supports()` reads that registry, and the action accepts any registered Eloquent subject that the current user can update. The package still registers Capell `Page` + `EditPage` by default, while host packages can register their own subject/edit-page pair through `CapellNotes`. — `src/Support/NotesManager.php`, `src/Filament/Extenders/Page/CreateNoteResourceHeaderActionExtender.php`, `src/Providers/NotesServiceProvider.php` — **M**
 
 8. **Tighten the health check label or implement real checks** — `NotesHealthCheck` only declares `compatibleCapellApiVersion()` (identical to sibling packages like comments/insights, so it is convention-correct, not a bug), but the manifest labels it _"surfaces, providers, and install health are discoverable by Diagnostics"_ at `severity: critical`. Either downgrade the label to match what the contract actually verifies, or extend it if the host contract grows assertion hooks. — `src/Health/NotesHealthCheck.php`, `capell.json` healthChecks — **S**
 
@@ -86,7 +86,7 @@ Manifest advertises `capabilities: ["notes", "notes-admin"]` and the summary now
 | Consolidate/cache attention counts (badge + page)                           | Done   | S      | Med    | §2.4        |
 | Searchable user selects (drop limit(100))                                   | Done   | S      | Med    | §2.6        |
 | Adopt enum labels (status/visibility/recurrence)                            | Done   | S      | Med    | §2.5        |
-| Generalize "Add note" beyond page EditPage to any subject                   | Next   | M      | High   | §2.7        |
+| Generalize "Add note" beyond page EditPage to any subject                   | Done   | M      | High   | §2.7        |
 | Notifications on assign/mention (database/email)                            | Next   | M      | Med    | §3          |
 | Orphaned-morph cleanup on subject/author delete                             | Next   | M      | Med    | §4          |
 | Promote dedicated user-menu badge and record-level Add note modal captures | Next   | S      | Med    | §5          |
