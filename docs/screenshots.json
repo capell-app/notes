@@ -6,6 +6,21 @@
     "outputDirectory": "packages/notes/docs/screenshots",
     "entries": [
         {
+            "id": "notes-user-menu-badge",
+            "title": "User-menu notes item with attention badge.",
+            "package": "notes",
+            "surface": "admin",
+            "targetType": "admin-surface",
+            "target": "AdminServiceProvider::registerUserMenuItem",
+            "url": "/notes",
+            "click": ".fi-user-menu-trigger",
+            "waitFor": ".fi-dropdown-list a[href*=\"/notes\"]",
+            "required": true,
+            "notes": "Opens the Filament user menu after seeding assigned, mentioned, or overdue note attention counts.",
+            "useCase": "An administrator sees the user-menu notes item with an attention badge.",
+            "screenshotPath": "packages/notes/docs/screenshots/notes-user-menu-badge.png"
+        },
+        {
             "id": "notes-inbox-page",
             "title": "Notes inbox page.",
             "package": "notes",
@@ -20,18 +35,20 @@
             "screenshotPath": "packages/notes/docs/screenshots/notes-inbox-page.png"
         },
         {
-            "id": "notes-user-menu-badge",
-            "title": "User-menu notes item with attention badge.",
+            "id": "notes-record-add-note-modal",
+            "title": "Record-level Add note modal.",
             "package": "notes",
             "surface": "admin",
             "targetType": "admin-surface",
-            "target": "AdminServiceProvider::registerUserMenuItem",
-            "url": "/notes",
-            "waitFor": "[data-capell-notes-inbox]",
+            "target": "PageResource/EditPage",
+            "scenario": "admin-form",
+            "url": "/pages/{first-record}/edit",
+            "click": "[wire\\:click*=\"createNote\"]",
+            "waitFor": ".fi-modal-window textarea",
             "required": true,
-            "notes": "Requires seeded assigned, mentioned, or overdue note attention counts.",
-            "useCase": "An administrator sees the user-menu notes item with an attention badge.",
-            "screenshotPath": "packages/notes/docs/screenshots/notes-user-menu-badge.png"
+            "notes": "Opens the real Create note Filament header action on a page edit record.",
+            "useCase": "An administrator leaves contextual record-level notes from the Capell page edit surface.",
+            "screenshotPath": "packages/notes/docs/screenshots/notes-record-add-note-modal.png"
         },
         {
             "id": "notes-empty-inbox",
