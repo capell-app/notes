@@ -21,5 +21,6 @@ final class CreateNoteData extends Data
         public readonly NoteVisibility $visibility = NoteVisibility::RecordEditors,
         public readonly array $assignees = [],
         public readonly array $mentions = [],
+        public readonly ?NoteReminderData $reminder = null,
     ) {}
 }

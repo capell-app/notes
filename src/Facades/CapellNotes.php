@@ -9,10 +9,11 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Facade;
 
 /**
- * @method static void registerSubject(string $modelClass)
+ * @method static void registerSubject(string $modelClass, array $resourcePageClasses = [])
  * @method static void registerParticipant(string $modelClass)
  * @method static void ensureSubject(Model $subject)
  * @method static void ensureParticipant(Model $participant)
+ * @method static bool supportsResourcePage(string $pageClass)
  * @method static void clear()
  *
  * @see NotesManager

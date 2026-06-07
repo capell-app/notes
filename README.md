@@ -1,6 +1,6 @@
 # Notes
 
-Contextual notes, assignments, mentions, and reminders for Capell.
+Private, assignable notes and @mentions for Capell admin records.
 
 ## At A Glance
 
@@ -12,7 +12,7 @@ Contextual notes, assignments, mentions, and reminders for Capell.
 
 ## Why It Helps Your Capell Workflow
 
-- Adds contextual notes, assignments, mentions, and reminders to supported Capell admin records.
+- Adds contextual notes, assignments, and mentions to supported Capell admin records.
 - Helps editors coordinate review work inside the CMS instead of moving comments into chat or spreadsheets.
 - Fits publishing and operations workflows where the record itself should carry the next action and accountability.
 
@@ -24,9 +24,9 @@ Contextual notes, assignments, mentions, and reminders for Capell.
 
 ## What It Adds
 
-- Contextual notes, assignments, mentions, and reminders for Capell.
+- Contextual notes, assignments, and mentions for Capell.
 - An admin inbox for operational follow-up that stays separate from public page output.
-- Package-owned note, assignment, mention, and reminder records.
+- Package-owned note, assignment, mention, and scheduled reminder records.
 
 ## Code Map
 

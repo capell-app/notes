@@ -16,6 +16,14 @@ class CreateNoteAction
 {
     use AsObject;
 
+    /**
+     * Maximum allowed note body length, in characters.
+     *
+     * Kept well below the database TEXT column limit so a single note
+     * cannot exhaust storage or degrade the admin inbox render.
+     */
+    public const int MAX_BODY_LENGTH = 5000;
+
     public function handle(CreateNoteData $data): Note
     {
         $this->validate($data);
@@ -34,6 +42,7 @@ class CreateNoteAction
 
             AssignNoteUsersAction::run($note, $data->assignees, assignedBy: $data->author);
             MentionNoteUsersAction::run($note, $data->mentions, mentionedBy: $data->author);
+            UpsertNoteReminderAction::run($note, $data->reminder);
 
             return $note->load([
                 'assignments.assignee',
@@ -41,6 +50,7 @@ class CreateNoteAction
                 'author',
                 'mentions.mentioned',
                 'mentions.mentionedBy',
+                'reminder',
                 'subject',
             ]);
         });
@@ -48,9 +58,17 @@ class CreateNoteAction
 
     private function validate(CreateNoteData $data): void
     {
-        if (trim($data->body) === '') {
+        $body = trim($data->body);
+
+        if ($body === '') {
             throw ValidationException::withMessages([
                 'body' => __('capell-notes::note.validation.body_required'),
+            ]);
+        }
+
+        if (mb_strlen($body) > self::MAX_BODY_LENGTH) {
+            throw ValidationException::withMessages([
+                'body' => __('capell-notes::note.validation.body_max', ['max' => self::MAX_BODY_LENGTH]),
             ]);
         }
 

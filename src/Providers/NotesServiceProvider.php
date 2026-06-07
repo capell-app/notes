@@ -5,15 +5,20 @@ declare(strict_types=1);
 namespace Capell\Notes\Providers;
 
 use Capell\Admin\Contracts\Extenders\ResourceHeaderActionExtender;
+use Capell\Admin\Filament\Resources\Pages\Pages\EditPage;
 use Capell\Core\Facades\CapellCore;
 use Capell\Core\Models\Page;
 use Capell\Core\Support\Packages\AbstractPackageServiceProvider;
+use Capell\Notes\Console\DemoCommand;
+use Capell\Notes\Console\SendDueNoteRemindersCommand;
 use Capell\Notes\Filament\Extenders\Page\CreateNoteResourceHeaderActionExtender;
 use Capell\Notes\Models\Note;
 use Capell\Notes\Models\NoteAssignment;
 use Capell\Notes\Models\NoteMention;
 use Capell\Notes\Models\NoteReminder;
 use Capell\Notes\Support\NotesManager;
+use Capell\Notes\Support\UserAttentionCountsCache;
+use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Database\Eloquent\Model;
 use Override;
 use Spatie\LaravelPackageTools\Package;
@@ -28,14 +33,18 @@ class NotesServiceProvider extends AbstractPackageServiceProvider
     {
         $package
             ->name(self::$name)
+            ->hasConfigFile()
             ->hasTranslations()
             ->hasViews()
+            ->hasCommand(DemoCommand::class)
+            ->hasCommand(SendDueNoteRemindersCommand::class)
             ->hasMigrations(['2026_05_10_190862_01_create_notes_tables']);
     }
 
     public function registeringPackage(): void
     {
         $this->app->singleton(NotesManager::class);
+        $this->app->scoped(UserAttentionCountsCache::class);
         $this->app->register(AdminServiceProvider::class);
         $this->app->tag([CreateNoteResourceHeaderActionExtender::class], ResourceHeaderActionExtender::TAG);
     }
@@ -51,6 +60,7 @@ class NotesServiceProvider extends AbstractPackageServiceProvider
             $this->registerDefaultSubjects();
             $this->registerDefaultParticipants();
             $this->registerProtectedTables();
+            $this->registerReminderSchedule();
         });
     }
 
@@ -95,7 +105,23 @@ class NotesServiceProvider extends AbstractPackageServiceProvider
 
     private function registerDefaultSubjects(): self
     {
-        resolve(NotesManager::class)->registerSubject(Page::class);
+        resolve(NotesManager::class)->registerSubject(Page::class, [EditPage::class]);
+
+        return $this;
+    }
+
+    private function registerReminderSchedule(): self
+    {
+        if (config('capell-notes.reminders.schedule_enabled', true) !== true) {
+            return $this;
+        }
+
+        $this->callAfterResolving(Schedule::class, function (Schedule $schedule): void {
+            $schedule->command('capell:notes:send-due-reminders')
+                ->everyFiveMinutes()
+                ->withoutOverlapping()
+                ->onOneServer();
+        });
 
         return $this;
     }

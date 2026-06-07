@@ -3,5 +3,5 @@
 declare(strict_types=1);
 
 return [
-    'description' => 'Contextual notes, assignments, mentions, and reminders for Capell admin records.',
+    'description' => 'Private, assignable notes and @mentions for any Capell admin record.',
 ];

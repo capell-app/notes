@@ -52,6 +52,32 @@ it('rejects blank note bodies', function (): void {
     )))->toThrow(ValidationException::class);
 });
 
+it('rejects note bodies longer than the maximum length', function (): void {
+    $subject = User::factory()->create();
+    $author = User::factory()->create();
+
+    expect(fn (): mixed => CreateNoteAction::run(new CreateNoteData(
+        subject: $subject,
+        author: $author,
+        body: str_repeat('a', CreateNoteAction::MAX_BODY_LENGTH + 1),
+    )))->toThrow(ValidationException::class);
+
+    expect(Note::query()->count())->toBe(0);
+});
+
+it('accepts a note body at exactly the maximum length', function (): void {
+    $subject = User::factory()->create();
+    $author = User::factory()->create();
+
+    $note = CreateNoteAction::run(new CreateNoteData(
+        subject: $subject,
+        author: $author,
+        body: str_repeat('a', CreateNoteAction::MAX_BODY_LENGTH),
+    ));
+
+    expect(mb_strlen((string) $note->body))->toBe(CreateNoteAction::MAX_BODY_LENGTH);
+});
+
 it('rolls back the note when assignment creation fails', function (): void {
     $subject = User::factory()->create();
     $author = User::factory()->create();

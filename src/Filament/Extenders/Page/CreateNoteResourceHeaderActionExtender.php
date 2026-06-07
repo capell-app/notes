@@ -5,14 +5,18 @@ declare(strict_types=1);
 namespace Capell\Notes\Filament\Extenders\Page;
 
 use Capell\Admin\Contracts\Extenders\ResourceHeaderActionExtender;
-use Capell\Admin\Filament\Resources\Pages\Pages\EditPage;
-use Capell\Core\Models\Page;
 use Capell\Notes\Actions\CreateNoteAction;
 use Capell\Notes\Data\CreateNoteData;
+use Capell\Notes\Data\NoteReminderData;
+use Capell\Notes\Enums\NoteReminderRecurrence;
 use Capell\Notes\Enums\NoteVisibility;
+use Capell\Notes\Support\NotesManager;
+use Carbon\CarbonImmutable;
 use Filament\Actions\Action;
+use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Database\Eloquent\Model;
@@ -22,7 +26,7 @@ final class CreateNoteResourceHeaderActionExtender implements ResourceHeaderActi
 {
     public function supports(string $pageClass): bool
     {
-        return $pageClass === EditPage::class;
+        return resolve(NotesManager::class)->supportsResourcePage($pageClass);
     }
 
     /** @return array<int, Action> */
@@ -33,7 +37,7 @@ final class CreateNoteResourceHeaderActionExtender implements ResourceHeaderActi
                 ->label(__('capell-notes::note.actions.create'))
                 ->icon('heroicon-o-chat-bubble-left-ellipsis')
                 ->color('gray')
-                ->form([
+                ->schema([
                     Textarea::make('body')
                         ->label(__('capell-notes::note.fields.body'))
                         ->rows(5)
@@ -45,18 +49,32 @@ final class CreateNoteResourceHeaderActionExtender implements ResourceHeaderActi
                         ->required(),
                     Select::make('assignee_ids')
                         ->label(__('capell-notes::note.fields.assignees'))
-                        ->options(fn (): array => $this->userOptions())
                         ->multiple()
-                        ->searchable(),
+                        ->searchable()
+                        ->getSearchResultsUsing(fn (string $search): array => $this->searchUsers($search))
+                        ->getOptionLabelsUsing(fn (array $values): array => $this->userLabelsForIds($values)),
                     Select::make('mention_ids')
                         ->label(__('capell-notes::note.fields.mentions'))
-                        ->options(fn (): array => $this->userOptions())
                         ->multiple()
-                        ->searchable(),
+                        ->searchable()
+                        ->getSearchResultsUsing(fn (string $search): array => $this->searchUsers($search))
+                        ->getOptionLabelsUsing(fn (array $values): array => $this->userLabelsForIds($values)),
+                    DateTimePicker::make('reminder_due_at')
+                        ->label(__('capell-notes::note.fields.reminder_due_at'))
+                        ->seconds(false)
+                        ->native(false),
+                    Select::make('reminder_recurrence')
+                        ->label(__('capell-notes::note.fields.reminder_recurrence'))
+                        ->options($this->recurrenceOptions())
+                        ->default(NoteReminderRecurrence::None->value),
+                    TextInput::make('reminder_timezone')
+                        ->label(__('capell-notes::note.fields.reminder_timezone'))
+                        ->default((string) config('app.timezone', 'UTC'))
+                        ->maxLength(64),
                 ])
                 ->modalSubmitActionLabel(__('capell-notes::note.actions.create'))
-                ->authorize(fn (Page $record): bool => Gate::allows('update', $record))
-                ->action(function (Page $record, array $data): void {
+                ->authorize(fn (Model $record): bool => $this->canCreateFor($record))
+                ->action(function (Model $record, array $data): void {
                     Gate::authorize('update', $record);
 
                     $author = auth()->user();
@@ -70,6 +88,7 @@ final class CreateNoteResourceHeaderActionExtender implements ResourceHeaderActi
                         visibility: NoteVisibility::from((string) $data['visibility']),
                         assignees: $this->usersForIds($data['assignee_ids'] ?? []),
                         mentions: $this->usersForIds($data['mention_ids'] ?? []),
+                        reminder: $this->reminderData($data),
                     ));
 
                     Notification::make('capell-notes-note-created')
@@ -80,17 +99,51 @@ final class CreateNoteResourceHeaderActionExtender implements ResourceHeaderActi
         ];
     }
 
+    private function canCreateFor(Model $record): bool
+    {
+        try {
+            resolve(NotesManager::class)->ensureSubject($record);
+        } catch (\InvalidArgumentException) {
+            return false;
+        }
+
+        return Gate::allows('update', $record);
+    }
+
+    /**
+     * @param  array<string, mixed>  $data
+     */
+    private function reminderData(array $data): ?NoteReminderData
+    {
+        if (! isset($data['reminder_due_at']) || $data['reminder_due_at'] === null || $data['reminder_due_at'] === '') {
+            return null;
+        }
+
+        return new NoteReminderData(
+            dueAt: CarbonImmutable::parse((string) $data['reminder_due_at']),
+            recurrence: NoteReminderRecurrence::tryFrom((string) ($data['reminder_recurrence'] ?? '')) ?? NoteReminderRecurrence::None,
+            timezone: (string) ($data['reminder_timezone'] ?? config('app.timezone', 'UTC')),
+        );
+    }
+
     /** @return array<string, string> */
     private function visibilityOptions(): array
     {
-        return [
-            NoteVisibility::RecordEditors->value => __('capell-notes::note.visibility.record_editors'),
-            NoteVisibility::Private->value => __('capell-notes::note.visibility.private'),
-        ];
+        return collect(NoteVisibility::cases())
+            ->mapWithKeys(fn (NoteVisibility $visibility): array => [$visibility->value => $visibility->getLabel()])
+            ->all();
+    }
+
+    /** @return array<string, string> */
+    private function recurrenceOptions(): array
+    {
+        return collect(NoteReminderRecurrence::cases())
+            ->mapWithKeys(fn (NoteReminderRecurrence $recurrence): array => [$recurrence->value => $recurrence->getLabel()])
+            ->all();
     }
 
     /** @return array<int|string, string> */
-    private function userOptions(): array
+    private function searchUsers(string $search): array
     {
         $userModel = $this->userModel();
 
@@ -98,8 +151,32 @@ final class CreateNoteResourceHeaderActionExtender implements ResourceHeaderActi
             return [];
         }
 
+        $query = $userModel::query();
+
+        if ($search !== '') {
+            $query
+                ->where('name', 'like', '%' . $search . '%')
+                ->orWhere('email', 'like', '%' . $search . '%');
+        }
+
+        return $query
+            ->limit(50)
+            ->get()
+            ->mapWithKeys(fn (Model $user): array => [$user->getKey() => $this->userLabel($user)])
+            ->all();
+    }
+
+    /** @return array<int|string, string> */
+    private function userLabelsForIds(array $ids): array
+    {
+        $userModel = $this->userModel();
+
+        if ($userModel === null || $ids === []) {
+            return [];
+        }
+
         return $userModel::query()
-            ->limit(100)
+            ->whereKey($ids)
             ->get()
             ->mapWithKeys(fn (Model $user): array => [$user->getKey() => $this->userLabel($user)])
             ->all();

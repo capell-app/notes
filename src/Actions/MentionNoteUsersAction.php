@@ -60,5 +60,7 @@ class MentionNoteUsersAction
                 ],
             );
         });
+
+        SendNoteMentionNotificationsAction::run($note, $mentions, $mentionedBy);
     }
 }

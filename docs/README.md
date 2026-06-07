@@ -1,6 +1,6 @@
 # Notes Docs
 
-Notes adds contextual notes, assignments, mentions, and reminders to supported Capell admin records.
+Notes adds contextual notes, assignments, and mentions to supported Capell admin records.
 
 Start at the [package README](../README.md) when deciding whether to install this package. Use the docs below for setup, extension, debugging, and verification details.
 

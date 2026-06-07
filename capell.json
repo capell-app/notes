@@ -6,7 +6,7 @@
     "kind": "package",
     "capellApiVersion": "^4.0",
     "version": "4.x-dev",
-    "description": "Notes adds contextual notes, assignments, mentions, and reminders to supported Capell admin records.",
+    "description": "Add private, assignable notes and @mentions to any Capell admin record so editors can leave context, hand off work, and never lose track of what needs attention.",
     "product": {
         "group": "Capell Collaboration",
         "tier": "premium",
@@ -26,7 +26,15 @@
         "admin": ["Capell\\Notes\\Providers\\AdminServiceProvider"],
         "frontend": []
     },
-    "contributes": [],
+    "contributes": [
+        {
+            "type": "scheduled-job",
+            "class": "Capell\\Notes\\Manifest\\NotesReminderScheduleContribution",
+            "name": "capell-notes-send-due-reminders",
+            "command": "capell:notes:send-due-reminders",
+            "frequency": "everyFiveMinutes"
+        }
+    ],
     "database": {
         "migrations": true,
         "settings": false,
@@ -35,7 +43,8 @@
     "commands": {
         "install": null,
         "setup": null,
-        "demo": null,
+        "demo": "capell:notes-demo",
+        "demoParams": ["force"],
         "doctor": null
     },
     "settings": [],
@@ -56,7 +65,7 @@
     "healthChecks": [
         {
             "key": "notes.package-health",
-            "label": "Notes package surfaces, providers, and install health are discoverable by Diagnostics.",
+            "label": "Notes storage tables and model morph aliases are present and registered.",
             "class": "Capell\\Notes\\Health\\NotesHealthCheck",
             "severity": "critical",
             "surface": "admin"
@@ -69,12 +78,43 @@
         "privateDocsRequested": true
     },
     "marketplace": {
-        "summary": "Notes adds contextual notes, assignments, mentions, and reminders to supported Capell admin records.",
+        "summary": "Add private, assignable notes and @mentions to any Capell admin record so editors can leave context, hand off work, and never lose track of what needs attention.",
+        "description": "Notes turns Capell admin records into a collaboration surface: leave a contextual note on a page (or any opted-in record), assign it to teammates, and mention people who need to weigh in. A per-user inbox and user-menu badge surface what's assigned to you and where you've been mentioned, so nothing slips between editors. Notes are strictly admin-internal with per-note visibility (record-editors or private) and are never exposed on the public site. Built the Capell way — domain logic in Actions, polymorphic attachment to any registered subject — so it extends cleanly into your own resources.",
         "screenshots": [
             {
                 "path": "docs/assets/marketplace/extension-card.jpg",
                 "alt": "Notes extension preview image",
                 "caption": "Notes extension preview"
+            },
+            {
+                "path": "docs/screenshots/notes-inbox-page.png",
+                "alt": "Notes inbox with assigned notes, mentions, and lifecycle controls",
+                "caption": "Review assigned notes, mentions, reminders, and open lifecycle actions from the Capell admin inbox."
+            },
+            {
+                "path": "docs/screenshots/notes-user-menu-badge.png",
+                "alt": "Opened Capell admin user menu showing the Notes attention badge",
+                "caption": "Editors see assigned notes, unread mentions, and overdue reminders from the Capell admin user menu."
+            },
+            {
+                "path": "docs/screenshots/notes-record-add-note-modal.png",
+                "alt": "Record-level Add note modal on a Capell page edit screen",
+                "caption": "Leave contextual record-level notes with visibility, assignment, mention, and reminder fields from the page edit workflow."
+            },
+            {
+                "path": "docs/screenshots/notes-attention-counts.png",
+                "alt": "Populated Notes inbox with attention counts and note actions",
+                "caption": "See assigned work, overdue reminders, mentioned records, and resolve or complete notes without leaving Capell Admin."
+            },
+            {
+                "path": "docs/screenshots/notes-empty-inbox.png",
+                "alt": "Empty Notes inbox state",
+                "caption": "A quiet empty state keeps the Notes inbox clear when no collaboration items need attention."
+            },
+            {
+                "path": "docs/screenshots/notes-attention-counts-dark.png",
+                "alt": "Dark mode Notes inbox with populated collaboration records",
+                "caption": "The same Notes workflow is captured in Capell Admin dark mode for marketplace parity."
             }
         ],
         "categories": ["admin", "collaboration"]

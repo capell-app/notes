@@ -1,10 +1,11 @@
 {
     "name": "capell-app/notes",
-    "description": "Contextual notes, assignments, mentions, and reminders for Capell",
+    "description": "Private, assignable notes and @mentions for any Capell admin record",
     "keywords": [
         "capell",
         "notes",
-        "reminders",
+        "mentions",
+        "collaboration",
         "laravel",
         "filamentphp",
         "cms"
