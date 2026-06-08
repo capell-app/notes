@@ -43,6 +43,7 @@ final class CanViewNoteAction
         if ($this->isAuthor($note, $user)) {
             return true;
         }
+
         if ($this->isAssigned($note, $user)) {
             return true;
         }

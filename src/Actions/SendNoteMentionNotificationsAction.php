@@ -25,9 +25,11 @@ final class SendNoteMentionNotificationsAction
             if ($this->isSameUser($mentioned, $mentionedBy)) {
                 continue;
             }
+
             if (! method_exists($mentioned, 'notify')) {
                 continue;
             }
+
             $mentioned->notify(new NoteAttentionNotification($note, 'mentioned'));
         }
     }

@@ -25,9 +25,11 @@ final class SendNoteAssignmentNotificationsAction
             if ($this->isSameUser($assignee, $assignedBy)) {
                 continue;
             }
+
             if (! method_exists($assignee, 'notify')) {
                 continue;
             }
+
             $assignee->notify(new NoteAttentionNotification($note, 'assigned'));
         }
     }
