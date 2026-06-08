@@ -1,3 +1,9 @@
+@php
+    use Capell\Notes\Enums\NoteStatus;
+    use Capell\Notes\Models\NoteAssignment;
+    use Capell\Notes\Models\NoteMention;
+@endphp
+
 <x-filament-panels::page>
     @php($counts = $this->counts())
     @php($notes = $this->inboxNotes())

@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace Capell\Notes\Tests;
 
+use Capell\Admin\Filament\Resources\Pages\Pages\EditPage;
 use Capell\Admin\Providers\AdminServiceProvider;
 use Capell\Admin\Providers\Filament\AdminPanelProvider;
 use Capell\Core\Facades\CapellCore;
+use Capell\Core\Models\Page;
 use Capell\Notes\Providers\NotesServiceProvider;
 use Capell\Notes\Support\NotesManager;
 use Capell\Tests\AbstractTestCase;
@@ -28,6 +30,7 @@ class NotesTestCase extends AbstractTestCase
 
         $notes = resolve(NotesManager::class);
         $notes->clear();
+        $notes->registerSubject(Page::class, [EditPage::class]);
         $notes->registerSubject(User::class);
         $notes->registerParticipant(User::class);
     }
