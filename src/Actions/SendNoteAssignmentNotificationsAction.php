@@ -22,10 +22,12 @@ final class SendNoteAssignmentNotificationsAction
     public function handle(Note $note, array $assignees, ?Model $assignedBy = null): void
     {
         foreach ($assignees as $assignee) {
-            if ($this->isSameUser($assignee, $assignedBy) || ! method_exists($assignee, 'notify')) {
+            if ($this->isSameUser($assignee, $assignedBy)) {
                 continue;
             }
-
+            if (! method_exists($assignee, 'notify')) {
+                continue;
+            }
             $assignee->notify(new NoteAttentionNotification($note, 'assigned'));
         }
     }

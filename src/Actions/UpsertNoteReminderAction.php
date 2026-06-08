@@ -7,6 +7,7 @@ namespace Capell\Notes\Actions;
 use Capell\Notes\Data\NoteReminderData;
 use Capell\Notes\Models\Note;
 use Capell\Notes\Models\NoteReminder;
+use Carbon\CarbonImmutable;
 use Lorisleiva\Actions\Concerns\AsObject;
 
 /**
@@ -18,7 +19,7 @@ final class UpsertNoteReminderAction
 
     public function handle(Note $note, ?NoteReminderData $data): ?NoteReminder
     {
-        if (! $data instanceof NoteReminderData || $data->dueAt === null) {
+        if (! $data instanceof NoteReminderData || ! $data->dueAt instanceof CarbonImmutable) {
             $note->reminder()->delete();
 
             return null;

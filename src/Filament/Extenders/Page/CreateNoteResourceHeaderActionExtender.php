@@ -21,6 +21,7 @@ use Filament\Notifications\Notification;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Gate;
+use InvalidArgumentException;
 
 final class CreateNoteResourceHeaderActionExtender implements ResourceHeaderActionExtender
 {
@@ -103,7 +104,7 @@ final class CreateNoteResourceHeaderActionExtender implements ResourceHeaderActi
     {
         try {
             resolve(NotesManager::class)->ensureSubject($record);
-        } catch (\InvalidArgumentException) {
+        } catch (InvalidArgumentException) {
             return false;
         }
 

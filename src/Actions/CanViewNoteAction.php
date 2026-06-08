@@ -40,9 +40,14 @@ final class CanViewNoteAction
 
     private function isParticipant(Note $note, Model $user): bool
     {
-        return $this->isAuthor($note, $user)
-            || $this->isAssigned($note, $user)
-            || $this->isMentioned($note, $user);
+        if ($this->isAuthor($note, $user)) {
+            return true;
+        }
+        if ($this->isAssigned($note, $user)) {
+            return true;
+        }
+
+        return $this->isMentioned($note, $user);
     }
 
     private function isAuthor(Note $note, Model $user): bool

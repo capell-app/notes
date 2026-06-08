@@ -22,10 +22,12 @@ final class SendNoteMentionNotificationsAction
     public function handle(Note $note, array $mentions, ?Model $mentionedBy = null): void
     {
         foreach ($mentions as $mentioned) {
-            if ($this->isSameUser($mentioned, $mentionedBy) || ! method_exists($mentioned, 'notify')) {
+            if ($this->isSameUser($mentioned, $mentionedBy)) {
                 continue;
             }
-
+            if (! method_exists($mentioned, 'notify')) {
+                continue;
+            }
             $mentioned->notify(new NoteAttentionNotification($note, 'mentioned'));
         }
     }
