@@ -85,8 +85,8 @@ final class CreateNoteResourceHeaderActionExtender implements ResourceHeaderActi
                     CreateNoteAction::run(new CreateNoteData(
                         subject: $record,
                         author: $author,
-                        body: (string) $data['body'],
-                        visibility: NoteVisibility::from((string) $data['visibility']),
+                        body: $this->stringValue($data['body'] ?? null),
+                        visibility: NoteVisibility::from($this->stringValue($data['visibility'] ?? null)),
                         assignees: $this->usersForIds($data['assignee_ids'] ?? []),
                         mentions: $this->usersForIds($data['mention_ids'] ?? []),
                         reminder: $this->reminderData($data),
@@ -116,14 +116,14 @@ final class CreateNoteResourceHeaderActionExtender implements ResourceHeaderActi
      */
     private function reminderData(array $data): ?NoteReminderData
     {
-        if (! isset($data['reminder_due_at']) || $data['reminder_due_at'] === null || $data['reminder_due_at'] === '') {
+        if (! isset($data['reminder_due_at']) || $data['reminder_due_at'] === '') {
             return null;
         }
 
         return new NoteReminderData(
-            dueAt: CarbonImmutable::parse((string) $data['reminder_due_at']),
-            recurrence: NoteReminderRecurrence::tryFrom((string) ($data['reminder_recurrence'] ?? '')) ?? NoteReminderRecurrence::None,
-            timezone: (string) ($data['reminder_timezone'] ?? config('app.timezone', 'UTC')),
+            dueAt: CarbonImmutable::parse($this->stringValue($data['reminder_due_at'] ?? null)),
+            recurrence: NoteReminderRecurrence::tryFrom($this->stringValue($data['reminder_recurrence'] ?? null)) ?? NoteReminderRecurrence::None,
+            timezone: $this->stringValue($data['reminder_timezone'] ?? config('app.timezone', 'UTC'), 'UTC'),
         );
     }
 
@@ -160,27 +160,49 @@ final class CreateNoteResourceHeaderActionExtender implements ResourceHeaderActi
                 ->orWhere('email', 'like', '%' . $search . '%');
         }
 
-        return $query
+        $options = [];
+
+        $query
             ->limit(50)
             ->get()
-            ->mapWithKeys(fn (Model $user): array => [$user->getKey() => $this->userLabel($user)])
-            ->all();
+            ->each(function (Model $user) use (&$options): void {
+                $key = $this->modelKey($user);
+
+                if ($key !== null) {
+                    $options[$key] = $this->userLabel($user);
+                }
+            });
+
+        return $options;
     }
 
-    /** @return array<int|string, string> */
+    /**
+     * @param  array<array-key, mixed>  $ids
+     * @return array<int|string, string>
+     */
     private function userLabelsForIds(array $ids): array
     {
         $userModel = $this->userModel();
+        $ids = $this->modelKeys($ids);
 
         if ($userModel === null || $ids === []) {
             return [];
         }
 
-        return $userModel::query()
+        $options = [];
+
+        $userModel::query()
             ->whereKey($ids)
             ->get()
-            ->mapWithKeys(fn (Model $user): array => [$user->getKey() => $this->userLabel($user)])
-            ->all();
+            ->each(function (Model $user) use (&$options): void {
+                $key = $this->modelKey($user);
+
+                if ($key !== null) {
+                    $options[$key] = $this->userLabel($user);
+                }
+            });
+
+        return $options;
     }
 
     /**
@@ -191,6 +213,12 @@ final class CreateNoteResourceHeaderActionExtender implements ResourceHeaderActi
         $userModel = $this->userModel();
 
         if ($userModel === null || ! is_array($ids) || $ids === []) {
+            return [];
+        }
+
+        $ids = $this->modelKeys($ids);
+
+        if ($ids === []) {
             return [];
         }
 
@@ -223,6 +251,37 @@ final class CreateNoteResourceHeaderActionExtender implements ResourceHeaderActi
             }
         }
 
-        return sprintf('%s #%s', class_basename($user), (string) $user->getKey());
+        return sprintf('%s #%s', class_basename($user), $this->stringValue($user->getKey()));
+    }
+
+    private function stringValue(mixed $value, string $fallback = ''): string
+    {
+        return is_string($value) || is_int($value) || is_float($value)
+            ? (string) $value
+            : $fallback;
+    }
+
+    private function modelKey(Model $model): int|string|null
+    {
+        $key = $model->getKey();
+
+        return is_int($key) || is_string($key) ? $key : null;
+    }
+
+    /**
+     * @param  array<array-key, mixed>  $ids
+     * @return list<int|string>
+     */
+    private function modelKeys(array $ids): array
+    {
+        $keys = [];
+
+        foreach ($ids as $id) {
+            if (is_int($id) || is_string($id)) {
+                $keys[] = $id;
+            }
+        }
+
+        return $keys;
     }
 }

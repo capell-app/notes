@@ -39,7 +39,9 @@ final class DemoCommand extends Command
             Note::query()
                 ->where('body', 'like', '[Notes demo]%')
                 ->get()
-                ->each(static fn (Note $note): bool => $note->delete());
+                ->each(static function (Note $note): void {
+                    $note->delete();
+                });
         }
 
         $assignedNote = $this->note($page, $author, '[Notes demo] Confirm the revised sitemap copy before launch.');
