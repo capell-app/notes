@@ -1,8 +1,17 @@
+@php
+    use Capell\Notes\Enums\NoteStatus;
+    use Capell\Notes\Models\NoteAssignment;
+    use Capell\Notes\Models\NoteMention;
+@endphp
+
 <x-filament-panels::page>
     @php($counts = $this->counts())
     @php($notes = $this->inboxNotes())
 
-    <div data-capell-notes-inbox class="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+    <div
+        data-capell-notes-inbox
+        class="grid gap-4 md:grid-cols-2 xl:grid-cols-4"
+    >
         <x-filament::section>
             <div class="text-sm font-medium text-gray-500 dark:text-gray-400">
                 {{ __('capell-notes::note.assigned_to_me') }}
@@ -119,20 +128,20 @@
                             @if ($note->assignments->isNotEmpty())
                                 <span>
                                     {{ __('capell-notes::note.labels.assigned') }}:
-                                    {{ $note->assignments->map(fn (\Capell\Notes\Models\NoteAssignment $assignment): string => $this->userLabel($assignment->assignee))->implode(', ') }}
+                                    {{ $note->assignments->map(fn (NoteAssignment $assignment): string => $this->userLabel($assignment->assignee))->implode(', ') }}
                                 </span>
                             @endif
 
                             @if ($note->mentions->isNotEmpty())
                                 <span>
                                     {{ __('capell-notes::note.labels.mentioned') }}:
-                                    {{ $note->mentions->map(fn (\Capell\Notes\Models\NoteMention $mention): string => $this->userLabel($mention->mentioned))->implode(', ') }}
+                                    {{ $note->mentions->map(fn (NoteMention $mention): string => $this->userLabel($mention->mentioned))->implode(', ') }}
                                 </span>
                             @endif
                         </div>
 
                         <div class="flex flex-wrap items-center gap-2">
-                            @if ($note->status === \Capell\Notes\Enums\NoteStatus::Resolved)
+                            @if ($note->status === NoteStatus::Resolved)
                                 <x-filament::button
                                     color="gray"
                                     size="xs"

@@ -38,35 +38,52 @@ final class CanViewNoteAction
         return Gate::forUser($user)->allows('update', $subject);
     }
 
+    private static function stringValue(mixed $value): string
+    {
+        return is_string($value) || is_int($value) || is_float($value)
+            ? (string) $value
+            : '';
+    }
+
     private function isParticipant(Note $note, Model $user): bool
     {
-        return $this->isAuthor($note, $user)
-            || $this->isAssigned($note, $user)
-            || $this->isMentioned($note, $user);
+        if ($this->isAuthor($note, $user)) {
+            return true;
+        }
+
+        if ($this->isAssigned($note, $user)) {
+            return true;
+        }
+
+        return $this->isMentioned($note, $user);
     }
 
     private function isAuthor(Note $note, Model $user): bool
     {
         return $note->author_type === $user->getMorphClass()
-            && (string) $note->author_id === (string) $user->getKey();
+            && self::stringValue($note->author_id) === self::stringValue($user->getKey());
     }
 
     private function isAssigned(Note $note, Model $user): bool
     {
+        $userKey = self::stringValue($user->getKey());
+
         return $note->assignments->contains(
             static fn (mixed $assignment): bool => $assignment instanceof NoteAssignment
                 && $assignment->assignee_type === $user->getMorphClass()
-                && (string) $assignment->assignee_id === (string) $user->getKey()
+                && self::stringValue($assignment->assignee_id) === $userKey
                 && $assignment->completed_at === null,
         );
     }
 
     private function isMentioned(Note $note, Model $user): bool
     {
+        $userKey = self::stringValue($user->getKey());
+
         return $note->mentions->contains(
             static fn (mixed $mention): bool => $mention instanceof NoteMention
                 && $mention->mentioned_type === $user->getMorphClass()
-                && (string) $mention->mentioned_id === (string) $user->getKey(),
+                && self::stringValue($mention->mentioned_id) === $userKey,
         );
     }
 }

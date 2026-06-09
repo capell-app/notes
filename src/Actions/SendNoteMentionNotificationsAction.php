@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Model;
 use Lorisleiva\Actions\Concerns\AsObject;
 
 /**
- * @method static void run(Note $note, array $mentions, ?Model $mentionedBy = null)
+ * @method static void run(Note $note, list<Model> $mentions, ?Model $mentionedBy = null)
  */
 final class SendNoteMentionNotificationsAction
 {
@@ -22,7 +22,11 @@ final class SendNoteMentionNotificationsAction
     public function handle(Note $note, array $mentions, ?Model $mentionedBy = null): void
     {
         foreach ($mentions as $mentioned) {
-            if ($this->isSameUser($mentioned, $mentionedBy) || ! method_exists($mentioned, 'notify')) {
+            if ($this->isSameUser($mentioned, $mentionedBy)) {
+                continue;
+            }
+
+            if (! method_exists($mentioned, 'notify')) {
                 continue;
             }
 
@@ -34,6 +38,13 @@ final class SendNoteMentionNotificationsAction
     {
         return $actor instanceof Model
             && $user->getMorphClass() === $actor->getMorphClass()
-            && (string) $user->getKey() === (string) $actor->getKey();
+            && $this->stringValue($user->getKey()) === $this->stringValue($actor->getKey());
+    }
+
+    private function stringValue(mixed $value): string
+    {
+        return is_string($value) || is_int($value) || is_float($value)
+            ? (string) $value
+            : '';
     }
 }

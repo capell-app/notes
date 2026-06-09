@@ -43,7 +43,7 @@ final class SendDueNoteReminderNotificationsAction
                     ->whereNull('last_notified_at')
                     ->orWhereColumn('last_notified_at', '<', 'next_due_at');
             })
-            ->orderBy('next_due_at')
+            ->oldest('next_due_at')
             ->orderBy('id')
             ->limit(max(1, $limit))
             ->get()

@@ -9,6 +9,7 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
+use Illuminate\Support\Facades\Schema;
 
 final class NoteAttentionNotification extends Notification implements ShouldQueue
 {
@@ -27,12 +28,14 @@ final class NoteAttentionNotification extends Notification implements ShouldQueu
         $channels = config('capell-notes.notifications.channels', ['database']);
 
         if (! is_array($channels)) {
-            return ['database'];
+            return Schema::hasTable('notifications') ? ['database'] : [];
         }
 
         return array_values(array_filter(
             $channels,
-            static fn (mixed $channel): bool => is_string($channel) && $channel !== '',
+            static fn (mixed $channel): bool => is_string($channel)
+                && $channel !== ''
+                && ($channel !== 'database' || Schema::hasTable('notifications')),
         ));
     }
 

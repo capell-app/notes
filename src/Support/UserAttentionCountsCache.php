@@ -31,6 +31,13 @@ final class UserAttentionCountsCache
 
     private function cacheKey(Model $user): string
     {
-        return $user->getMorphClass() . ':' . $user->getKey();
+        return $user->getMorphClass() . ':' . $this->stringValue($user->getKey());
+    }
+
+    private function stringValue(mixed $value): string
+    {
+        return is_string($value) || is_int($value) || is_float($value)
+            ? (string) $value
+            : '';
     }
 }

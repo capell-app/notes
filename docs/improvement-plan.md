@@ -89,7 +89,7 @@ Manifest advertises `capabilities: ["notes", "notes-admin"]` and the summary now
 | Generalize "Add note" beyond page EditPage to any subject                   | Done   | M      | High   | §2.7        |
 | Notifications on assign/mention (database/email)                            | Done   | M      | Med    | §3          |
 | Orphaned-morph cleanup on subject/author delete                             | Done   | M      | Med    | §4          |
-| Promote dedicated user-menu badge and record-level Add note modal captures | Done   | S      | Med    | §5          |
+| Promote dedicated user-menu badge and record-level Add note modal captures  | Done   | S      | Med    | §5          |
 | Note threads/replies + attachments                                          | Later  | L      | Med    | §3          |
 | Pinning + dismiss/archive lifecycle (use dead enum cases)                   | Later  | M      | Low    | §3          |
 | Per-note view/manage permissions (manifest permissions: [])                 | Later  | M      | Med    | §3          |
