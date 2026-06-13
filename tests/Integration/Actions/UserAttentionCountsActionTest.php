@@ -32,7 +32,7 @@ it('counts assigned notes, mentions, and active reminders for the user', functio
 
     NoteReminder::factory()->create([
         'note_id' => $dueTodayNote->getKey(),
-        'due_at' => now()->addHour(),
+        'due_at' => now()->startOfDay()->addHour(),
         'next_due_at' => null,
     ]);
 
