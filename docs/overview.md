@@ -1,42 +1,100 @@
 # Notes
 
-Status: **Available, schema-owning** · Kind: **package** · Tier: **premium** · Bundle: **collaboration** · Contexts: **admin** · Product group: **Capell Collaboration**
+<!-- prettier-ignore-start -->
 
-Notes adds contextual notes, assignments, mentions, attention counts, and a user inbox to supported Capell admin records.
+## What This Plugin Adds
 
-## Install
+Notes is an **Available**, **Schema-owning** Capell package in the **Capell Collaboration** product group. It ships as `capell-app/notes` and extends these surfaces: admin.
 
-```bash
-composer require capell-app/notes
-```
+Add private, assignable notes and @mentions to any Capell admin record so editors can leave context, hand off work, and never lose track of what needs attention.
 
-The package requires `capell-app/admin`.
+After install, admins get package-owned management or reporting surfaces inside Capell.
 
-## Admin Surfaces
+Status details:
 
-- `NotesInboxPage` at `/admin/notes`.
-- Admin user-menu item with attention badge.
-- Package models for notes, assignments, mentions, and scheduled reminder records.
-- Actions for creating notes, assigning users, marking mentions read, calculating attention counts, and sending due reminder notifications.
+- Status: Available
+- Tier: premium
+- Bundle: collaboration
+- Composer package: `capell-app/notes`
+- Namespace: `Capell\Notes`
+- Theme key: not applicable
 
-## Frontend Surfaces
+## Why It Matters
 
-This package has no public frontend routes or Blade output. It should not add any anonymous public surface.
+**For developers:** The package gives developers package-owned service providers, Actions, Data objects, models, Filament classes, and Blade views instead of pushing this behaviour into core or application code.
 
-## Screenshot Plan
+**For teams:** Add private, assignable notes and @mentions to any Capell admin record so editors can leave context, hand off work, and never lose track of what needs attention.
 
-- Notes inbox page.
-- User-menu notes item with attention badge.
-- Empty inbox state.
-- Inbox with assigned, mentioned, and lifecycle action states.
+## Screens And Workflow
 
-## Verification
+Screenshot contract: `screenshots.json`.
 
-- Package tests: `vendor/bin/pest packages/notes/tests --configuration=phpunit.xml`.
-- Harness install: `composer require capell-app/notes:4.x-dev -W`, then `php artisan package:discover --ansi` and `php artisan migrate --graceful --ansi`.
+- User-menu notes item with attention badge (admin, required).
+- Notes inbox page (admin, required).
+- Record-level Add note modal (admin, required).
+- Empty notes inbox state (admin, required).
+- Notes inbox with assigned, mentioned, and lifecycle controls (admin, required).
 
-## Known Risks
+## Technical Shape
 
-- Marketplace screenshots include Capell runner captures for the populated inbox, attention counts, empty state, and dark-mode workflow.
-- The user-menu badge capture contract still targets `/admin/notes`; promote a dedicated menu-open capture once the runner supports that state.
-- The package has no public frontend surface; future render hooks should include public-safety tests before documentation screenshots are added.
+- Service providers: `Capell\Notes\Providers\NotesServiceProvider`, `Capell\Notes\Providers\AdminServiceProvider`.
+- Config files: `packages/notes/config/capell-notes.php`.
+- Migrations: `packages/notes/database/migrations/2026_05_10_190862_01_create_notes_tables.php`.
+- Models: `Note`, `NoteAssignment`, `NoteMention`, `NoteReminder`.
+- Filament classes: `CreateNoteResourceHeaderActionExtender`, `NotesInboxPage`.
+- Actions: `AssignNoteUsersAction`, `BuildSubjectNotesAction`, `BuildUserAttentionCountsAction`, `BuildUserInboxNotesAction`, `CanViewNoteAction`, `CompleteNoteAssignmentAction`, `CreateNoteAction`, `MarkNoteMentionsReadAction`, `MentionNoteUsersAction`, `PruneNotesForDeletedParticipantAction`, `PruneNotesForDeletedSubjectAction`, `ReopenNoteAction`, `and 5 more`.
+- Data objects: `CreateNoteData`, `NoteReminderData`, `UserAttentionCountData`.
+- Command signatures: `capell:notes-demo`.
+- Console command classes: `DemoCommand`, `SendDueNoteRemindersCommand`.
+- Manifest contributions: `scheduled-job: Capell\Notes\Manifest\NotesReminderScheduleContribution`.
+- Health checks: `Capell\Notes\Health\NotesHealthCheck`.
+- Blade views: `packages/notes/resources/views/filament/pages/notes-inbox.blade.php`.
+
+## Data Model
+
+- Models: `Note`, `NoteAssignment`, `NoteMention`, `NoteReminder`.
+- Migration files: `2026_05_10_190862_01_create_notes_tables.php`.
+- Migration impact: run host migrations through the package install flow before opening package surfaces.
+- Deletion/retention behaviour: Docs gap unless the package has an explicit pruning command, retention setting, or tested cascade path.
+
+## Install Impact
+
+- Admin navigation: adds package-owned Filament classes when registered.
+- Permissions: none declared in `capell.json`.
+- Public routes: none detected in package route files.
+- Database changes: package migrations are declared.
+- Settings: no package settings declared.
+- Queues or schedules: none detected in standard package paths.
+- Cache tags: none declared.
+- Commands: `capell:notes-demo`.
+
+## Common Pitfalls
+
+- Run migrations before opening package resources or public routes.
+- Keep `composer.json`, `composer.local.json`, `capell.json`, docs, screenshots, and tests aligned when the package surface changes.
+
+## Troubleshooting
+
+| Symptom | Likely cause | Check | Fix |
+| --- | --- | --- | --- |
+| Package surface is missing after install | Provider or manifest is not loaded | Confirm `capell.json`, package `composer.json`, and provider registration | Reinstall the package, refresh Composer autoload, and clear host caches |
+| Admin screen or command fails on missing table | Package migrations have not run | Check the tables listed in `Data Model` | Run host migrations and rerun the focused package test |
+| Background work does not run | Queue worker or scheduled command is not active | Check package jobs, commands, and host scheduler configuration | Start the queue or scheduler, then run the focused command or package test |
+
+## Quick Start
+
+1. Install the package: `composer require capell-app/notes`.
+2. Run the required setup: `php artisan capell:notes-demo`.
+3. Open the related Capell admin surface and verify Notes appears.
+
+## Next Steps
+
+- [Package docs index](README.md)
+- [Screenshot contract](screenshots.json)
+- [Marketplace assets](assets/marketplace/)
+- [Capell content language plan](../../../docs/CONTENT_LANGUAGE_PLAN.md)
+- [Capell documentation design system](../../../docs/DESIGN_SYSTEM.md)
+- [Capell and package ERD notes](../../../docs/erd/capell-and-package-erds.md)
+- Focused tests: `vendor/bin/pest packages/notes/tests --configuration=phpunit.xml`.
+
+<!-- prettier-ignore-end -->

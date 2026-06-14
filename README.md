@@ -1,83 +1,101 @@
 # Notes
 
-Private, assignable notes and @mentions for Capell admin records.
+<!-- prettier-ignore-start -->
 
-## At A Glance
+## What This Plugin Adds
 
-- Package: `capell-app/notes`
-- Namespace: `Capell\Notes\`
-- Surfaces: Filament admin, database
-- Service providers: `packages/notes/src/Providers/AdminServiceProvider.php`, `packages/notes/src/Providers/NotesServiceProvider.php`
-- Capell dependencies: `capell-app/admin`
+Notes is an **Available**, **Schema-owning** Capell package in the **Capell Collaboration** product group. It ships as `capell-app/notes` and extends these surfaces: admin.
 
-## Why It Helps Your Capell Workflow
+Add private, assignable notes and @mentions to any Capell admin record so editors can leave context, hand off work, and never lose track of what needs attention.
 
-- Adds contextual notes, assignments, and mentions to supported Capell admin records.
-- Helps editors coordinate review work inside the CMS instead of moving comments into chat or spreadsheets.
-- Fits publishing and operations workflows where the record itself should carry the next action and accountability.
+After install, admins get package-owned management or reporting surfaces inside Capell.
 
-## Best Used With
+Status details:
 
-- [Publishing Studio](../publishing-studio/README.md)
-- [Diagnostics](../diagnostics/README.md)
-- [Welcome Tour](../welcome-tour/README.md)
+- Status: Available
+- Tier: premium
+- Bundle: collaboration
+- Composer package: `capell-app/notes`
+- Namespace: `Capell\Notes`
+- Theme key: not applicable
 
-## What It Adds
+## Why It Matters
 
-- Contextual notes, assignments, and mentions for Capell.
-- An admin inbox for operational follow-up that stays separate from public page output.
-- Package-owned note, assignment, mention, and scheduled reminder records.
+**For developers:** The package gives developers package-owned service providers, Actions, Data objects, models, Filament classes, and Blade views instead of pushing this behaviour into core or application code.
 
-## Code Map
+**For teams:** Add private, assignable notes and @mentions to any Capell admin record so editors can leave context, hand off work, and never lose track of what needs attention.
 
-| Area      | Path                           | Purpose                                                             |
-| --------- | ------------------------------ | ------------------------------------------------------------------- |
-| Actions   | `packages/notes/src/Actions`   | Domain operations. Test these directly where possible.              |
-| Data      | `packages/notes/src/Data`      | Structured payloads, form state, view models, and integration data. |
-| Enums     | `packages/notes/src/Enums`     | Persisted states and Filament option values.                        |
-| Models    | `packages/notes/src/Models`    | Eloquent records owned by the package.                              |
-| Filament  | `packages/notes/src/Filament`  | Admin resources, pages, widgets, and settings UI.                   |
-| Providers | `packages/notes/src/Providers` | Registration, extension hooks, routes, migrations, and resources.   |
-| Resources | `packages/notes/resources`     | Views, translations, assets, and package resources.                 |
-| Database  | `packages/notes/database`      | Migrations, seeders, and settings migrations.                       |
-| Tests     | `packages/notes/tests`         | Package-level Pest coverage.                                        |
+## Screens And Workflow
 
-## Admin Surface
+Screenshot contract: `docs/screenshots.json`.
 
-- Pages: `NotesInboxPage`.
+- User-menu notes item with attention badge (admin, required).
+- Notes inbox page (admin, required).
+- Record-level Add note modal (admin, required).
+- Empty notes inbox state (admin, required).
+- Notes inbox with assigned, mentioned, and lifecycle controls (admin, required).
 
-## Data And Persistence
+## Technical Shape
+
+- Service providers: `Capell\Notes\Providers\NotesServiceProvider`, `Capell\Notes\Providers\AdminServiceProvider`.
+- Config files: `packages/notes/config/capell-notes.php`.
+- Migrations: `packages/notes/database/migrations/2026_05_10_190862_01_create_notes_tables.php`.
+- Models: `Note`, `NoteAssignment`, `NoteMention`, `NoteReminder`.
+- Filament classes: `CreateNoteResourceHeaderActionExtender`, `NotesInboxPage`.
+- Actions: `AssignNoteUsersAction`, `BuildSubjectNotesAction`, `BuildUserAttentionCountsAction`, `BuildUserInboxNotesAction`, `CanViewNoteAction`, `CompleteNoteAssignmentAction`, `CreateNoteAction`, `MarkNoteMentionsReadAction`, `MentionNoteUsersAction`, `PruneNotesForDeletedParticipantAction`, `PruneNotesForDeletedSubjectAction`, `ReopenNoteAction`, `and 5 more`.
+- Data objects: `CreateNoteData`, `NoteReminderData`, `UserAttentionCountData`.
+- Command signatures: `capell:notes-demo`.
+- Console command classes: `DemoCommand`, `SendDueNoteRemindersCommand`.
+- Manifest contributions: `scheduled-job: Capell\Notes\Manifest\NotesReminderScheduleContribution`.
+- Health checks: `Capell\Notes\Health\NotesHealthCheck`.
+- Blade views: `packages/notes/resources/views/filament/pages/notes-inbox.blade.php`.
+
+## Data Model
 
 - Models: `Note`, `NoteAssignment`, `NoteMention`, `NoteReminder`.
-- Migrations: `2026_05_10_190862_01_create_notes_tables.php`.
-- Data objects live in `src/Data/`; use them for payloads, form state, and view models.
+- Migration files: `2026_05_10_190862_01_create_notes_tables.php`.
+- Migration impact: run host migrations through the package install flow before opening package surfaces.
+- Deletion/retention behaviour: Docs gap unless the package has an explicit pruning command, retention setting, or tested cascade path.
 
-## Extension Points
+## Install Impact
 
-- Register Capell extension points, routes, migrations, settings, render hooks, and resources from service providers.
+- Admin navigation: adds package-owned Filament classes when registered.
+- Permissions: none declared in `capell.json`.
+- Public routes: none detected in package route files.
+- Database changes: package migrations are declared.
+- Settings: no package settings declared.
+- Queues or schedules: none detected in standard package paths.
+- Cache tags: none declared.
+- Commands: `capell:notes-demo`.
 
-## Install And Setup
+## Common Pitfalls
 
-- Install with `composer require capell-app/notes` in the host Capell application.
-- Run migrations through the host application package install flow.
-- In this repository, verify package changes with `vendor/bin/pest`; do not use `php artisan`.
+- Run migrations before opening package resources or public routes.
+- Keep `composer.json`, `composer.local.json`, `capell.json`, docs, screenshots, and tests aligned when the package surface changes.
 
-## Docs
+## Troubleshooting
 
-- [docs index](docs/README.md)
-- [overview.md](docs/overview.md)
-- [screenshots.json](docs/screenshots.json)
+| Symptom | Likely cause | Check | Fix |
+| --- | --- | --- | --- |
+| Package surface is missing after install | Provider or manifest is not loaded | Confirm `capell.json`, package `composer.json`, and provider registration | Reinstall the package, refresh Composer autoload, and clear host caches |
+| Admin screen or command fails on missing table | Package migrations have not run | Check the tables listed in `Data Model` | Run host migrations and rerun the focused package test |
+| Background work does not run | Queue worker or scheduled command is not active | Check package jobs, commands, and host scheduler configuration | Start the queue or scheduler, then run the focused command or package test |
 
-## Testing
+## Quick Start
 
-Run package tests from the repository root:
+1. Install the package: `composer require capell-app/notes`.
+2. Run the required setup: `php artisan capell:notes-demo`.
+3. Open the related Capell admin surface and verify Notes appears.
 
-```bash
-vendor/bin/pest packages/notes/tests --configuration=phpunit.xml
-```
+## Next Steps
 
-## Maintenance Notes
+- [Package docs](docs/README.md)
+- [Overview](docs/overview.md)
+- [Screenshot contract](docs/screenshots.json)
+- [Marketplace assets](docs/assets/marketplace/)
+- [Capell content language plan](../../docs/CONTENT_LANGUAGE_PLAN.md)
+- [Capell documentation design system](../../docs/DESIGN_SYSTEM.md)
+- [Capell and package ERD notes](../../docs/erd/capell-and-package-erds.md)
+- Focused tests: `vendor/bin/pest packages/notes/tests --configuration=phpunit.xml`.
 
-- Put behaviour changes in `src/Actions/`; UI classes, commands, and controllers should call actions instead of owning domain logic.
-- Use package `Data` classes at boundaries instead of passing anonymous arrays between layers.
-- Use backed enums for persisted values and enum labels for Filament options.
+<!-- prettier-ignore-end -->
