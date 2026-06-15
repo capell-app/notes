@@ -59,7 +59,10 @@
         {
             "type": "console-command",
             "class": "Capell\\Notes\\Manifest\\NotesConsoleCommandsContribution",
-            "commands": ["capell:notes-demo", "capell:notes:send-due-reminders"],
+            "commands": [
+                "capell:notes-demo",
+                "capell:notes:send-due-reminders"
+            ],
             "commandClasses": [
                 "Capell\\Notes\\Console\\DemoCommand",
                 "Capell\\Notes\\Console\\SendDueNoteRemindersCommand"
