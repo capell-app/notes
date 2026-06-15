@@ -8,7 +8,7 @@ Notes is an **Available**, **Schema-owning** Capell package in the **Capell Coll
 
 Add private, assignable notes and @mentions to any Capell admin record so editors can leave context, hand off work, and never lose track of what needs attention.
 
-After install, admins get the Notes inbox page, user-menu attention badge, record-level Add note header action, demo command, and scheduled reminder command inside Capell Admin.
+After install, admins get package-owned management or reporting surfaces inside Capell.
 
 Status details:
 
@@ -44,7 +44,7 @@ Screenshot contract: `screenshots.json`.
 - Filament classes: `CreateNoteResourceHeaderActionExtender`, `NotesInboxPage`.
 - Actions: `AssignNoteUsersAction`, `BuildSubjectNotesAction`, `BuildUserAttentionCountsAction`, `BuildUserInboxNotesAction`, `CanViewNoteAction`, `CompleteNoteAssignmentAction`, `CreateNoteAction`, `MarkNoteMentionsReadAction`, `MentionNoteUsersAction`, `PruneNotesForDeletedParticipantAction`, `PruneNotesForDeletedSubjectAction`, `ReopenNoteAction`, `and 5 more`.
 - Data objects: `CreateNoteData`, `NoteReminderData`, `UserAttentionCountData`.
-- Command signatures: `capell:notes-demo`.
+- Command signatures: `capell:notes-demo`, `capell:notes:send-due-reminders`.
 - Console command classes: `DemoCommand`, `SendDueNoteRemindersCommand`.
 - Manifest contributions: `admin-action-extender: Capell\Notes\Manifest\NotesAdminActionExtenderContribution`, `admin-page: Capell\Notes\Manifest\NotesAdminPageContribution`, `console-command: Capell\Notes\Manifest\NotesConsoleCommandsContribution`, `health-check: Capell\Notes\Manifest\NotesHealthContribution`, `model: Capell\Notes\Manifest\NotesModelsContribution`, `scheduled-job: Capell\Notes\Manifest\NotesReminderScheduleContribution`.
 - Health checks: `Capell\Notes\Health\NotesHealthCheck`.
@@ -52,20 +52,20 @@ Screenshot contract: `screenshots.json`.
 
 ## Data Model
 
-- Models: `Note`, `NoteAssignment`, `NoteMention`, `NoteReminder`.
 - Required tables: `notes`, `note_assignments`, `note_mentions`, `note_reminders`.
+- Models: `Note`, `NoteAssignment`, `NoteMention`, `NoteReminder`.
 - Migration files: `2026_05_10_190862_01_create_notes_tables.php`.
 - Migration impact: run host migrations through the package install flow before opening package surfaces.
 - Deletion/retention behaviour: Docs gap unless the package has an explicit pruning command, retention setting, or tested cascade path.
 
 ## Install Impact
 
-- Admin navigation: adds the Notes inbox page and user-menu attention badge when registered.
+- Admin navigation: adds package-owned Filament classes when registered.
 - Permissions: none declared in `capell.json`.
 - Public routes: none detected in package route files.
 - Database changes: package migrations are declared.
 - Settings: no package settings declared.
-- Queues or schedules: `capell:notes:send-due-reminders` runs every five minutes when reminder scheduling is enabled.
+- Queues or schedules: none detected in standard package paths.
 - Cache tags: none declared.
 - Commands: `capell:notes-demo`, `capell:notes:send-due-reminders`.
 
@@ -85,7 +85,7 @@ Screenshot contract: `screenshots.json`.
 ## Quick Start
 
 1. Install the package: `composer require capell-app/notes`.
-2. Run the host application's package install and migration flow.
+2. Run the required setup: `php artisan capell:notes-demo`.
 3. Open the related Capell admin surface and verify Notes appears.
 
 ## Next Steps
