@@ -28,24 +28,69 @@
     },
     "contributes": [
         {
+            "type": "admin-page",
+            "class": "Capell\\Notes\\Manifest\\NotesAdminPageContribution",
+            "pageClass": "Capell\\Notes\\Filament\\Pages\\NotesInboxPage",
+            "userMenuKey": "capell-notes.inbox"
+        },
+        {
+            "type": "admin-action-extender",
+            "class": "Capell\\Notes\\Manifest\\NotesAdminActionExtenderContribution",
+            "extenderClass": "Capell\\Notes\\Filament\\Extenders\\Page\\CreateNoteResourceHeaderActionExtender",
+            "tag": "capell-admin:resource-header-actions"
+        },
+        {
+            "type": "model",
+            "class": "Capell\\Notes\\Manifest\\NotesModelsContribution",
+            "modelClasses": [
+                "Capell\\Notes\\Models\\Note",
+                "Capell\\Notes\\Models\\NoteAssignment",
+                "Capell\\Notes\\Models\\NoteMention",
+                "Capell\\Notes\\Models\\NoteReminder"
+            ]
+        },
+        {
             "type": "scheduled-job",
             "class": "Capell\\Notes\\Manifest\\NotesReminderScheduleContribution",
             "name": "capell-notes-send-due-reminders",
             "command": "capell:notes:send-due-reminders",
             "frequency": "everyFiveMinutes"
+        },
+        {
+            "type": "console-command",
+            "class": "Capell\\Notes\\Manifest\\NotesConsoleCommandsContribution",
+            "commands": [
+                "capell:notes-demo",
+                "capell:notes:send-due-reminders"
+            ],
+            "commandClasses": [
+                "Capell\\Notes\\Console\\DemoCommand",
+                "Capell\\Notes\\Console\\SendDueNoteRemindersCommand"
+            ]
+        },
+        {
+            "type": "health-check",
+            "class": "Capell\\Notes\\Manifest\\NotesHealthContribution",
+            "checkClass": "Capell\\Notes\\Health\\NotesHealthCheck"
         }
     ],
     "database": {
         "migrations": true,
         "settings": false,
-        "requiredTables": []
+        "requiredTables": [
+            "notes",
+            "note_assignments",
+            "note_mentions",
+            "note_reminders"
+        ]
     },
     "commands": {
         "install": null,
         "setup": null,
         "demo": "capell:notes-demo",
         "demoParams": ["force"],
-        "doctor": null
+        "doctor": null,
+        "sendDueReminders": "capell:notes:send-due-reminders"
     },
     "settings": [],
     "permissions": [],
@@ -153,6 +198,6 @@
         "categories": ["admin", "collaboration"]
     },
     "contributionTraceability": {
-        "deferredContributions": ["admin-page", "model"]
+        "deferredContributions": []
     }
 }

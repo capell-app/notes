@@ -72,12 +72,15 @@ class NotesServiceProvider extends AbstractPackageServiceProvider
 
     private function registerModels(): self
     {
-        $this->surface()->models([
+        $models = [
             Note::class,
             NoteAssignment::class,
             NoteMention::class,
             NoteReminder::class,
-        ]);
+        ];
+
+        $this->surface()->models($models);
+        CapellCore::registerModels($models);
 
         return $this;
     }

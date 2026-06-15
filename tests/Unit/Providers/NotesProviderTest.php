@@ -32,9 +32,11 @@ it('declares provider classes and package metadata', function (): void {
 });
 
 it('registers notes metadata, models, and protected tables when installed', function (): void {
-    CapellCore::forcePackageInstalled(NotesServiceProvider::$packageName);
+    CapellCore::markPackageInstalled(NotesServiceProvider::$packageName);
 
-    (new NotesServiceProvider(app()))->packageRegistered();
+    $provider = new NotesServiceProvider(app());
+    $provider->packageRegistered();
+    app()->boot();
 
     expect(CapellCore::getModels())->toContain(Note::class)
         ->and(CapellCore::getModels())->toContain(NoteAssignment::class)
