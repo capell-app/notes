@@ -36,7 +36,7 @@ it('declares implemented notes package contributions', function (): void {
     throw_unless(is_array($manifestContributions), RuntimeException::class, 'Notes contributions must be arrays.');
     $contributions = collect($manifestContributions);
 
-    expect($manifest['contributionTraceability']['deferredContributions'])->toBe([])
+    expect(data_get($manifest, 'contributionTraceability.deferredContributions'))->toBe([])
         ->and($contributions->pluck('class')->all())->toContain(
             NotesAdminPageContribution::class,
             NotesAdminActionExtenderContribution::class,
@@ -70,8 +70,8 @@ it('declares implemented notes package contributions', function (): void {
             NoteReminder::class,
         ])
         ->and($scheduledJob['command'])->toBe('capell:notes:send-due-reminders')
-        ->and($manifest['commands']['demo'])->toBe('capell:notes-demo')
-        ->and($manifest['commands']['sendDueReminders'])->toBe('capell:notes:send-due-reminders')
+        ->and(data_get($manifest, 'commands.demo'))->toBe('capell:notes-demo')
+        ->and(data_get($manifest, 'commands.sendDueReminders'))->toBe('capell:notes:send-due-reminders')
         ->and($consoleCommands['commands'])->toBe(['capell:notes-demo', 'capell:notes:send-due-reminders'])
         ->and($consoleCommands['commandClasses'])->toBe([
             DemoCommand::class,
@@ -88,7 +88,7 @@ it('declares implemented notes package contributions', function (): void {
 it('declares the notes storage tables required by package health checks', function (): void {
     $manifest = notesManifest();
 
-    expect($manifest['database']['requiredTables'])->toBe([
+    expect(data_get($manifest, 'database.requiredTables'))->toBe([
         'notes',
         'note_assignments',
         'note_mentions',
