@@ -18,10 +18,7 @@
             "required": true,
             "notes": "Opens the Filament user menu after seeding assigned, mentioned, or overdue note attention counts.",
             "useCase": "An administrator sees the user-menu notes item with an attention badge.",
-            "screenshotPath": "packages/notes/docs/screenshots/notes-user-menu-badge.png",
-            "covers": [
-                "packages/notes/src/Filament/Extenders/Page/CreateNoteResourceHeaderActionExtender.php"
-            ]
+            "screenshotPath": "packages/notes/docs/screenshots/notes-user-menu-badge.png"
         },
         {
             "id": "notes-inbox-page",
