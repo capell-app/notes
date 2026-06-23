@@ -1,7 +1,3 @@
-# Notes
-
-<!-- prettier-ignore-start -->
-
 ## What it does for you
 
 Notes lets your team leave private notes on records in the admin, with optional reminders. Notes are for your team only and are never shown to visitors.
@@ -26,10 +22,3 @@ Open **Notes** in the admin, or add a note directly on a record.
 - Leave a private **note** on a record for your team.
 - Notes are internal and never shown to visitors.
 - A note can carry a reminder, so nothing important is forgotten.
-
----
-
-For how to use Notes, see the [admin guide](admin-guide.md).
-For developers: see the [README](../README.md).
-
-<!-- prettier-ignore-end -->
