@@ -23,7 +23,7 @@ use Illuminate\Database\Eloquent\Model;
 use Override;
 use Spatie\LaravelPackageTools\Package;
 
-class NotesServiceProvider extends AbstractPackageServiceProvider
+final class NotesServiceProvider extends AbstractPackageServiceProvider
 {
     public static string $name = 'capell-notes';
 
@@ -67,7 +67,7 @@ class NotesServiceProvider extends AbstractPackageServiceProvider
     #[Override]
     protected function isPackageInstalled(): bool
     {
-        return CapellCore::isPackageInstalled(static::$packageName);
+        return CapellCore::isPackageInstalled(self::$packageName);
     }
 
     private function registerModels(): self
