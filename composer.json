@@ -13,7 +13,7 @@
     "homepage": "https://github.com/capell-app/notes",
     "license": "proprietary",
     "require": {
-        "php": "^8.3",
+        "php": "^8.4",
         "capell-app/admin": "^4.0 || 4.x-dev"
     },
     "autoload": {
