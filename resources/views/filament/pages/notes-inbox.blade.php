@@ -5,8 +5,8 @@
 @endphp
 
 <x-filament-panels::page>
-    @php($counts = $this->counts())
-    @php($notes = $this->inboxNotes())
+    @php ($counts = $this->counts())
+    @php ($notes = $this->inboxNotes())
 
     <div
         data-capell-notes-inbox
@@ -106,8 +106,7 @@
                             <span
                                 class="text-xs text-gray-500 dark:text-gray-400"
                             >
-                                {{ __('capell-notes::note.labels.subject') }}:
-                                {{ $this->subjectLabel($note->subject) }}
+                                {{ __('capell-notes::note.labels.subject') }}: {{ $this->subjectLabel($note->subject) }}
                             </span>
                         </div>
 
@@ -121,21 +120,18 @@
                             class="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-gray-500 dark:text-gray-400"
                         >
                             <span>
-                                {{ __('capell-notes::note.labels.author') }}:
-                                {{ $this->userLabel($note->author) }}
+                                {{ __('capell-notes::note.labels.author') }}: {{ $this->userLabel($note->author) }}
                             </span>
 
                             @if ($note->assignments->isNotEmpty())
                                 <span>
-                                    {{ __('capell-notes::note.labels.assigned') }}:
-                                    {{ $note->assignments->map(fn (NoteAssignment $assignment): string => $this->userLabel($assignment->assignee))->implode(', ') }}
+                                    {{ __('capell-notes::note.labels.assigned') }}: {{ $note->assignments->map(fn (NoteAssignment $assignment): string => $this->userLabel($assignment->assignee))->implode(', ') }}
                                 </span>
                             @endif
 
                             @if ($note->mentions->isNotEmpty())
                                 <span>
-                                    {{ __('capell-notes::note.labels.mentioned') }}:
-                                    {{ $note->mentions->map(fn (NoteMention $mention): string => $this->userLabel($mention->mentioned))->implode(', ') }}
+                                    {{ __('capell-notes::note.labels.mentioned') }}: {{ $note->mentions->map(fn (NoteMention $mention): string => $this->userLabel($mention->mentioned))->implode(', ') }}
                                 </span>
                             @endif
                         </div>
