@@ -6,4 +6,4 @@ use Capell\Notes\Tests\NotesTestCase;
 
 require_once __DIR__ . '/NotesTestCase.php';
 
-pest()->extend(NotesTestCase::class)->group('notes')->in(__DIR__);
+pest()->extend(NotesTestCase::class)->group('notes')->in('.');

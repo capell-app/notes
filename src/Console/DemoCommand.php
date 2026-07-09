@@ -19,12 +19,18 @@ use RuntimeException;
 
 final class DemoCommand extends Command
 {
-    protected $signature = 'capell:notes-demo {--force : Replace existing Notes demo records}';
+    protected $signature = 'capell:notes-demo
+        {--force : Replace existing Notes demo records}
+        {--allow-production : Allow demo notes to be seeded in production}';
 
     protected $description = 'Seed demo notes for Capell Notes screenshots.';
 
     public function handle(): int
     {
+        if (! $this->passesProductionGuard()) {
+            return self::FAILURE;
+        }
+
         $user = $this->firstUser();
         $author = $this->authorUser($user);
         $page = Page::query()->first();
@@ -65,6 +71,23 @@ final class DemoCommand extends Command
         $this->components->info('Seeded Notes demo records.');
 
         return self::SUCCESS;
+    }
+
+    private function passesProductionGuard(): bool
+    {
+        if (! app()->environment('production')) {
+            return true;
+        }
+
+        if ($this->option('allow-production') === true) {
+            $this->components->warn('Running Notes demo seeding against a production environment because --allow-production was supplied.');
+
+            return true;
+        }
+
+        $this->components->error('Notes demo seeding is blocked in the production environment. Pass --allow-production to override.');
+
+        return false;
     }
 
     private function firstUser(): Model
