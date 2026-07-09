@@ -88,7 +88,7 @@
         "install": null,
         "setup": null,
         "demo": "capell:notes-demo",
-        "demoParams": ["force"],
+        "demoParams": ["force", "allow-production"],
         "doctor": null,
         "sendDueReminders": "capell:notes:send-due-reminders"
     },
