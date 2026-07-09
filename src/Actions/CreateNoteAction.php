@@ -8,8 +8,10 @@ use Capell\Notes\Data\CreateNoteData;
 use Capell\Notes\Enums\NoteStatus;
 use Capell\Notes\Models\Note;
 use Capell\Notes\Support\NotesManager;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
+use InvalidArgumentException;
 use Lorisleiva\Actions\Concerns\AsObject;
 
 class CreateNoteAction
@@ -23,6 +25,17 @@ class CreateNoteAction
      * cannot exhaust storage or degrade the admin inbox render.
      */
     public const int MAX_BODY_LENGTH = 5000;
+
+    public static function canCreateForSubject(Model $subject): bool
+    {
+        try {
+            resolve(NotesManager::class)->ensureSubject($subject);
+        } catch (InvalidArgumentException) {
+            return false;
+        }
+
+        return true;
+    }
 
     public function handle(CreateNoteData $data): Note
     {

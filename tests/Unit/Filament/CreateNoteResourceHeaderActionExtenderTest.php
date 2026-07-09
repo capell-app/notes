@@ -35,6 +35,14 @@ it('authorizes note creation against the edited page update policy', function ()
     expect($action->record($page)->isAuthorized())->toBeFalse();
 });
 
+it('does not authorize the header action for unsupported note subjects', function (): void {
+    Gate::before(fn (mixed $actor, string $ability): ?bool => $ability === 'update' ? true : null);
+
+    $action = (new CreateNoteResourceHeaderActionExtender)->actions()[0];
+
+    expect($action->record(new Note)->isAuthorized())->toBeFalse();
+});
+
 it('creates a note from the page header action with selected assignees and mentions', function (): void {
     Gate::before(fn (mixed $actor, string $ability): ?bool => $ability === 'update' ? true : null);
 
