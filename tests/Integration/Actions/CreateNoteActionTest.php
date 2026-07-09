@@ -52,6 +52,18 @@ it('rejects blank note bodies', function (): void {
     )))->toThrow(ValidationException::class);
 });
 
+it('rejects unregistered note subjects', function (): void {
+    $subject = new Note;
+    $author = User::factory()->create();
+
+    expect(CreateNoteAction::canCreateForSubject($subject))->toBeFalse()
+        ->and(fn (): mixed => CreateNoteAction::run(new CreateNoteData(
+            subject: $subject,
+            author: $author,
+            body: 'This should not attach to an unsupported subject.',
+        )))->toThrow(InvalidArgumentException::class, 'not been registered as a note subject');
+});
+
 it('rejects note bodies longer than the maximum length', function (): void {
     $subject = User::factory()->create();
     $author = User::factory()->create();
