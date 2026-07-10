@@ -6,6 +6,7 @@ namespace Capell\Notes\Actions;
 
 use Capell\Notes\Models\Note;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Gate;
 use Lorisleiva\Actions\Concerns\AsObject;
 
 class CompleteNoteAssignmentAction
@@ -14,6 +15,8 @@ class CompleteNoteAssignmentAction
 
     public function handle(Note $note, Model $assignee): void
     {
+        Gate::forUser($assignee)->authorize('completeAssignment', $note);
+
         $note->assignments()
             ->where('assignee_type', $assignee->getMorphClass())
             ->where('assignee_id', $assignee->getKey())

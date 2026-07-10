@@ -59,7 +59,7 @@ final class SendDueNoteReminderNotificationsAction
                     ->each(function (NoteAssignment $assignment) use ($note, &$sent): void {
                         $assignee = $assignment->assignee;
 
-                        if ($assignee instanceof Model && method_exists($assignee, 'notify')) {
+                        if ($assignee instanceof Model && method_exists($assignee, 'notify') && CanViewNoteAction::run($note, $assignee)) {
                             $assignee->notify(new NoteAttentionNotification($note, 'reminder'));
                             $sent++;
                         }

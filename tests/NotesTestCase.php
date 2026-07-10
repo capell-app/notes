@@ -14,6 +14,7 @@ use Capell\Notes\Support\NotesManager;
 use Capell\Tests\AbstractTestCase;
 use Capell\Tests\Fixtures\Models\User;
 use Illuminate\Foundation\Application;
+use Illuminate\Support\Facades\Gate;
 use Livewire\LivewireServiceProvider;
 use Override;
 
@@ -33,6 +34,8 @@ class NotesTestCase extends AbstractTestCase
         $notes->registerSubject(Page::class, [EditPage::class]);
         $notes->registerSubject(User::class);
         $notes->registerParticipant(User::class);
+
+        Gate::define('update', static fn (): bool => true);
     }
 
     protected function getPackageServiceName(): string

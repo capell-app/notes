@@ -49,6 +49,8 @@ final class BuildUserInboxNotesAction
             ->latest('updated_at')
             ->latest('id')
             ->limit($limit)
-            ->get();
+            ->get()
+            ->filter(fn (Note $note): bool => CanViewNoteAction::run($note, $user))
+            ->values();
     }
 }

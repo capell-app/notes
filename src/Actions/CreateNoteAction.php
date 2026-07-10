@@ -10,6 +10,7 @@ use Capell\Notes\Models\Note;
 use Capell\Notes\Support\NotesManager;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\ValidationException;
 use InvalidArgumentException;
 use Lorisleiva\Actions\Concerns\AsObject;
@@ -53,8 +54,8 @@ class CreateNoteAction
                 'resolved_at' => null,
             ]);
 
-            AssignNoteUsersAction::run($note, $data->assignees, assignedBy: $data->author);
-            MentionNoteUsersAction::run($note, $data->mentions, mentionedBy: $data->author);
+            AssignNoteUsersAction::run($note, $data->assignees, $data->author);
+            MentionNoteUsersAction::run($note, $data->mentions, $data->author);
             UpsertNoteReminderAction::run($note, $data->reminder);
 
             return $note->load([
@@ -88,13 +89,16 @@ class CreateNoteAction
         $notes = resolve(NotesManager::class);
         $notes->ensureSubject($data->subject);
         $notes->ensureParticipant($data->author);
+        Gate::forUser($data->author)->authorize('update', $data->subject);
 
         foreach ($data->assignees as $assignee) {
             $notes->ensureParticipant($assignee);
+            Gate::forUser($assignee)->authorize('update', $data->subject);
         }
 
         foreach ($data->mentions as $mentioned) {
             $notes->ensureParticipant($mentioned);
+            Gate::forUser($mentioned)->authorize('update', $data->subject);
         }
     }
 }

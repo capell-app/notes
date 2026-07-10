@@ -9,7 +9,10 @@ use Capell\Notes\Actions\ReopenNoteAction;
 use Capell\Notes\Actions\ResolveNoteAction;
 use Capell\Notes\Enums\NoteStatus;
 use Capell\Notes\Models\Note;
+use Capell\Notes\Notifications\NoteAttentionNotification;
 use Capell\Tests\Fixtures\Models\User;
+use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Support\Facades\Gate;
 
 require_once dirname(__DIR__, 2) . '/NotesTestCase.php';
 
@@ -48,7 +51,7 @@ it('rolls back standalone assignment batches when a later assignee fails', funct
         }
     };
 
-    expect(fn (): mixed => AssignNoteUsersAction::run($note, [$assignee, $failingParticipant], assignedBy: null))
+    expect(fn (): mixed => AssignNoteUsersAction::run($note, [$assignee, $failingParticipant], assignedBy: $assignee))
         ->toThrow(RuntimeException::class, 'Participant failed');
 
     expect($note->assignments()->count())->toBe(0);
@@ -65,7 +68,7 @@ it('rolls back standalone mention batches when a later mention fails', function 
         }
     };
 
-    expect(fn (): mixed => MentionNoteUsersAction::run($note, [$mentioned, $failingParticipant], mentionedBy: null))
+    expect(fn (): mixed => MentionNoteUsersAction::run($note, [$mentioned, $failingParticipant], mentionedBy: $mentioned))
         ->toThrow(RuntimeException::class, 'Participant failed');
 
     expect($note->mentions()->count())->toBe(0);
@@ -76,7 +79,7 @@ it('completes only the current assignee assignment', function (): void {
     $firstUser = User::factory()->create();
     $secondUser = User::factory()->create();
 
-    AssignNoteUsersAction::run($note, [$firstUser, $secondUser], assignedBy: null);
+    AssignNoteUsersAction::run($note, [$firstUser, $secondUser], assignedBy: $firstUser);
 
     CompleteNoteAssignmentAction::run($note, $firstUser);
 
@@ -88,12 +91,12 @@ it('reactivates a completed assignment when the user is assigned again', functio
     $note = Note::factory()->create();
     $assignee = User::factory()->create();
 
-    AssignNoteUsersAction::run($note, [$assignee], assignedBy: null);
+    AssignNoteUsersAction::run($note, [$assignee], assignedBy: $assignee);
     CompleteNoteAssignmentAction::run($note, $assignee);
 
     expect($note->assignments()->whereMorphedTo('assignee', $assignee)->first()->completed_at)->not->toBeNull();
 
-    AssignNoteUsersAction::run($note, [$assignee], assignedBy: null);
+    AssignNoteUsersAction::run($note, [$assignee], assignedBy: $assignee);
 
     expect($note->assignments()->whereMorphedTo('assignee', $assignee)->first()->completed_at)->toBeNull();
 });
@@ -102,13 +105,13 @@ it('reactivates a read mention when the user is mentioned again', function (): v
     $note = Note::factory()->create();
     $mentioned = User::factory()->create();
 
-    MentionNoteUsersAction::run($note, [$mentioned], mentionedBy: null);
+    MentionNoteUsersAction::run($note, [$mentioned], mentionedBy: $mentioned);
 
     $note->mentions()->whereMorphedTo('mentioned', $mentioned)->update(['read_at' => now()]);
 
     expect($note->mentions()->whereMorphedTo('mentioned', $mentioned)->first()->read_at)->not->toBeNull();
 
-    MentionNoteUsersAction::run($note, [$mentioned], mentionedBy: null);
+    MentionNoteUsersAction::run($note, [$mentioned], mentionedBy: $mentioned);
 
     expect($note->mentions()->whereMorphedTo('mentioned', $mentioned)->first()->read_at)->toBeNull();
 });
@@ -116,13 +119,43 @@ it('reactivates a read mention when the user is mentioned again', function (): v
 it('resolving and reopening note updates status and timestamps correctly', function (): void {
     $note = Note::factory()->create();
 
-    ResolveNoteAction::run($note);
+    ResolveNoteAction::run($note, $note->author);
 
     expect($note->refresh()->status)->toBe(NoteStatus::Resolved)
         ->and($note->resolved_at)->not->toBeNull();
 
-    ReopenNoteAction::run($note);
+    ReopenNoteAction::run($note, $note->author);
 
     expect($note->refresh()->status)->toBe(NoteStatus::Open)
         ->and($note->resolved_at)->toBeNull();
+});
+
+it('does not allow a mentioned participant to resolve a note', function (): void {
+    $author = User::factory()->create();
+    $mentionedParticipant = User::factory()->create();
+    $note = Note::factory()->create([
+        'subject_type' => $author->getMorphClass(),
+        'subject_id' => $author->getKey(),
+        'author_type' => $author->getMorphClass(),
+        'author_id' => $author->getKey(),
+    ]);
+
+    Gate::define('update', static fn (User $user, User $subject): bool => $user->is($subject) || $user->is($mentionedParticipant));
+
+    MentionNoteUsersAction::run($note, [$mentionedParticipant], mentionedBy: $author);
+
+    expect(fn (): mixed => ResolveNoteAction::run($note, $mentionedParticipant))->toThrow(AuthorizationException::class)
+        ->and($note->refresh()->status)->toBe(NoteStatus::Open);
+});
+
+it('keeps note content and subject identifiers out of notification payloads', function (): void {
+    $note = Note::factory()->create(['body' => 'Confidential launch plan.']);
+    $recipient = User::factory()->create();
+
+    $payload = (new NoteAttentionNotification($note, 'assigned'))->toArray($recipient);
+
+    expect($payload)->toBe([
+        'type' => 'assigned',
+        'note_id' => $note->getKey(),
+    ]);
 });

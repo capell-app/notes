@@ -7,9 +7,12 @@ use Capell\Notes\Actions\BuildUserInboxNotesAction;
 use Capell\Notes\Actions\CompleteNoteAssignmentAction;
 use Capell\Notes\Actions\MarkNoteMentionsReadAction;
 use Capell\Notes\Actions\MentionNoteUsersAction;
+use Capell\Notes\Actions\ResolveNoteParticipantsAction;
 use Capell\Notes\Enums\NoteStatus;
 use Capell\Notes\Models\Note;
 use Capell\Tests\Fixtures\Models\User;
+use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Support\Facades\Gate;
 
 require_once dirname(__DIR__, 2) . '/NotesTestCase.php';
 
@@ -26,11 +29,11 @@ it('lists relevant inbox notes without leaking private notes for other participa
     $completedAssignedNote = Note::factory()->create(['body' => 'Completed assignment']);
     $otherPrivateNote = Note::factory()->private()->create(['body' => 'Other private note']);
 
-    AssignNoteUsersAction::run($assignedNote, [$user], assignedBy: null);
-    MentionNoteUsersAction::run($mentionedNote, [$user], mentionedBy: null);
-    AssignNoteUsersAction::run($completedAssignedNote, [$user], assignedBy: null);
+    AssignNoteUsersAction::run($assignedNote, [$user], assignedBy: $user);
+    MentionNoteUsersAction::run($mentionedNote, [$user], mentionedBy: $user);
+    AssignNoteUsersAction::run($completedAssignedNote, [$user], assignedBy: $user);
     CompleteNoteAssignmentAction::run($completedAssignedNote, $user);
-    AssignNoteUsersAction::run($otherPrivateNote, [$otherUser], assignedBy: null);
+    AssignNoteUsersAction::run($otherPrivateNote, [$otherUser], assignedBy: $user);
 
     $notes = BuildUserInboxNotesAction::run($user);
 
@@ -43,8 +46,8 @@ it('filters inbox notes by status', function (): void {
     $openNote = Note::factory()->create(['body' => 'Open note']);
     $resolvedNote = Note::factory()->resolved()->create(['body' => 'Resolved note']);
 
-    AssignNoteUsersAction::run($openNote, [$user], assignedBy: null);
-    MentionNoteUsersAction::run($resolvedNote, [$user], mentionedBy: null);
+    AssignNoteUsersAction::run($openNote, [$user], assignedBy: $user);
+    MentionNoteUsersAction::run($resolvedNote, [$user], mentionedBy: $user);
 
     $openNotes = BuildUserInboxNotesAction::run($user, NoteStatus::Open);
     $resolvedNotes = BuildUserInboxNotesAction::run($user, NoteStatus::Resolved);
@@ -59,8 +62,8 @@ it('marks only displayed note mentions read for the current user', function (): 
     $displayedNote = Note::factory()->create();
     $undisplayedNote = Note::factory()->create();
 
-    MentionNoteUsersAction::run($displayedNote, [$user, $otherUser], mentionedBy: null);
-    MentionNoteUsersAction::run($undisplayedNote, [$user], mentionedBy: null);
+    MentionNoteUsersAction::run($displayedNote, [$user, $otherUser], mentionedBy: $user);
+    MentionNoteUsersAction::run($undisplayedNote, [$user], mentionedBy: $user);
 
     $updated = MarkNoteMentionsReadAction::run($user, [$displayedNote]);
 
@@ -68,4 +71,27 @@ it('marks only displayed note mentions read for the current user', function (): 
         ->and($displayedNote->mentions()->whereMorphedTo('mentioned', $user)->first()->read_at)->not->toBeNull()
         ->and($displayedNote->mentions()->whereMorphedTo('mentioned', $otherUser)->first()->read_at)->toBeNull()
         ->and($undisplayedNote->mentions()->whereMorphedTo('mentioned', $user)->first()->read_at)->toBeNull();
+});
+
+it('does not expose cross-tenant participants or notes through tampered IDs', function (): void {
+    $subject = User::factory()->create();
+    $authorizedParticipant = $subject;
+    $crossTenantParticipant = User::factory()->create();
+    $note = Note::factory()->create([
+        'subject_type' => $subject->getMorphClass(),
+        'subject_id' => $subject->getKey(),
+        'author_type' => $subject->getMorphClass(),
+        'author_id' => $subject->getKey(),
+    ]);
+
+    Gate::define('update', static fn (User $user, User $noteSubject): bool => $user->is($noteSubject));
+
+    $participants = ResolveNoteParticipantsAction::run($subject, [
+        $authorizedParticipant->getKey(),
+        $crossTenantParticipant->getKey(),
+    ]);
+
+    expect(collect($participants)->map(static fn (User $participant): int|string => $participant->getKey())->all())->toBe([$authorizedParticipant->getKey()])
+        ->and(fn (): mixed => AssignNoteUsersAction::run($note, [$crossTenantParticipant], assignedBy: $subject))->toThrow(AuthorizationException::class)
+        ->and(BuildUserInboxNotesAction::run($crossTenantParticipant))->toBeEmpty();
 });

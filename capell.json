@@ -93,7 +93,12 @@
         "sendDueReminders": "capell:notes:send-due-reminders"
     },
     "settings": [],
-    "permissions": [],
+    "permissions": [
+        "View:Note",
+        "Resolve:Note",
+        "Reopen:Note",
+        "CompleteAssignment:Note"
+    ],
     "capabilities": ["notes", "notes-admin"],
     "security": {
         "riskTier": "standard",
@@ -124,8 +129,13 @@
             "clients": []
         },
         "adminSurface": {
-            "authorization": "panel-auth",
-            "permissions": []
+            "authorization": "permissions",
+            "permissions": [
+                "View:Note",
+                "Resolve:Note",
+                "Reopen:Note",
+                "CompleteAssignment:Note"
+            ]
         }
     },
     "performance": {
