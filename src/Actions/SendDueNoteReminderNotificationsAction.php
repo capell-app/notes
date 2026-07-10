@@ -60,7 +60,7 @@ final class SendDueNoteReminderNotificationsAction
                         $assignee = $assignment->assignee;
 
                         if ($assignee instanceof Model && method_exists($assignee, 'notify')) {
-                            $assignee->notify(new NoteAttentionNotification($note, 'reminder'));
+                            $assignee->notify(new NoteAttentionNotification((int) $note->getKey(), 'reminder'));
                             $sent++;
                         }
                     });

@@ -30,7 +30,7 @@ final class SendNoteMentionNotificationsAction
                 continue;
             }
 
-            $mentioned->notify(new NoteAttentionNotification($note, 'mentioned'));
+            $mentioned->notify(new NoteAttentionNotification((int) $note->getKey(), 'mentioned'));
         }
     }
 

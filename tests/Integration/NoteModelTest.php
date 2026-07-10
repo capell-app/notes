@@ -9,8 +9,10 @@ use Capell\Notes\Models\Note;
 use Capell\Notes\Models\NoteAssignment;
 use Capell\Notes\Models\NoteMention;
 use Capell\Notes\Models\NoteReminder;
+use Capell\Notes\Notifications\NoteAttentionNotification;
 use Capell\Tests\Fixtures\Models\User;
 use Carbon\CarbonImmutable;
+use Illuminate\Support\Facades\DB;
 
 require_once dirname(__DIR__) . '/NotesTestCase.php';
 
@@ -80,4 +82,15 @@ it('creates note relationships through factories', function (): void {
         ->and($reminder->recurrence)->toBe(NoteReminderRecurrence::Weekly)
         ->and($reminder->due_at)->toBeInstanceOf(CarbonImmutable::class)
         ->and($reminder->next_due_at)->toBeInstanceOf(CarbonImmutable::class);
+});
+
+it('encrypts note bodies and keeps queued attention notifications opaque', function (): void {
+    $note = Note::factory()->create(['body' => 'internal-note-secret']);
+    $rawBody = DB::table('notes')->where('id', $note->getKey())->value('body');
+
+    expect($rawBody)->toBeString()
+        ->not->toContain('internal-note-secret')
+        ->and($note->refresh()->body)->toBe('internal-note-secret')
+        ->and(serialize(new NoteAttentionNotification((int) $note->getKey(), 'mentioned')))
+        ->not->toContain('internal-note-secret');
 });

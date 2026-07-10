@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Capell\Notes\Notifications;
 
-use Capell\Notes\Models\Note;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -16,7 +15,7 @@ final class NoteAttentionNotification extends Notification implements ShouldQueu
     use Queueable;
 
     public function __construct(
-        private readonly Note $note,
+        private readonly int $noteId,
         private readonly string $type,
     ) {}
 
@@ -43,8 +42,7 @@ final class NoteAttentionNotification extends Notification implements ShouldQueu
     {
         return (new MailMessage)
             ->subject((string) __('capell-notes::note.notification_mail.' . $this->type . '.subject'))
-            ->line((string) __('capell-notes::note.notification_mail.' . $this->type . '.line'))
-            ->line($this->excerpt());
+            ->line((string) __('capell-notes::note.notification_mail.' . $this->type . '.line'));
     }
 
     /**
@@ -54,10 +52,7 @@ final class NoteAttentionNotification extends Notification implements ShouldQueu
     {
         return [
             'type' => $this->type,
-            'note_id' => $this->note->getKey(),
-            'subject_type' => $this->note->subject_type,
-            'subject_id' => $this->note->subject_id,
-            'excerpt' => $this->excerpt(),
+            'note_id' => $this->noteId,
         ];
     }
 
@@ -67,13 +62,5 @@ final class NoteAttentionNotification extends Notification implements ShouldQueu
     public function toDatabase(object $notifiable): array
     {
         return $this->toArray($notifiable);
-    }
-
-    private function excerpt(): string
-    {
-        return str($this->note->body)
-            ->squish()
-            ->limit(160)
-            ->toString();
     }
 }

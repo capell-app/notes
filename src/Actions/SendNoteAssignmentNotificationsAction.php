@@ -30,7 +30,7 @@ final class SendNoteAssignmentNotificationsAction
                 continue;
             }
 
-            $assignee->notify(new NoteAttentionNotification($note, 'assigned'));
+            $assignee->notify(new NoteAttentionNotification((int) $note->getKey(), 'assigned'));
         }
     }
 

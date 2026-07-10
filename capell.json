@@ -107,10 +107,12 @@
             "throttledRoutes": []
         },
         "sensitiveData": {
-            "encryptedFields": [],
+            "encryptedFields": ["notes.body"],
             "hashedTokenFields": [],
             "redactedOutputClasses": [],
-            "plaintextJustifications": []
+            "plaintextJustifications": [
+                "Queued attention notifications contain only an opaque note identifier and notification type."
+            ]
         },
         "publicOutput": {
             "cacheSafe": true,
