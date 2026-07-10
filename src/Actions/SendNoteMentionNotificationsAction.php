@@ -30,6 +30,10 @@ final class SendNoteMentionNotificationsAction
                 continue;
             }
 
+            if (! CanViewNoteAction::run($note, $mentioned)) {
+                continue;
+            }
+
             $mentioned->notify(new NoteAttentionNotification($note, 'mentioned'));
         }
     }

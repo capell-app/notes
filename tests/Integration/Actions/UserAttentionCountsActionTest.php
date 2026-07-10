@@ -21,12 +21,12 @@ it('counts assigned notes, mentions, and active reminders for the user', functio
     $overdueNote = Note::factory()->create();
     $completedNote = Note::factory()->create();
 
-    AssignNoteUsersAction::run($assignedNote, [$user], assignedBy: null);
-    AssignNoteUsersAction::run($dueTodayNote, [$user], assignedBy: null);
-    AssignNoteUsersAction::run($overdueNote, [$user], assignedBy: null);
-    AssignNoteUsersAction::run($completedNote, [$user], assignedBy: null);
-    AssignNoteUsersAction::run(Note::factory()->create(), [$otherUser], assignedBy: null);
-    MentionNoteUsersAction::run($mentionedNote, [$user], mentionedBy: null);
+    AssignNoteUsersAction::run($assignedNote, [$user], assignedBy: $user);
+    AssignNoteUsersAction::run($dueTodayNote, [$user], assignedBy: $user);
+    AssignNoteUsersAction::run($overdueNote, [$user], assignedBy: $user);
+    AssignNoteUsersAction::run($completedNote, [$user], assignedBy: $user);
+    AssignNoteUsersAction::run(Note::factory()->create(), [$otherUser], assignedBy: $user);
+    MentionNoteUsersAction::run($mentionedNote, [$user], mentionedBy: $user);
 
     CompleteNoteAssignmentAction::run($completedNote, $user);
 

@@ -8,6 +8,8 @@ use Capell\Notes\Enums\NoteStatus;
 use Capell\Notes\Enums\NoteVisibility;
 use Capell\Notes\Models\Note;
 use Capell\Tests\Fixtures\Models\User;
+use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\ValidationException;
 
 require_once dirname(__DIR__, 2) . '/NotesTestCase.php';
@@ -62,6 +64,29 @@ it('rejects unregistered note subjects', function (): void {
             author: $author,
             body: 'This should not attach to an unsupported subject.',
         )))->toThrow(InvalidArgumentException::class, 'not been registered as a note subject');
+});
+
+it('rejects assignees and mentions without access to the note subject', function (): void {
+    $author = User::factory()->create();
+    $assigneeWithoutAccess = User::factory()->create();
+    $mentionedWithoutAccess = User::factory()->create();
+
+    Gate::define('update', static fn (User $user, User $subject): bool => $user->is($subject));
+
+    expect(fn (): mixed => CreateNoteAction::run(new CreateNoteData(
+        subject: $author,
+        author: $author,
+        body: 'Do not notify a user outside this subject scope.',
+        assignees: [$assigneeWithoutAccess],
+    )))->toThrow(AuthorizationException::class);
+
+    expect(fn (): mixed => CreateNoteAction::run(new CreateNoteData(
+        subject: $author,
+        author: $author,
+        body: 'Do not notify a user outside this subject scope.',
+        mentions: [$mentionedWithoutAccess],
+    )))->toThrow(AuthorizationException::class)
+        ->and(Note::query()->count())->toBe(0);
 });
 
 it('rejects note bodies longer than the maximum length', function (): void {

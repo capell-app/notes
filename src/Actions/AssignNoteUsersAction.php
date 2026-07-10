@@ -6,8 +6,10 @@ namespace Capell\Notes\Actions;
 
 use Capell\Notes\Models\Note;
 use Capell\Notes\Support\NotesManager;
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
 use Lorisleiva\Actions\Concerns\AsObject;
 
 class AssignNoteUsersAction
@@ -17,7 +19,7 @@ class AssignNoteUsersAction
     /**
      * @param  list<Model>  $assignees
      */
-    public function handle(Note $note, array $assignees, ?Model $assignedBy = null): void
+    public function handle(Note $note, array $assignees, Model $assignedBy): void
     {
         $notes = resolve(NotesManager::class);
 
@@ -25,8 +27,15 @@ class AssignNoteUsersAction
             $notes->ensureParticipant($assignee);
         }
 
-        if ($assignedBy instanceof Model) {
-            $notes->ensureParticipant($assignedBy);
+        $notes->ensureParticipant($assignedBy);
+        $subject = $note->subject;
+
+        throw_unless($subject instanceof Model, AuthorizationException::class);
+
+        Gate::forUser($assignedBy)->authorize('update', $subject);
+
+        foreach ($assignees as $assignee) {
+            Gate::forUser($assignee)->authorize('update', $subject);
         }
 
         DB::transaction(function () use ($note, $assignees, $assignedBy): void {
@@ -36,8 +45,8 @@ class AssignNoteUsersAction
                     'note_id' => $note->getKey(),
                     'assignee_type' => $assignee->getMorphClass(),
                     'assignee_id' => $assignee->getKey(),
-                    'assigned_by_type' => $assignedBy?->getMorphClass(),
-                    'assigned_by_id' => $assignedBy?->getKey(),
+                    'assigned_by_type' => $assignedBy->getMorphClass(),
+                    'assigned_by_id' => $assignedBy->getKey(),
                     'completed_at' => null,
                     'created_at' => $timestamp,
                     'updated_at' => $timestamp,

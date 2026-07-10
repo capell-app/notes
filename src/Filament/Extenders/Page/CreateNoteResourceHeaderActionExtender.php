@@ -6,6 +6,7 @@ namespace Capell\Notes\Filament\Extenders\Page;
 
 use Capell\Admin\Contracts\Extenders\ResourceHeaderActionExtender;
 use Capell\Notes\Actions\CreateNoteAction;
+use Capell\Notes\Actions\ResolveNoteParticipantsAction;
 use Capell\Notes\Data\CreateNoteData;
 use Capell\Notes\Data\NoteReminderData;
 use Capell\Notes\Enums\NoteReminderRecurrence;
@@ -51,14 +52,14 @@ final class CreateNoteResourceHeaderActionExtender implements ResourceHeaderActi
                         ->label(__('capell-notes::note.fields.assignees'))
                         ->multiple()
                         ->searchable()
-                        ->getSearchResultsUsing(fn (string $search): array => $this->searchUsers($search))
-                        ->getOptionLabelsUsing(fn (array $values): array => $this->userLabelsForIds($values)),
+                        ->getSearchResultsUsing(fn (string $search, Model $record): array => $this->searchUsers($record, $search))
+                        ->getOptionLabelsUsing(fn (array $values, Model $record): array => $this->userLabelsForIds($record, $values)),
                     Select::make('mention_ids')
                         ->label(__('capell-notes::note.fields.mentions'))
                         ->multiple()
                         ->searchable()
-                        ->getSearchResultsUsing(fn (string $search): array => $this->searchUsers($search))
-                        ->getOptionLabelsUsing(fn (array $values): array => $this->userLabelsForIds($values)),
+                        ->getSearchResultsUsing(fn (string $search, Model $record): array => $this->searchUsers($record, $search))
+                        ->getOptionLabelsUsing(fn (array $values, Model $record): array => $this->userLabelsForIds($record, $values)),
                     DateTimePicker::make('reminder_due_at')
                         ->label(__('capell-notes::note.fields.reminder_due_at'))
                         ->seconds(false)
@@ -86,8 +87,8 @@ final class CreateNoteResourceHeaderActionExtender implements ResourceHeaderActi
                         author: $author,
                         body: $this->stringValue($data['body'] ?? null),
                         visibility: NoteVisibility::from($this->stringValue($data['visibility'] ?? null)),
-                        assignees: $this->usersForIds($data['assignee_ids'] ?? []),
-                        mentions: $this->usersForIds($data['mention_ids'] ?? []),
+                        assignees: $this->usersForIds($record, $data['assignee_ids'] ?? []),
+                        mentions: $this->usersForIds($record, $data['mention_ids'] ?? []),
                         reminder: $this->reminderData($data),
                     ));
 
@@ -141,7 +142,7 @@ final class CreateNoteResourceHeaderActionExtender implements ResourceHeaderActi
     }
 
     /** @return array<int|string, string> */
-    private function searchUsers(string $search): array
+    private function searchUsers(Model $subject, string $search): array
     {
         $userModel = $this->userModel();
 
@@ -162,6 +163,7 @@ final class CreateNoteResourceHeaderActionExtender implements ResourceHeaderActi
         $query
             ->limit(50)
             ->get()
+            ->filter(fn (Model $user): bool => Gate::forUser($user)->allows('update', $subject))
             ->each(function (Model $user) use (&$options): void {
                 $key = $this->modelKey($user);
 
@@ -177,20 +179,17 @@ final class CreateNoteResourceHeaderActionExtender implements ResourceHeaderActi
      * @param  array<array-key, mixed>  $ids
      * @return array<int|string, string>
      */
-    private function userLabelsForIds(array $ids): array
+    private function userLabelsForIds(Model $subject, array $ids): array
     {
-        $userModel = $this->userModel();
         $ids = $this->modelKeys($ids);
 
-        if ($userModel === null || $ids === []) {
+        if ($ids === []) {
             return [];
         }
 
         $options = [];
 
-        $userModel::query()
-            ->whereKey($ids)
-            ->get()
+        ResolveNoteParticipantsAction::run($subject, $ids)
             ->each(function (Model $user) use (&$options): void {
                 $key = $this->modelKey($user);
 
@@ -205,11 +204,9 @@ final class CreateNoteResourceHeaderActionExtender implements ResourceHeaderActi
     /**
      * @return list<Model>
      */
-    private function usersForIds(mixed $ids): array
+    private function usersForIds(Model $subject, mixed $ids): array
     {
-        $userModel = $this->userModel();
-
-        if ($userModel === null || ! is_array($ids) || $ids === []) {
+        if (! is_array($ids) || $ids === []) {
             return [];
         }
 
@@ -219,11 +216,7 @@ final class CreateNoteResourceHeaderActionExtender implements ResourceHeaderActi
             return [];
         }
 
-        return array_values($userModel::query()
-            ->whereKey($ids)
-            ->get()
-            ->values()
-            ->all());
+        return ResolveNoteParticipantsAction::run($subject, $ids);
     }
 
     /** @return class-string<Model>|null */

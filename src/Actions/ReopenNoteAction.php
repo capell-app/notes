@@ -6,14 +6,18 @@ namespace Capell\Notes\Actions;
 
 use Capell\Notes\Enums\NoteStatus;
 use Capell\Notes\Models\Note;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Gate;
 use Lorisleiva\Actions\Concerns\AsObject;
 
 class ReopenNoteAction
 {
     use AsObject;
 
-    public function handle(Note $note): Note
+    public function handle(Note $note, Model $actor): Note
     {
+        Gate::forUser($actor)->authorize('reopen', $note);
+
         $note->forceFill([
             'status' => NoteStatus::Open,
             'resolved_at' => null,

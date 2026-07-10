@@ -21,21 +21,21 @@ final class CanViewNoteAction
 
     public function handle(Note $note, Model $user): bool
     {
-        if ($this->isParticipant($note, $user)) {
+        if ($this->isAuthor($note, $user)) {
             return true;
-        }
-
-        if ($note->visibility === NoteVisibility::Private) {
-            return false;
         }
 
         $subject = $note->subject;
 
-        if (! $subject instanceof Model) {
+        if (! $subject instanceof Model || ! Gate::forUser($user)->allows('update', $subject)) {
             return false;
         }
 
-        return Gate::forUser($user)->allows('update', $subject);
+        if ($this->isParticipant($note, $user)) {
+            return true;
+        }
+
+        return $note->visibility !== NoteVisibility::Private;
     }
 
     private static function stringValue(mixed $value): string
@@ -47,10 +47,6 @@ final class CanViewNoteAction
 
     private function isParticipant(Note $note, Model $user): bool
     {
-        if ($this->isAuthor($note, $user)) {
-            return true;
-        }
-
         if ($this->isAssigned($note, $user)) {
             return true;
         }

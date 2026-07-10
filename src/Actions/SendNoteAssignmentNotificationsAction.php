@@ -30,6 +30,10 @@ final class SendNoteAssignmentNotificationsAction
                 continue;
             }
 
+            if (! CanViewNoteAction::run($note, $assignee)) {
+                continue;
+            }
+
             $assignee->notify(new NoteAttentionNotification($note, 'assigned'));
         }
     }

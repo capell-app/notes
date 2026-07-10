@@ -18,8 +18,8 @@ it('renders inbox notes and marks displayed mentions read after preserving initi
     $assignedNote = Note::factory()->create(['body' => 'Follow up with legal before publish.']);
     $mentionedNote = Note::factory()->create(['body' => 'Please review the launch copy.']);
 
-    AssignNoteUsersAction::run($assignedNote, [$user], assignedBy: null);
-    MentionNoteUsersAction::run($mentionedNote, [$user], mentionedBy: null);
+    AssignNoteUsersAction::run($assignedNote, [$user], assignedBy: $user);
+    MentionNoteUsersAction::run($mentionedNote, [$user], mentionedBy: $user);
 
     test()->actingAs($user);
 
@@ -44,8 +44,8 @@ it('does not render another participant private note in the inbox', function ():
     $visibleNote = Note::factory()->create(['body' => 'Visible current user note.']);
     $privateNote = Note::factory()->private()->create(['body' => 'Private note for another user.']);
 
-    AssignNoteUsersAction::run($visibleNote, [$user], assignedBy: null);
-    AssignNoteUsersAction::run($privateNote, [$otherUser], assignedBy: null);
+    AssignNoteUsersAction::run($visibleNote, [$user], assignedBy: $user);
+    AssignNoteUsersAction::run($privateNote, [$otherUser], assignedBy: $user);
 
     test()->actingAs($user);
 
@@ -59,7 +59,7 @@ it('marks mentions read when a status filter displays new notes', function (): v
     $user = User::factory()->create();
     $openNote = Note::factory()->create(['body' => 'Open mention for current user.']);
 
-    MentionNoteUsersAction::run($openNote, [$user], mentionedBy: null);
+    MentionNoteUsersAction::run($openNote, [$user], mentionedBy: $user);
 
     test()->actingAs($user);
 
@@ -68,7 +68,7 @@ it('marks mentions read when a status filter displays new notes', function (): v
 
     $resolvedNote = Note::factory()->resolved()->create(['body' => 'Resolved mention for current user.']);
 
-    MentionNoteUsersAction::run($resolvedNote, [$user], mentionedBy: null);
+    MentionNoteUsersAction::run($resolvedNote, [$user], mentionedBy: $user);
 
     $component
         ->call('setStatusFilter', 'resolved')
@@ -83,7 +83,7 @@ it('delegates note lifecycle actions from the inbox', function (): void {
     $user = User::factory()->create();
     $assignedNote = Note::factory()->create(['body' => 'Lifecycle controls are available.']);
 
-    AssignNoteUsersAction::run($assignedNote, [$user], assignedBy: null);
+    AssignNoteUsersAction::run($assignedNote, [$user], assignedBy: $user);
 
     test()->actingAs($user);
 
