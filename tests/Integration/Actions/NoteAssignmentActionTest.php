@@ -17,6 +17,8 @@ use Illuminate\Support\Facades\Gate;
 require_once dirname(__DIR__, 2) . '/NotesTestCase.php';
 
 it('assigning the same user twice does not duplicate assignment', function (): void {
+    Gate::before(static fn (): bool => true);
+
     $note = Note::factory()->create();
     $assignee = User::factory()->create();
     $assignedBy = User::factory()->create();
@@ -29,6 +31,8 @@ it('assigning the same user twice does not duplicate assignment', function (): v
 });
 
 it('mentioning the same user twice does not duplicate mention', function (): void {
+    Gate::before(static fn (): bool => true);
+
     $note = Note::factory()->create();
     $mentioned = User::factory()->create();
     $mentionedBy = User::factory()->create();
@@ -41,6 +45,8 @@ it('mentioning the same user twice does not duplicate mention', function (): voi
 });
 
 it('rolls back standalone assignment batches when a later assignee fails', function (): void {
+    Gate::before(static fn (): bool => true);
+
     $note = Note::factory()->create();
     $assignee = User::factory()->create();
     $failingParticipant = new class extends User
@@ -58,6 +64,8 @@ it('rolls back standalone assignment batches when a later assignee fails', funct
 });
 
 it('rolls back standalone mention batches when a later mention fails', function (): void {
+    Gate::before(static fn (): bool => true);
+
     $note = Note::factory()->create();
     $mentioned = User::factory()->create();
     $failingParticipant = new class extends User
@@ -75,6 +83,8 @@ it('rolls back standalone mention batches when a later mention fails', function 
 });
 
 it('completes only the current assignee assignment', function (): void {
+    Gate::before(static fn (): bool => true);
+
     $note = Note::factory()->create();
     $firstUser = User::factory()->create();
     $secondUser = User::factory()->create();
@@ -88,6 +98,8 @@ it('completes only the current assignee assignment', function (): void {
 });
 
 it('reactivates a completed assignment when the user is assigned again', function (): void {
+    Gate::before(static fn (): bool => true);
+
     $note = Note::factory()->create();
     $assignee = User::factory()->create();
 
@@ -102,6 +114,8 @@ it('reactivates a completed assignment when the user is assigned again', functio
 });
 
 it('reactivates a read mention when the user is mentioned again', function (): void {
+    Gate::before(static fn (): bool => true);
+
     $note = Note::factory()->create();
     $mentioned = User::factory()->create();
 
@@ -117,6 +131,8 @@ it('reactivates a read mention when the user is mentioned again', function (): v
 });
 
 it('resolving and reopening note updates status and timestamps correctly', function (): void {
+    Gate::before(static fn (): bool => true);
+
     $note = Note::factory()->create();
 
     ResolveNoteAction::run($note, $note->author);
@@ -140,7 +156,9 @@ it('does not allow a mentioned participant to resolve a note', function (): void
         'author_id' => $author->getKey(),
     ]);
 
-    Gate::define('update', static fn (User $user, User $subject): bool => $user->is($subject) || $user->is($mentionedParticipant));
+    Gate::before(static fn (User $user, string $ability): ?bool => $ability === 'update'
+        ? $user->is($author) || $user->is($mentionedParticipant)
+        : null);
 
     MentionNoteUsersAction::run($note, [$mentionedParticipant], mentionedBy: $author);
 

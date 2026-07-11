@@ -91,6 +91,6 @@ it('encrypts note bodies and keeps queued attention notifications opaque', funct
     expect($rawBody)->toBeString()
         ->not->toContain('internal-note-secret')
         ->and($note->refresh()->body)->toBe('internal-note-secret')
-        ->and(serialize(new NoteAttentionNotification((int) $note->getKey(), 'mentioned')))
+        ->and(serialize(new NoteAttentionNotification($note, 'mentioned')))
         ->not->toContain('internal-note-secret');
 });

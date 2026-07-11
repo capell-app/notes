@@ -21,14 +21,14 @@ final class CanViewNoteAction
 
     public function handle(Note $note, Model $user): bool
     {
-        if ($this->isAuthor($note, $user)) {
-            return true;
-        }
-
         $subject = $note->subject;
 
         if (! $subject instanceof Model || ! Gate::forUser($user)->allows('update', $subject)) {
             return false;
+        }
+
+        if ($this->isAuthor($note, $user)) {
+            return true;
         }
 
         if ($this->isParticipant($note, $user)) {

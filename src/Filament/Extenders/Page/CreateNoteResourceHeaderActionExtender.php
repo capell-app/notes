@@ -144,26 +144,15 @@ final class CreateNoteResourceHeaderActionExtender implements ResourceHeaderActi
     /** @return array<int|string, string> */
     private function searchUsers(Model $subject, string $search): array
     {
-        $userModel = $this->userModel();
+        $actor = auth()->user();
 
-        if ($userModel === null) {
+        if (! $actor instanceof Model) {
             return [];
-        }
-
-        $query = $userModel::query();
-
-        if ($search !== '') {
-            $query
-                ->where('name', 'like', '%' . $search . '%')
-                ->orWhere('email', 'like', '%' . $search . '%');
         }
 
         $options = [];
 
-        $query
-            ->limit(50)
-            ->get()
-            ->filter(fn (Model $user): bool => Gate::forUser($user)->allows('update', $subject))
+        collect(ResolveNoteParticipantsAction::run($subject, $actor, search: $search))
             ->each(function (Model $user) use (&$options): void {
                 $key = $this->modelKey($user);
 
@@ -181,15 +170,16 @@ final class CreateNoteResourceHeaderActionExtender implements ResourceHeaderActi
      */
     private function userLabelsForIds(Model $subject, array $ids): array
     {
+        $actor = auth()->user();
         $ids = $this->modelKeys($ids);
 
-        if ($ids === []) {
+        if (! $actor instanceof Model || $ids === []) {
             return [];
         }
 
         $options = [];
 
-        ResolveNoteParticipantsAction::run($subject, $ids)
+        collect(ResolveNoteParticipantsAction::run($subject, $actor, $ids))
             ->each(function (Model $user) use (&$options): void {
                 $key = $this->modelKey($user);
 
@@ -206,7 +196,9 @@ final class CreateNoteResourceHeaderActionExtender implements ResourceHeaderActi
      */
     private function usersForIds(Model $subject, mixed $ids): array
     {
-        if (! is_array($ids) || $ids === []) {
+        $actor = auth()->user();
+
+        if (! $actor instanceof Model || ! is_array($ids) || $ids === []) {
             return [];
         }
 
@@ -216,19 +208,7 @@ final class CreateNoteResourceHeaderActionExtender implements ResourceHeaderActi
             return [];
         }
 
-        return ResolveNoteParticipantsAction::run($subject, $ids);
-    }
-
-    /** @return class-string<Model>|null */
-    private function userModel(): ?string
-    {
-        $userModel = config('auth.providers.users.model');
-
-        if (! is_string($userModel) || ! is_a($userModel, Model::class, true)) {
-            return null;
-        }
-
-        return $userModel;
+        return ResolveNoteParticipantsAction::run($subject, $actor, $ids);
     }
 
     private function userLabel(Model $user): string

@@ -73,5 +73,4 @@ final class NoteAttentionNotification extends Notification implements ShouldQueu
     {
         return $this->toArray($notifiable);
     }
-
 }

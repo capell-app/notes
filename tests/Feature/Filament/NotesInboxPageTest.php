@@ -9,9 +9,14 @@ use Capell\Notes\Filament\Pages\NotesInboxPage;
 use Capell\Notes\Models\Note;
 use Capell\Notes\Models\NoteMention;
 use Capell\Tests\Fixtures\Models\User;
+use Illuminate\Support\Facades\Gate;
 use Livewire\Livewire;
 
 require_once dirname(__DIR__, 2) . '/NotesTestCase.php';
+
+beforeEach(function (): void {
+    Gate::before(static fn (): bool => true);
+});
 
 it('renders inbox notes and marks displayed mentions read after preserving initial counts', function (): void {
     $user = User::factory()->create(['name' => 'Editor One']);
