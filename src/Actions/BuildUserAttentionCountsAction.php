@@ -26,11 +26,15 @@ final class BuildUserAttentionCountsAction
 
         return new UserAttentionCountData(
             assigned: NoteAssignment::query()
+                ->with(['note.assignments', 'note.mentions', 'note.subject'])
                 ->where('assignee_type', $user->getMorphClass())
                 ->where('assignee_id', $user->getKey())
                 ->whereNull('completed_at')
+                ->get()
+                ->filter(fn (NoteAssignment $assignment): bool => $assignment->note !== null
+                    && CanViewNoteAction::run($assignment->note, $user))
                 ->count(),
-            dueToday: $this->activeReminderQuery($user)
+            dueToday: $this->visibleReminderCount($this->activeReminderQuery($user)
                 ->where(function (Builder $query) use ($startOfDay, $endOfDay): void {
                     $query
                         ->whereBetween('next_due_at', [$startOfDay, $endOfDay])
@@ -39,9 +43,8 @@ final class BuildUserAttentionCountsAction
                                 ->whereNull('next_due_at')
                                 ->whereBetween('due_at', [$startOfDay, $endOfDay]);
                         });
-                })
-                ->count(),
-            overdue: $this->activeReminderQuery($user)
+                }), $user),
+            overdue: $this->visibleReminderCount($this->activeReminderQuery($user)
                 ->where(function (Builder $query) use ($startOfDay): void {
                     $query
                         ->where('next_due_at', '<', $startOfDay)
@@ -50,12 +53,15 @@ final class BuildUserAttentionCountsAction
                                 ->whereNull('next_due_at')
                                 ->where('due_at', '<', $startOfDay);
                         });
-                })
-                ->count(),
+                }), $user),
             mentions: NoteMention::query()
+                ->with(['note.assignments', 'note.mentions', 'note.subject'])
                 ->where('mentioned_type', $user->getMorphClass())
                 ->where('mentioned_id', $user->getKey())
                 ->whereNull('read_at')
+                ->get()
+                ->filter(fn (NoteMention $mention): bool => $mention->note !== null
+                    && CanViewNoteAction::run($mention->note, $user))
                 ->count(),
         );
     }
@@ -74,5 +80,18 @@ final class BuildUserAttentionCountsAction
                     ->where('assignee_id', $user->getKey())
                     ->whereNull('completed_at');
             });
+    }
+
+    /**
+     * @param  Builder<NoteReminder>  $query
+     */
+    private function visibleReminderCount(Builder $query, Model $user): int
+    {
+        return $query
+            ->with(['note.assignments', 'note.mentions', 'note.subject'])
+            ->get()
+            ->filter(fn (NoteReminder $reminder): bool => $reminder->note !== null
+                && CanViewNoteAction::run($reminder->note, $user))
+            ->count();
     }
 }

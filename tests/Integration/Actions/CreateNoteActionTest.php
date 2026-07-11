@@ -15,6 +15,8 @@ use Illuminate\Validation\ValidationException;
 require_once dirname(__DIR__, 2) . '/NotesTestCase.php';
 
 it('creates a note attached to a record with assignments and mentions', function (): void {
+    Gate::before(static fn (): bool => true);
+
     $subject = User::factory()->create();
     $author = User::factory()->create();
     $assignee = User::factory()->create();
@@ -71,7 +73,7 @@ it('rejects assignees and mentions without access to the note subject', function
     $assigneeWithoutAccess = User::factory()->create();
     $mentionedWithoutAccess = User::factory()->create();
 
-    Gate::define('update', static fn (User $user, User $subject): bool => $user->is($subject));
+    Gate::before(static fn (User $user, string $ability): ?bool => $ability === 'update' ? $user->is($author) : null);
 
     expect(fn (): mixed => CreateNoteAction::run(new CreateNoteData(
         subject: $author,
@@ -103,6 +105,8 @@ it('rejects note bodies longer than the maximum length', function (): void {
 });
 
 it('accepts a note body at exactly the maximum length', function (): void {
+    Gate::before(static fn (): bool => true);
+
     $subject = User::factory()->create();
     $author = User::factory()->create();
 
@@ -116,6 +120,8 @@ it('accepts a note body at exactly the maximum length', function (): void {
 });
 
 it('rolls back the note when assignment creation fails', function (): void {
+    Gate::before(static fn (): bool => true);
+
     $subject = User::factory()->create();
     $author = User::factory()->create();
     $failingParticipant = new class extends User
@@ -137,6 +143,8 @@ it('rolls back the note when assignment creation fails', function (): void {
 });
 
 it('rolls back the note when mention creation fails', function (): void {
+    Gate::before(static fn (): bool => true);
+
     $subject = User::factory()->create();
     $author = User::factory()->create();
     $failingParticipant = new class extends User

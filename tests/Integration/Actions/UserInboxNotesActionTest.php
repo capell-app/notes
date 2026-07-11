@@ -17,6 +17,8 @@ use Illuminate\Support\Facades\Gate;
 require_once dirname(__DIR__, 2) . '/NotesTestCase.php';
 
 it('lists relevant inbox notes without leaking private notes for other participants', function (): void {
+    Gate::before(static fn (): bool => true);
+
     $user = User::factory()->create();
     $otherUser = User::factory()->create();
     $assignedNote = Note::factory()->create(['body' => 'Assigned to current user']);
@@ -42,6 +44,8 @@ it('lists relevant inbox notes without leaking private notes for other participa
 });
 
 it('filters inbox notes by status', function (): void {
+    Gate::before(static fn (): bool => true);
+
     $user = User::factory()->create();
     $openNote = Note::factory()->create(['body' => 'Open note']);
     $resolvedNote = Note::factory()->resolved()->create(['body' => 'Resolved note']);
@@ -57,6 +61,8 @@ it('filters inbox notes by status', function (): void {
 });
 
 it('marks only displayed note mentions read for the current user', function (): void {
+    Gate::before(static fn (): bool => true);
+
     $user = User::factory()->create();
     $otherUser = User::factory()->create();
     $displayedNote = Note::factory()->create();
@@ -84,9 +90,9 @@ it('does not expose cross-tenant participants or notes through tampered IDs', fu
         'author_id' => $subject->getKey(),
     ]);
 
-    Gate::define('update', static fn (User $user, User $noteSubject): bool => $user->is($noteSubject));
+    Gate::before(static fn (User $user, string $ability): ?bool => $ability === 'update' ? $user->is($subject) : null);
 
-    $participants = ResolveNoteParticipantsAction::run($subject, [
+    $participants = ResolveNoteParticipantsAction::run($subject, $subject, [
         $authorizedParticipant->getKey(),
         $crossTenantParticipant->getKey(),
     ]);
@@ -94,4 +100,59 @@ it('does not expose cross-tenant participants or notes through tampered IDs', fu
     expect(collect($participants)->map(static fn (User $participant): int|string => $participant->getKey())->all())->toBe([$authorizedParticipant->getKey()])
         ->and(fn (): mixed => AssignNoteUsersAction::run($note, [$crossTenantParticipant], assignedBy: $subject))->toThrow(AuthorizationException::class)
         ->and(BuildUserInboxNotesAction::run($crossTenantParticipant))->toBeEmpty();
+});
+
+it('requires the requesting actor to access the subject before resolving participants', function (): void {
+    $subject = User::factory()->create();
+    $authorizedParticipant = $subject;
+    $unauthorizedActor = User::factory()->create();
+
+    Gate::before(static fn (User $user, string $ability): ?bool => $ability === 'update' ? $user->is($subject) : null);
+
+    expect(fn (): mixed => ResolveNoteParticipantsAction::run(
+        $subject,
+        $unauthorizedActor,
+        [$authorizedParticipant->getKey()],
+    ))->toThrow(AuthorizationException::class);
+});
+
+it('uses subject access for participant search results', function (): void {
+    $subject = User::factory()->create(['name' => 'Allowed Editor']);
+    User::factory()->create(['name' => 'Foreign Editor']);
+
+    Gate::before(static fn (User $user, string $ability): ?bool => $ability === 'update' ? $user->is($subject) : null);
+
+    $participants = ResolveNoteParticipantsAction::run($subject, $subject, search: 'Editor');
+
+    expect(collect($participants)->map(static fn (User $participant): int|string => $participant->getKey())->all())
+        ->toBe([$subject->getKey()]);
+});
+
+it('hides authored private notes after the author loses subject access', function (): void {
+    $subject = User::factory()->create();
+    $author = User::factory()->create();
+    $authorHasAccess = true;
+    $note = Note::factory()->private()->create([
+        'subject_type' => $subject->getMorphClass(),
+        'subject_id' => $subject->getKey(),
+        'author_type' => $author->getMorphClass(),
+        'author_id' => $author->getKey(),
+    ]);
+
+    Gate::before(static function (User $user, string $ability) use (&$authorHasAccess, $author, $subject): ?bool {
+        if ($ability !== 'update') {
+            return null;
+        }
+
+        return $user->is($subject) || ($authorHasAccess && $user->is($author));
+    });
+    Gate::define('update', static function (User $user, User $noteSubject) use (&$authorHasAccess, $author, $subject): bool {
+        return $user->is($subject) || ($authorHasAccess && $user->is($author) && $noteSubject->is($subject));
+    });
+
+    expect(BuildUserInboxNotesAction::run($author)->modelKeys())->toBe([$note->getKey()]);
+
+    $authorHasAccess = false;
+
+    expect(BuildUserInboxNotesAction::run($author))->toBeEmpty();
 });
