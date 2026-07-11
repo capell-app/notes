@@ -73,8 +73,8 @@
             "target": "NotesInboxPage",
             "url": "/notes",
             "waitFor": "[data-capell-notes-inbox]",
-            "required": true,
-            "notes": "Requires seeded notes covering assignment, mention, resolved, and open states.",
+            "required": false,
+            "notes": "Optional Beta evidence target. The current file duplicates the Notes inbox capture; replace it with an independently captured populated attention-count state before using it as release or Marketplace evidence.",
             "useCase": "An administrator reviews seeded assigned and mentioned notes with resolve, reopen, and complete-assignment controls.",
             "screenshotPath": "packages/notes/docs/screenshots/notes-attention-counts.png",
             "darkScreenshotPath": "packages/notes/docs/screenshots/notes-attention-counts-dark.png"

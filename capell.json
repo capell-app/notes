@@ -4,8 +4,8 @@
     "slug": "notes",
     "displayName": "Notes",
     "kind": "package",
-    "capellApiVersion": "^4.0",
-    "version": "4.x-dev",
+    "capellApiVersion": "^1.0",
+    "version": "1.x-dev",
     "description": "Add private, assignable notes and @mentions to any Capell admin record so editors can leave context, hand off work, and never lose track of what needs attention.",
     "product": {
         "group": "Capell Collaboration",
@@ -88,12 +88,17 @@
         "install": null,
         "setup": null,
         "demo": "capell:notes-demo",
-        "demoParams": ["force"],
+        "demoParams": ["force", "allow-production"],
         "doctor": null,
         "sendDueReminders": "capell:notes:send-due-reminders"
     },
     "settings": [],
-    "permissions": [],
+    "permissions": [
+        "View:Note",
+        "Resolve:Note",
+        "Reopen:Note",
+        "CompleteAssignment:Note"
+    ],
     "capabilities": ["notes", "notes-admin"],
     "security": {
         "riskTier": "standard",
@@ -107,10 +112,12 @@
             "throttledRoutes": []
         },
         "sensitiveData": {
-            "encryptedFields": [],
+            "encryptedFields": ["notes.body"],
             "hashedTokenFields": [],
             "redactedOutputClasses": [],
-            "plaintextJustifications": []
+            "plaintextJustifications": [
+                "Queued attention notifications contain only an opaque note identifier and notification type."
+            ]
         },
         "publicOutput": {
             "cacheSafe": true,
@@ -124,8 +131,13 @@
             "clients": []
         },
         "adminSurface": {
-            "authorization": "panel-auth",
-            "permissions": []
+            "authorization": "permissions",
+            "permissions": [
+                "View:Note",
+                "Resolve:Note",
+                "Reopen:Note",
+                "CompleteAssignment:Note"
+            ]
         }
     },
     "performance": {
@@ -180,19 +192,9 @@
                 "caption": "Leave contextual record-level notes with visibility, assignment, mention, and reminder fields from the page edit workflow."
             },
             {
-                "path": "docs/screenshots/notes-attention-counts.png",
-                "alt": "Populated Notes inbox with attention counts and note actions",
-                "caption": "See assigned work, overdue reminders, mentioned records, and resolve or complete notes without leaving Capell Admin."
-            },
-            {
                 "path": "docs/screenshots/notes-empty-inbox.png",
                 "alt": "Empty Notes inbox state",
                 "caption": "A quiet empty state keeps the Notes inbox clear when no collaboration items need attention."
-            },
-            {
-                "path": "docs/screenshots/notes-attention-counts-dark.png",
-                "alt": "Dark mode Notes inbox with populated collaboration records",
-                "caption": "The same Notes workflow is captured in Capell Admin dark mode for marketplace parity."
             }
         ],
         "categories": ["admin", "collaboration"]

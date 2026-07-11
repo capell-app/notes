@@ -7,6 +7,7 @@ namespace Capell\Notes\Actions;
 use Capell\Notes\Models\Note;
 use Capell\Notes\Models\NoteMention;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Gate;
 use Lorisleiva\Actions\Concerns\AsObject;
 
 /**
@@ -24,7 +25,7 @@ final class MarkNoteMentionsReadAction
         $noteIds = [];
 
         foreach ($notes as $note) {
-            if ($note instanceof Note && $note->exists) {
+            if ($note instanceof Note && $note->exists && Gate::forUser($user)->allows('view', $note)) {
                 $noteIds[] = $note->id;
             }
         }

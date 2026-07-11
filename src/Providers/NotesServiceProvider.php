@@ -16,10 +16,12 @@ use Capell\Notes\Models\Note;
 use Capell\Notes\Models\NoteAssignment;
 use Capell\Notes\Models\NoteMention;
 use Capell\Notes\Models\NoteReminder;
+use Capell\Notes\Policies\NotePolicy;
 use Capell\Notes\Support\NotesManager;
 use Capell\Notes\Support\UserAttentionCountsCache;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Gate;
 use Override;
 use Spatie\LaravelPackageTools\Package;
 
@@ -38,11 +40,15 @@ final class NotesServiceProvider extends AbstractPackageServiceProvider
             ->hasViews()
             ->hasCommand(DemoCommand::class)
             ->hasCommand(SendDueNoteRemindersCommand::class)
-            ->hasMigrations(['2026_05_10_190862_01_create_notes_tables']);
+            ->hasMigrations([
+                '2026_05_10_190862_01_create_notes_tables',
+                '2026_07_10_000002_encrypt_note_bodies',
+            ]);
     }
 
     public function registeringPackage(): void
     {
+        Gate::policy(Note::class, NotePolicy::class);
         $this->app->singleton(NotesManager::class);
         $this->app->scoped(UserAttentionCountsCache::class);
         $this->app->register(AdminServiceProvider::class);

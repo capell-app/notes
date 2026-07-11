@@ -71,6 +71,12 @@ it('declares implemented notes package contributions', function (): void {
         ])
         ->and($scheduledJob['command'])->toBe('capell:notes:send-due-reminders')
         ->and(data_get($manifest, 'commands.demo'))->toBe('capell:notes-demo')
+        ->and(data_get($manifest, 'permissions'))->toBe([
+            'View:Note',
+            'Resolve:Note',
+            'Reopen:Note',
+            'CompleteAssignment:Note',
+        ])
         ->and(data_get($manifest, 'commands.sendDueReminders'))->toBe('capell:notes:send-due-reminders')
         ->and($consoleCommands['commands'])->toBe(['capell:notes-demo', 'capell:notes:send-due-reminders'])
         ->and($consoleCommands['commandClasses'])->toBe([

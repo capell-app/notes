@@ -10,15 +10,24 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 use Illuminate\Support\Facades\Schema;
+use InvalidArgumentException;
 
 final class NoteAttentionNotification extends Notification implements ShouldQueue
 {
     use Queueable;
 
+    private readonly int|string $noteId;
+
     public function __construct(
-        private readonly Note $note,
+        Note $note,
         private readonly string $type,
-    ) {}
+    ) {
+        $noteId = $note->getKey();
+
+        throw_unless(is_int($noteId) || is_string($noteId), InvalidArgumentException::class);
+
+        $this->noteId = $noteId;
+    }
 
     /**
      * @return list<string>
@@ -43,8 +52,7 @@ final class NoteAttentionNotification extends Notification implements ShouldQueu
     {
         return (new MailMessage)
             ->subject((string) __('capell-notes::note.notification_mail.' . $this->type . '.subject'))
-            ->line((string) __('capell-notes::note.notification_mail.' . $this->type . '.line'))
-            ->line($this->excerpt());
+            ->line((string) __('capell-notes::note.notification_mail.' . $this->type . '.line'));
     }
 
     /**
@@ -54,10 +62,7 @@ final class NoteAttentionNotification extends Notification implements ShouldQueu
     {
         return [
             'type' => $this->type,
-            'note_id' => $this->note->getKey(),
-            'subject_type' => $this->note->subject_type,
-            'subject_id' => $this->note->subject_id,
-            'excerpt' => $this->excerpt(),
+            'note_id' => $this->noteId,
         ];
     }
 
@@ -67,13 +72,5 @@ final class NoteAttentionNotification extends Notification implements ShouldQueu
     public function toDatabase(object $notifiable): array
     {
         return $this->toArray($notifiable);
-    }
-
-    private function excerpt(): string
-    {
-        return str($this->note->body)
-            ->squish()
-            ->limit(160)
-            ->toString();
     }
 }

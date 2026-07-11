@@ -106,6 +106,7 @@ class Note extends Model
     protected function casts(): array
     {
         return [
+            'body' => 'encrypted',
             'status' => NoteStatus::class,
             'visibility' => NoteVisibility::class,
             'resolved_at' => 'immutable_datetime',

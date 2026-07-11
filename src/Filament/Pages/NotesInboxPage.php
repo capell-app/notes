@@ -128,25 +128,27 @@ final class NotesInboxPage extends Page
 
     public function resolveNote(int $noteId): void
     {
+        $user = $this->user();
         $note = $this->noteVisibleToCurrentUser($noteId);
 
-        if (! $note instanceof Note || $note->status === NoteStatus::Resolved) {
+        if (! $user instanceof Model || ! $note instanceof Note || $note->status === NoteStatus::Resolved) {
             return;
         }
 
-        (new ResolveNoteAction)->handle($note);
+        (new ResolveNoteAction)->handle($note, $user);
         $this->forgetAttentionCounts();
     }
 
     public function reopenNote(int $noteId): void
     {
+        $user = $this->user();
         $note = $this->noteVisibleToCurrentUser($noteId);
 
-        if (! $note instanceof Note || $note->status === NoteStatus::Open) {
+        if (! $user instanceof Model || ! $note instanceof Note || $note->status === NoteStatus::Open) {
             return;
         }
 
-        (new ReopenNoteAction)->handle($note);
+        (new ReopenNoteAction)->handle($note, $user);
         $this->forgetAttentionCounts();
     }
 
