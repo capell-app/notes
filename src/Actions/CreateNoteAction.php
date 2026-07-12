@@ -1,0 +1,104 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Capell\Notes\Actions;
+
+use Capell\Notes\Data\CreateNoteData;
+use Capell\Notes\Enums\NoteStatus;
+use Capell\Notes\Models\Note;
+use Capell\Notes\Support\NotesManager;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
+use Illuminate\Validation\ValidationException;
+use InvalidArgumentException;
+use Lorisleiva\Actions\Concerns\AsObject;
+
+class CreateNoteAction
+{
+    use AsObject;
+
+    /**
+     * Maximum allowed note body length, in characters.
+     *
+     * Kept well below the database TEXT column limit so a single note
+     * cannot exhaust storage or degrade the admin inbox render.
+     */
+    public const int MAX_BODY_LENGTH = 5000;
+
+    public static function canCreateForSubject(Model $subject): bool
+    {
+        try {
+            resolve(NotesManager::class)->ensureSubject($subject);
+        } catch (InvalidArgumentException) {
+            return false;
+        }
+
+        return true;
+    }
+
+    public function handle(CreateNoteData $data): Note
+    {
+        $this->validate($data);
+
+        return DB::transaction(function () use ($data): Note {
+            $note = Note::query()->create([
+                'subject_type' => $data->subject->getMorphClass(),
+                'subject_id' => $data->subject->getKey(),
+                'author_type' => $data->author->getMorphClass(),
+                'author_id' => $data->author->getKey(),
+                'body' => trim($data->body),
+                'status' => NoteStatus::Open,
+                'visibility' => $data->visibility,
+                'resolved_at' => null,
+            ]);
+
+            AssignNoteUsersAction::run($note, $data->assignees, $data->author);
+            MentionNoteUsersAction::run($note, $data->mentions, $data->author);
+            UpsertNoteReminderAction::run($note, $data->reminder);
+
+            return $note->load([
+                'assignments.assignee',
+                'assignments.assignedBy',
+                'author',
+                'mentions.mentioned',
+                'mentions.mentionedBy',
+                'reminder',
+                'subject',
+            ]);
+        });
+    }
+
+    private function validate(CreateNoteData $data): void
+    {
+        $body = trim($data->body);
+
+        if ($body === '') {
+            throw ValidationException::withMessages([
+                'body' => __('capell-notes::note.validation.body_required'),
+            ]);
+        }
+
+        if (mb_strlen($body) > self::MAX_BODY_LENGTH) {
+            throw ValidationException::withMessages([
+                'body' => __('capell-notes::note.validation.body_max', ['max' => self::MAX_BODY_LENGTH]),
+            ]);
+        }
+
+        $notes = resolve(NotesManager::class);
+        $notes->ensureSubject($data->subject);
+        $notes->ensureParticipant($data->author);
+        Gate::forUser($data->author)->authorize('update', $data->subject);
+
+        foreach ($data->assignees as $assignee) {
+            $notes->ensureParticipant($assignee);
+            Gate::forUser($assignee)->authorize('update', $data->subject);
+        }
+
+        foreach ($data->mentions as $mentioned) {
+            $notes->ensureParticipant($mentioned);
+            Gate::forUser($mentioned)->authorize('update', $data->subject);
+        }
+    }
+}
