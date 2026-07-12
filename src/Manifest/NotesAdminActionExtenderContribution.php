@@ -10,6 +10,6 @@ final class NotesAdminActionExtenderContribution implements ExtensionContributio
 {
     public static function compatibleCapellApiVersion(): string
     {
-        return '^0.0';
+        return '^4.0';
     }
 }

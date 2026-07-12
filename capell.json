@@ -4,7 +4,7 @@
     "slug": "notes",
     "displayName": "Notes",
     "kind": "package",
-    "capellApiVersion": "^0.0",
+    "capellApiVersion": "^4.0",
     "version": "0.0.x-dev",
     "description": "Add private, assignable notes and @mentions to any Capell admin record so editors can leave context, hand off work, and never lose track of what needs attention.",
     "product": {
