@@ -2,7 +2,7 @@
 
 <!-- prettier-ignore-start -->
 
-## What This Extension Adds
+## What This Plugin Adds
 
 Notes is an **Available**, **Schema-owning** Capell package in the **Capell Collaboration** product group. It ships as `capell-app/notes` and extends these surfaces: admin.
 
@@ -29,20 +29,25 @@ Status details:
 
 Screenshot contract: `docs/screenshots.json`.
 
+![User-menu notes item with attention badge](docs/screenshots/notes-user-menu-badge.png)
+
+![Notes inbox page](docs/screenshots/notes-inbox-page.png)
+
 - User-menu notes item with attention badge (admin, required).
 - Notes inbox page (admin, required).
 - Record-level Add note modal (admin, required).
 - Empty notes inbox state (admin, required).
-- Notes inbox with assigned, mentioned, and lifecycle controls (admin, required).
+- Notes inbox with assigned, mentioned, and lifecycle controls (admin, optional).
 
 ## Technical Shape
 
 - Service providers: `Capell\Notes\Providers\NotesServiceProvider`, `Capell\Notes\Providers\AdminServiceProvider`.
 - Config files: `packages/notes/config/capell-notes.php`.
-- Migrations: `packages/notes/database/migrations/2026_05_10_190862_01_create_notes_tables.php`.
+- Migrations: `packages/notes/database/migrations/2026_05_10_190862_01_create_notes_tables.php`, `packages/notes/database/migrations/2026_07_10_000002_encrypt_note_bodies.php`.
 - Models: `Note`, `NoteAssignment`, `NoteMention`, `NoteReminder`.
 - Filament classes: `CreateNoteResourceHeaderActionExtender`, `NotesInboxPage`.
-- Actions: `AssignNoteUsersAction`, `BuildSubjectNotesAction`, `BuildUserAttentionCountsAction`, `BuildUserInboxNotesAction`, `CanViewNoteAction`, `CompleteNoteAssignmentAction`, `CreateNoteAction`, `MarkNoteMentionsReadAction`, `MentionNoteUsersAction`, `PruneNotesForDeletedParticipantAction`, `PruneNotesForDeletedSubjectAction`, `ReopenNoteAction`, `and 5 more`.
+- Policies: `NotePolicy`.
+- Actions: `AssignNoteUsersAction`, `BuildSubjectNotesAction`, `BuildUserAttentionCountsAction`, `BuildUserInboxNotesAction`, `CanViewNoteAction`, `CompleteNoteAssignmentAction`, `CreateNoteAction`, `MarkNoteMentionsReadAction`, `MentionNoteUsersAction`, `PruneNotesForDeletedParticipantAction`, `PruneNotesForDeletedSubjectAction`, `ReopenNoteAction`, `and 6 more`.
 - Data objects: `CreateNoteData`, `NoteReminderData`, `UserAttentionCountData`.
 - Command signatures: `capell:notes-demo`, `capell:notes:send-due-reminders`.
 - Console command classes: `DemoCommand`, `SendDueNoteRemindersCommand`.
@@ -54,14 +59,14 @@ Screenshot contract: `docs/screenshots.json`.
 
 - Required tables: `notes`, `note_assignments`, `note_mentions`, `note_reminders`.
 - Models: `Note`, `NoteAssignment`, `NoteMention`, `NoteReminder`.
-- Migration files: `2026_05_10_190862_01_create_notes_tables.php`.
+- Migration files: `2026_05_10_190862_01_create_notes_tables.php`, `2026_07_10_000002_encrypt_note_bodies.php`.
 - Migration impact: run host migrations through the package install flow before opening package surfaces.
 - Deletion/retention behaviour: Docs gap unless the package has an explicit pruning command, retention setting, or tested cascade path.
 
 ## Install Impact
 
 - Admin navigation: adds package-owned Filament classes when registered.
-- Permissions: none declared in `capell.json`.
+- Permissions: `View:Note`, `Resolve:Note`, `Reopen:Note`, `CompleteAssignment:Note`.
 - Public routes: none detected in package route files.
 - Database changes: package migrations are declared.
 - Settings: no package settings declared.
