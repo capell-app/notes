@@ -44,7 +44,11 @@ final class NotePolicy
             return false;
         }
 
-        return ($note->author_type === $user->getMorphClass() && (string) $note->author_id === (string) $user->getKey())
+        $userKey = $user->getKey();
+
+        return ($note->author_type === $user->getMorphClass()
+                && (is_int($userKey) || is_string($userKey))
+                && $note->author_id === $userKey)
             || $note->assignments()
                 ->where('assignee_type', $user->getMorphClass())
                 ->where('assignee_id', $user->getKey())

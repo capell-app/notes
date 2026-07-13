@@ -41,7 +41,7 @@ final class ResolveNoteParticipantsAction
             return [];
         }
 
-        return $participantModel::query()
+        return array_values($participantModel::query()
             ->when($ids !== [], static fn (Builder $query): Builder => $query->whereKey($ids))
             ->when($search !== null && $search !== '', static function (Builder $query) use ($search): void {
                 $query->where(static function (Builder $searchQuery) use ($search): void {
@@ -54,7 +54,7 @@ final class ResolveNoteParticipantsAction
             ->get()
             ->filter(fn (Model $participant): bool => Gate::forUser($participant)->allows('update', $subject))
             ->values()
-            ->all();
+            ->all());
     }
 
     /**

@@ -63,7 +63,10 @@ it('counts assigned notes, mentions, and active reminders for the user', functio
 it('does not count attention records after subject access is revoked', function (): void {
     $subject = User::factory()->create();
     $user = User::factory()->create();
-    $userHasAccess = true;
+    $access = new class
+    {
+        public bool $allowed = true;
+    };
     $assignedNote = Note::factory()->create([
         'subject_type' => $subject->getMorphClass(),
         'subject_id' => $subject->getKey(),
@@ -73,16 +76,14 @@ it('does not count attention records after subject access is revoked', function 
         'subject_id' => $subject->getKey(),
     ]);
 
-    Gate::before(static function (User $actor, string $ability) use (&$userHasAccess, $subject, $user): ?bool {
+    Gate::before(static function (User $actor, string $ability) use ($access, $subject, $user): ?bool {
         if ($ability !== 'update') {
             return null;
         }
 
-        return $actor->is($subject) || ($userHasAccess && $actor->is($user));
+        return $actor->is($subject) || ($actor->is($user) && $access->allowed);
     });
-    Gate::define('update', static function (User $actor, User $noteSubject) use (&$userHasAccess, $subject, $user): bool {
-        return $actor->is($subject) || ($userHasAccess && $actor->is($user) && $noteSubject->is($subject));
-    });
+    Gate::define('update', static fn (User $actor, User $noteSubject): bool => $actor->is($subject) || ($actor->is($user) && $noteSubject->is($subject) && $access->allowed));
 
     AssignNoteUsersAction::run($assignedNote, [$user], assignedBy: $subject);
     MentionNoteUsersAction::run($mentionedNote, [$user], mentionedBy: $subject);
@@ -94,7 +95,7 @@ it('does not count attention records after subject access is revoked', function 
 
     expect(BuildUserAttentionCountsAction::run($user)->total())->toBe(3);
 
-    $userHasAccess = false;
+    $access->allowed = false;
 
     $counts = BuildUserAttentionCountsAction::run($user);
 

@@ -12,6 +12,7 @@ use Capell\Notes\Enums\NoteStatus;
 use Capell\Notes\Models\Note;
 use Capell\Tests\Fixtures\Models\User;
 use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Gate;
 
 require_once dirname(__DIR__, 2) . '/NotesTestCase.php';
@@ -97,7 +98,7 @@ it('does not expose cross-tenant participants or notes through tampered IDs', fu
         $crossTenantParticipant->getKey(),
     ]);
 
-    expect(collect($participants)->map(static fn (User $participant): int|string => $participant->getKey())->all())->toBe([$authorizedParticipant->getKey()])
+    expect(array_map(noteModelKey(...), $participants))->toBe([$authorizedParticipant->getKey()])
         ->and(fn (): mixed => AssignNoteUsersAction::run($note, [$crossTenantParticipant], assignedBy: $subject))->toThrow(AuthorizationException::class)
         ->and(BuildUserInboxNotesAction::run($crossTenantParticipant))->toBeEmpty();
 });
@@ -124,14 +125,17 @@ it('uses subject access for participant search results', function (): void {
 
     $participants = ResolveNoteParticipantsAction::run($subject, $subject, search: 'Editor');
 
-    expect(collect($participants)->map(static fn (User $participant): int|string => $participant->getKey())->all())
+    expect(array_map(noteModelKey(...), $participants))
         ->toBe([$subject->getKey()]);
 });
 
 it('hides authored private notes after the author loses subject access', function (): void {
     $subject = User::factory()->create();
     $author = User::factory()->create();
-    $authorHasAccess = true;
+    $access = new class
+    {
+        public bool $allowed = true;
+    };
     $note = Note::factory()->private()->create([
         'subject_type' => $subject->getMorphClass(),
         'subject_id' => $subject->getKey(),
@@ -139,20 +143,29 @@ it('hides authored private notes after the author loses subject access', functio
         'author_id' => $author->getKey(),
     ]);
 
-    Gate::before(static function (User $user, string $ability) use (&$authorHasAccess, $author, $subject): ?bool {
+    Gate::before(static function (User $user, string $ability) use ($access, $author, $subject): ?bool {
         if ($ability !== 'update') {
             return null;
         }
 
-        return $user->is($subject) || ($authorHasAccess && $user->is($author));
+        return $user->is($subject) || ($user->is($author) && $access->allowed);
     });
-    Gate::define('update', static function (User $user, User $noteSubject) use (&$authorHasAccess, $author, $subject): bool {
-        return $user->is($subject) || ($authorHasAccess && $user->is($author) && $noteSubject->is($subject));
-    });
+    Gate::define('update', static fn (User $user, User $noteSubject): bool => $user->is($subject) || ($user->is($author) && $noteSubject->is($subject) && $access->allowed));
 
     expect(BuildUserInboxNotesAction::run($author)->modelKeys())->toBe([$note->getKey()]);
 
-    $authorHasAccess = false;
+    $access->allowed = false;
 
     expect(BuildUserInboxNotesAction::run($author))->toBeEmpty();
 });
+
+function noteModelKey(Model $model): int|string
+{
+    $key = $model->getKey();
+
+    if (! is_int($key) && ! is_string($key)) {
+        throw new LogicException('Expected an integer or string model key.');
+    }
+
+    return $key;
+}
