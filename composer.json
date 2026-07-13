@@ -14,7 +14,7 @@
     "license": "proprietary",
     "require": {
         "php": "^8.4",
-        "capell-app/admin": "^1.0"
+        "capell-app/admin": "^4.0"
     },
     "autoload": {
         "psr-4": {
