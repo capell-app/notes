@@ -4,7 +4,7 @@
 
 ## What This Plugin Adds
 
-Notes is an **Available**, **Schema-owning** Capell package in the **Capell Collaboration** product group. It ships as `capell-app/notes` and extends these surfaces: admin.
+Notes is an **Available**, **Schema-owning** Capell package in the **Capell Engagement & CRM** product group. It ships as `capell-app/notes` and extends these surfaces: admin.
 
 Add private, assignable notes and @mentions to any Capell admin record so editors can leave context, hand off work, and never lose track of what needs attention.
 
@@ -14,7 +14,7 @@ Status details:
 
 - Status: Available
 - Tier: premium
-- Bundle: collaboration
+- Bundle: engagement-crm
 - Composer package: `capell-app/notes`
 - Namespace: `Capell\Notes`
 - Theme key: not applicable
