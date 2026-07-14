@@ -1,0 +1,39 @@
+{
+    "whatThisPluginAdds": {
+        "text": "Notes adds private record notes with assignments, mentions, reminders, completion state, and an inbox for work needing attention.",
+        "evidence": [
+            "src/Actions/CreateNoteAction.php",
+            "src/Actions/AssignNoteUsersAction.php",
+            "src/Actions/MentionNoteUsersAction.php",
+            "src/Actions/UpsertNoteReminderAction.php"
+        ]
+    },
+    "surfaceOutcome": {
+        "text": "Admin users can add a note from supported records, assign colleagues, mention people, set reminders, and work through their Notes inbox.",
+        "evidence": [
+            "src/Filament/Extenders/Page/CreateNoteResourceHeaderActionExtender.php",
+            "src/Filament/Pages/NotesInboxPage.php",
+            "tests/Feature/Filament/NotesInboxPageTest.php",
+            "tests/Unit/Filament/CreateNoteResourceHeaderActionExtenderTest.php"
+        ]
+    },
+    "whyItMatters": {
+        "developers": {
+            "text": "Note creation, visibility, assignment, reminders, and notifications are split into Actions behind a reusable Notes manager.",
+            "evidence": [
+                "src/Support/NotesManager.php",
+                "src/Actions/CanViewNoteAction.php",
+                "src/Actions/SendDueNoteReminderNotificationsAction.php",
+                "tests/Integration/Actions/CreateNoteActionTest.php"
+            ]
+        },
+        "teams": {
+            "text": "Editors can coordinate follow-up beside the record being discussed without exposing internal notes on the public site.",
+            "evidence": [
+                "docs/overview.admin.md",
+                "src/Actions/BuildSubjectNotesAction.php",
+                "tests/Integration/Actions/NoteAssignmentActionTest.php"
+            ]
+        }
+    }
+}
