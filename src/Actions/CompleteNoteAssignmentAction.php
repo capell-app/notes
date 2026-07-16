@@ -7,10 +7,12 @@ namespace Capell\Notes\Actions;
 use Capell\Notes\Models\Note;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Gate;
+use Lorisleiva\Actions\Concerns\AsFake;
 use Lorisleiva\Actions\Concerns\AsObject;
 
 class CompleteNoteAssignmentAction
 {
+    use AsFake;
     use AsObject;
 
     public function handle(Note $note, Model $assignee): void

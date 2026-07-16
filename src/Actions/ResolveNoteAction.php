@@ -8,10 +8,12 @@ use Capell\Notes\Enums\NoteStatus;
 use Capell\Notes\Models\Note;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Gate;
+use Lorisleiva\Actions\Concerns\AsFake;
 use Lorisleiva\Actions\Concerns\AsObject;
 
 class ResolveNoteAction
 {
+    use AsFake;
     use AsObject;
 
     public function handle(Note $note, Model $actor): Note

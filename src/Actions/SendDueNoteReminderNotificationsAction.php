@@ -11,6 +11,7 @@ use Capell\Notes\Notifications\NoteAttentionNotification;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Lorisleiva\Actions\Concerns\AsFake;
 use Lorisleiva\Actions\Concerns\AsObject;
 
 /**
@@ -18,6 +19,7 @@ use Lorisleiva\Actions\Concerns\AsObject;
  */
 final class SendDueNoteReminderNotificationsAction
 {
+    use AsFake;
     use AsObject;
 
     public function handle(?CarbonImmutable $now = null, int $limit = 100): int

@@ -8,6 +8,7 @@ use Capell\Notes\Models\Note;
 use Capell\Notes\Models\NoteMention;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Gate;
+use Lorisleiva\Actions\Concerns\AsFake;
 use Lorisleiva\Actions\Concerns\AsObject;
 
 /**
@@ -15,6 +16,7 @@ use Lorisleiva\Actions\Concerns\AsObject;
  */
 final class MarkNoteMentionsReadAction
 {
+    use AsFake;
     use AsObject;
 
     /**

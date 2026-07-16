@@ -10,6 +10,7 @@ use Capell\Notes\Models\NoteAssignment;
 use Capell\Notes\Models\NoteMention;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Gate;
+use Lorisleiva\Actions\Concerns\AsFake;
 use Lorisleiva\Actions\Concerns\AsObject;
 
 /**
@@ -17,6 +18,7 @@ use Lorisleiva\Actions\Concerns\AsObject;
  */
 final class CanViewNoteAction
 {
+    use AsFake;
     use AsObject;
 
     public function handle(Note $note, Model $user): bool

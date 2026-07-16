@@ -10,6 +10,7 @@ use Capell\Notes\Models\NoteMention;
 use Capell\Notes\Models\NoteReminder;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Lorisleiva\Actions\Concerns\AsFake;
 use Lorisleiva\Actions\Concerns\AsObject;
 
 /**
@@ -17,6 +18,7 @@ use Lorisleiva\Actions\Concerns\AsObject;
  */
 final class BuildUserAttentionCountsAction
 {
+    use AsFake;
     use AsObject;
 
     public function handle(Model $user): UserAttentionCountData

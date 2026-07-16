@@ -8,6 +8,7 @@ use Capell\Notes\Data\NoteReminderData;
 use Capell\Notes\Models\Note;
 use Capell\Notes\Models\NoteReminder;
 use Carbon\CarbonImmutable;
+use Lorisleiva\Actions\Concerns\AsFake;
 use Lorisleiva\Actions\Concerns\AsObject;
 
 /**
@@ -15,6 +16,7 @@ use Lorisleiva\Actions\Concerns\AsObject;
  */
 final class UpsertNoteReminderAction
 {
+    use AsFake;
     use AsObject;
 
     public function handle(Note $note, ?NoteReminderData $data): ?NoteReminder

@@ -6,6 +6,7 @@ namespace Capell\Notes\Actions;
 
 use Capell\Notes\Models\Note;
 use Illuminate\Database\Eloquent\Model;
+use Lorisleiva\Actions\Concerns\AsFake;
 use Lorisleiva\Actions\Concerns\AsObject;
 
 /**
@@ -13,6 +14,7 @@ use Lorisleiva\Actions\Concerns\AsObject;
  */
 final class PruneNotesForDeletedSubjectAction
 {
+    use AsFake;
     use AsObject;
 
     public function handle(Model $subject): void

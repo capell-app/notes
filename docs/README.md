@@ -8,9 +8,10 @@ Start at the [package README](../README.md) when deciding whether to install thi
 
 | Doc                     | Use it for                                                                         |
 | ----------------------- | ---------------------------------------------------------------------------------- |
+| [Admin Guide](admin-guide.md) | Add, assign, and manage contextual record notes.                            |
 | [Overview](overview.md) | Package boundary, runtime surfaces, install notes, and first troubleshooting path. |
 
-## Read Next
+## Next
 
 | Related doc                                                   | Why                                                   |
 | ------------------------------------------------------------- | ----------------------------------------------------- |

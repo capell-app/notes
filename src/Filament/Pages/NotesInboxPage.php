@@ -66,7 +66,7 @@ final class NotesInboxPage extends Page
             'mentions' => $counts->mentions,
         ];
 
-        (new MarkNoteMentionsReadAction)->handle($user, $this->inboxNotes());
+        MarkNoteMentionsReadAction::run($user, $this->inboxNotes());
     }
 
     #[Override]
@@ -106,7 +106,7 @@ final class NotesInboxPage extends Page
             return new Collection;
         }
 
-        return (new BuildUserInboxNotesAction)->handle(
+        return BuildUserInboxNotesAction::run(
             user: $user,
             status: $this->selectedStatus(),
         );
@@ -122,7 +122,7 @@ final class NotesInboxPage extends Page
         $user = $this->user();
 
         if ($user instanceof Model) {
-            (new MarkNoteMentionsReadAction)->handle($user, $this->inboxNotes());
+            MarkNoteMentionsReadAction::run($user, $this->inboxNotes());
         }
     }
 
@@ -135,7 +135,7 @@ final class NotesInboxPage extends Page
             return;
         }
 
-        (new ResolveNoteAction)->handle($note, $user);
+        ResolveNoteAction::run($note, $user);
         $this->forgetAttentionCounts();
     }
 
@@ -148,7 +148,7 @@ final class NotesInboxPage extends Page
             return;
         }
 
-        (new ReopenNoteAction)->handle($note, $user);
+        ReopenNoteAction::run($note, $user);
         $this->forgetAttentionCounts();
     }
 
@@ -161,7 +161,7 @@ final class NotesInboxPage extends Page
             return;
         }
 
-        (new CompleteNoteAssignmentAction)->handle($note, $user);
+        CompleteNoteAssignmentAction::run($note, $user);
         $this->forgetAttentionCounts();
     }
 

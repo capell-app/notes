@@ -7,6 +7,7 @@ namespace Capell\Notes\Actions;
 use Capell\Notes\Models\Note;
 use Capell\Notes\Notifications\NoteAttentionNotification;
 use Illuminate\Database\Eloquent\Model;
+use Lorisleiva\Actions\Concerns\AsFake;
 use Lorisleiva\Actions\Concerns\AsObject;
 
 /**
@@ -14,6 +15,7 @@ use Lorisleiva\Actions\Concerns\AsObject;
  */
 final class SendNoteAssignmentNotificationsAction
 {
+    use AsFake;
     use AsObject;
 
     /**

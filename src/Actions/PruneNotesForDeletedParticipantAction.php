@@ -9,6 +9,7 @@ use Capell\Notes\Models\NoteAssignment;
 use Capell\Notes\Models\NoteMention;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
+use Lorisleiva\Actions\Concerns\AsFake;
 use Lorisleiva\Actions\Concerns\AsObject;
 
 /**
@@ -16,6 +17,7 @@ use Lorisleiva\Actions\Concerns\AsObject;
  */
 final class PruneNotesForDeletedParticipantAction
 {
+    use AsFake;
     use AsObject;
 
     public function handle(Model $participant): void
