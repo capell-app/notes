@@ -57,7 +57,9 @@ it('rolls back standalone assignment batches when a later assignee fails', funct
         }
     };
 
-    expect(fn (): mixed => AssignNoteUsersAction::run($note, [$assignee, $failingParticipant], assignedBy: $assignee))
+    expect(function () use ($note, $assignee, $failingParticipant): void {
+        AssignNoteUsersAction::run($note, [$assignee, $failingParticipant], assignedBy: $assignee);
+    })
         ->toThrow(RuntimeException::class, 'Participant failed');
 
     expect($note->assignments()->count())->toBe(0);
@@ -76,7 +78,9 @@ it('rolls back standalone mention batches when a later mention fails', function 
         }
     };
 
-    expect(fn (): mixed => MentionNoteUsersAction::run($note, [$mentioned, $failingParticipant], mentionedBy: $mentioned))
+    expect(function () use ($note, $mentioned, $failingParticipant): void {
+        MentionNoteUsersAction::run($note, [$mentioned, $failingParticipant], mentionedBy: $mentioned);
+    })
         ->toThrow(RuntimeException::class, 'Participant failed');
 
     expect($note->mentions()->count())->toBe(0);

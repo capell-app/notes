@@ -99,7 +99,9 @@ it('does not expose cross-tenant participants or notes through tampered IDs', fu
     ]);
 
     expect(array_map(noteModelKey(...), $participants))->toBe([$authorizedParticipant->getKey()])
-        ->and(fn (): mixed => AssignNoteUsersAction::run($note, [$crossTenantParticipant], assignedBy: $subject))->toThrow(AuthorizationException::class)
+        ->and(function () use ($note, $crossTenantParticipant, $subject): void {
+            AssignNoteUsersAction::run($note, [$crossTenantParticipant], assignedBy: $subject);
+        })->toThrow(AuthorizationException::class)
         ->and(BuildUserInboxNotesAction::run($crossTenantParticipant))->toBeEmpty();
 });
 

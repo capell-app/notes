@@ -6,10 +6,10 @@ Start at the [package README](../README.md) when deciding whether to install thi
 
 ## Guides
 
-| Doc                     | Use it for                                                                         |
-| ----------------------- | ---------------------------------------------------------------------------------- |
-| [Admin Guide](admin-guide.md) | Add, assign, and manage contextual record notes.                            |
-| [Overview](overview.md) | Package boundary, runtime surfaces, install notes, and first troubleshooting path. |
+| Doc                           | Use it for                                                                         |
+| ----------------------------- | ---------------------------------------------------------------------------------- |
+| [Admin Guide](admin-guide.md) | Add, assign, and manage contextual record notes.                                   |
+| [Overview](overview.md)       | Package boundary, runtime surfaces, install notes, and first troubleshooting path. |
 
 ## Next
 

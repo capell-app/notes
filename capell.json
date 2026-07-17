@@ -112,12 +112,10 @@
             "throttledRoutes": []
         },
         "sensitiveData": {
-            "encryptedFields": ["notes.body"],
+            "encryptedFields": ["Capell\\Notes\\Models\\Note::$body"],
             "hashedTokenFields": [],
             "redactedOutputClasses": [],
-            "plaintextJustifications": [
-                "Queued attention notifications contain only an opaque note identifier and notification type."
-            ]
+            "plaintextJustifications": []
         },
         "publicOutput": {
             "cacheSafe": true,

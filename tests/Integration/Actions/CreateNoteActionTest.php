@@ -30,19 +30,35 @@ it('creates a note attached to a record with assignments and mentions', function
         assignees: [$assignee],
         mentions: [$mentioned],
     ));
+    $note->refresh();
+    $noteSubject = $note->subject;
+    $noteAuthor = $note->author;
+    $assignment = $note->assignments()->firstOrFail();
+    $mention = $note->mentions()->firstOrFail();
+    $assignmentAssignee = $assignment->assignee;
+    $assignmentAuthor = $assignment->assignedBy;
+    $mentionedUser = $mention->mentioned;
+    $mentionAuthor = $mention->mentionedBy;
 
-    expect($note->refresh()->subject->is($subject))->toBeTrue()
-        ->and($note->author->is($author))->toBeTrue()
+    throw_unless($noteSubject instanceof User, RuntimeException::class, 'Expected the note subject to be a user.');
+    throw_unless($noteAuthor instanceof User, RuntimeException::class, 'Expected the note author to be a user.');
+    throw_unless($assignmentAssignee instanceof User, RuntimeException::class, 'Expected the note assignee to be a user.');
+    throw_unless($assignmentAuthor instanceof User, RuntimeException::class, 'Expected the assignment author to be a user.');
+    throw_unless($mentionedUser instanceof User, RuntimeException::class, 'Expected the mentioned participant to be a user.');
+    throw_unless($mentionAuthor instanceof User, RuntimeException::class, 'Expected the mention author to be a user.');
+
+    expect($noteSubject->is($subject))->toBeTrue()
+        ->and($noteAuthor->is($author))->toBeTrue()
         ->and($note->body)->toBe('Update this content before campaign launch.')
         ->and($note->status)->toBe(NoteStatus::Open)
         ->and($note->visibility)->toBe(NoteVisibility::RecordEditors)
         ->and($note->resolved_at)->toBeNull()
         ->and($note->assignments)->toHaveCount(1)
-        ->and($note->assignments->first()->assignee->is($assignee))->toBeTrue()
-        ->and($note->assignments->first()->assignedBy->is($author))->toBeTrue()
+        ->and($assignmentAssignee->is($assignee))->toBeTrue()
+        ->and($assignmentAuthor->is($author))->toBeTrue()
         ->and($note->mentions)->toHaveCount(1)
-        ->and($note->mentions->first()->mentioned->is($mentioned))->toBeTrue()
-        ->and($note->mentions->first()->mentionedBy->is($author))->toBeTrue();
+        ->and($mentionedUser->is($mentioned))->toBeTrue()
+        ->and($mentionAuthor->is($author))->toBeTrue();
 });
 
 it('rejects blank note bodies', function (): void {
