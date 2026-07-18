@@ -48,6 +48,8 @@ final class NotesServiceProvider extends AbstractPackageServiceProvider
 
     public function registeringPackage(): void
     {
+        parent::registeringPackage();
+
         Gate::policy(Note::class, NotePolicy::class);
         $this->app->singleton(NotesManager::class);
         $this->app->scoped(UserAttentionCountsCache::class);
