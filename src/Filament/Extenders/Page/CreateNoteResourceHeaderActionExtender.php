@@ -119,7 +119,7 @@ final class CreateNoteResourceHeaderActionExtender implements ResourceHeaderActi
         }
 
         return new NoteReminderData(
-            dueAt: CarbonImmutable::parse($this->stringValue($data['reminder_due_at'] ?? null)),
+            dueAt: CarbonImmutable::parse($this->stringValue($data['reminder_due_at'])),
             recurrence: NoteReminderRecurrence::tryFrom($this->stringValue($data['reminder_recurrence'] ?? null)) ?? NoteReminderRecurrence::None,
             timezone: $this->stringValue($data['reminder_timezone'] ?? config('app.timezone', 'UTC'), 'UTC'),
         );
