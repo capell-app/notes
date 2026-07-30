@@ -5,8 +5,8 @@
 @endphp
 
 <x-filament-panels::page>
-    @php ($counts = $this->counts())
-    @php ($notes = $this->inboxNotes())
+    @php($counts = $this->counts())
+    @php($notes = $this->inboxNotes())
 
     <div
         data-capell-notes-inbox
@@ -110,11 +110,7 @@
                             </span>
                         </div>
 
-                        <p
-                            class="text-sm leading-6 text-gray-950 dark:text-white"
-                        >
-                            {{ $this->excerpt($note) }}
-                        </p>
+                        <p class="text-sm leading-6 text-gray-950 dark:text-white">{{ $this->excerpt($note) }}</p>
 
                         <div
                             class="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-gray-500 dark:text-gray-400"
