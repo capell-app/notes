@@ -78,6 +78,26 @@
             "useCase": "An administrator reviews seeded assigned and mentioned notes with resolve, reopen, and complete-assignment controls.",
             "screenshotPath": "packages/notes/docs/screenshots/notes-attention-counts.png",
             "darkScreenshotPath": "packages/notes/docs/screenshots/notes-attention-counts-dark.png"
+        },
+        {
+            "id": "notes-admin-sidebar-menu-open",
+            "title": "Notes inbox page with admin sidebar menu open.",
+            "package": "notes",
+            "surface": "admin",
+            "targetType": "admin-surface",
+            "target": "NotesInboxPage",
+            "url": "/notes",
+            "waitFor": "[data-capell-notes-inbox]",
+            "required": false,
+            "notes": "Shows the main inbox at /admin/notes. Capture this same admin surface with the fully collapsible sidebar opened.",
+            "useCase": "An administrator reviews assigned notes, mentions, and lifecycle actions from the inbox.",
+            "screenshotPath": "packages/notes/docs/screenshots/notes-admin-sidebar-menu-open.png",
+            "interactions": [
+                {
+                    "type": "click",
+                    "selector": ".fi-topbar-open-collapse-sidebar-btn"
+                }
+            ]
         }
     ]
 }
