@@ -5,11 +5,11 @@
     "displayName": "Notes",
     "kind": "package",
     "capellApiVersion": "^1.0",
-    "version": "1.x-dev",
+    "version": "1.0.0",
     "description": "Add private, assignable notes and @mentions to any Capell admin record so editors can leave context, hand off work, and never lose track of what needs attention.",
     "product": {
         "group": "Capell Engagement & CRM",
-        "tier": "premium",
+        "tier": "free",
         "bundle": "engagement-crm"
     },
     "namespace": "Capell\\Notes",
@@ -160,10 +160,10 @@
         }
     ],
     "commercial": {
-        "proposedLicense": "paid",
+        "proposedLicense": "free",
         "requestedCertification": "first-party",
-        "supportPolicy": "priority",
-        "privateDocsRequested": true
+        "supportPolicy": "capell-first-party",
+        "privateDocsRequested": false
     },
     "marketplace": {
         "summary": "Add private, assignable notes and @mentions to any Capell admin record so editors can leave context, hand off work, and never lose track of what needs attention.",

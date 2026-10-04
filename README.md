@@ -10,12 +10,10 @@ Notes adds private record notes with assignments, mentions, reminders, completio
 
 Admin users can add a note from supported records, assign colleagues, mention people, set reminders, and work through their Notes inbox.
 
-Evidence: [`src/Actions/CreateNoteAction.php`](src/Actions/CreateNoteAction.php), [`src/Actions/AssignNoteUsersAction.php`](src/Actions/AssignNoteUsersAction.php), [`src/Actions/MentionNoteUsersAction.php`](src/Actions/MentionNoteUsersAction.php), [`src/Actions/UpsertNoteReminderAction.php`](src/Actions/UpsertNoteReminderAction.php), [`src/Filament/Extenders/Page/CreateNoteResourceHeaderActionExtender.php`](src/Filament/Extenders/Page/CreateNoteResourceHeaderActionExtender.php), [`src/Filament/Pages/NotesInboxPage.php`](src/Filament/Pages/NotesInboxPage.php), [`tests/Feature/Filament/NotesInboxPageTest.php`](tests/Feature/Filament/NotesInboxPageTest.php), [`tests/Unit/Filament/CreateNoteResourceHeaderActionExtenderTest.php`](tests/Unit/Filament/CreateNoteResourceHeaderActionExtenderTest.php).
-
 Status details:
 
 - Status: Available
-- Tier: premium
+- Tier: free
 - Bundle: engagement-crm
 - Composer package: `capell-app/notes`
 - Namespace: `Capell\Notes`
@@ -26,8 +24,6 @@ Status details:
 **For developers:** Note creation, visibility, assignment, reminders, and notifications are split into Actions behind a reusable Notes manager.
 
 **For teams:** Editors can coordinate follow-up beside the record being discussed without exposing internal notes on the public site.
-
-Evidence: [`src/Support/NotesManager.php`](src/Support/NotesManager.php), [`src/Actions/CanViewNoteAction.php`](src/Actions/CanViewNoteAction.php), [`src/Actions/SendDueNoteReminderNotificationsAction.php`](src/Actions/SendDueNoteReminderNotificationsAction.php), [`tests/Integration/Actions/CreateNoteActionTest.php`](tests/Integration/Actions/CreateNoteActionTest.php), [`docs/overview.admin.md`](docs/overview.admin.md), [`src/Actions/BuildSubjectNotesAction.php`](src/Actions/BuildSubjectNotesAction.php), [`tests/Integration/Actions/NoteAssignmentActionTest.php`](tests/Integration/Actions/NoteAssignmentActionTest.php).
 
 ## Screens And Workflow
 
@@ -87,6 +83,7 @@ Screenshot contract: `docs/screenshots.json`.
 - `CreateNoteAction`
 - `MarkNoteMentionsReadAction`
 - `MentionNoteUsersAction`
+- `PrepareEmptyNotesScreenshotInboxAction`
 - `PruneNotesForDeletedParticipantAction`
 - `PruneNotesForDeletedSubjectAction`
 - `ReopenNoteAction`
@@ -176,7 +173,7 @@ Screenshot contract: `docs/screenshots.json`.
 
 1. Install the package: `composer require capell-app/notes`.
 2. See it working: run `php artisan capell:notes-demo`.
-3. Open the package admin surface at `/notes` and confirm Notes is available.
+3. Open the package admin surface at `/admin/notes` and confirm Notes is available.
 
 ## Next Steps
 
@@ -190,6 +187,5 @@ Screenshot contract: `docs/screenshots.json`.
 - [Capell content language plan](../../docs/CONTENT_LANGUAGE_PLAN.md)
 - [Capell documentation design system](../../docs/DESIGN_SYSTEM.md)
 - [Capell and package ERD notes](../../docs/erd/capell-and-package-erds.md)
-- Focused tests: `vendor/bin/pest packages/notes/tests --configuration=phpunit.xml`.
 
 <!-- prettier-ignore-end -->
