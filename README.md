@@ -45,6 +45,7 @@ Screenshot contract: `docs/screenshots.json`.
 ### Service providers
 
 - `Capell\Notes\Providers\NotesServiceProvider`
+- `Capell\Notes\Providers\ConsoleServiceProvider`
 - `Capell\Notes\Providers\AdminServiceProvider`
 
 ### Config files

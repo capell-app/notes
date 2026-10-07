@@ -6,6 +6,7 @@ namespace Capell\Notes\Providers;
 
 use Capell\Admin\Facades\CapellAdmin;
 use Capell\Core\Facades\CapellCore;
+use Capell\Core\Support\Packages\RegistersInstalledRuntime;
 use Capell\Notes\Data\UserAttentionCountData;
 use Capell\Notes\Filament\Pages\NotesInboxPage;
 use Capell\Notes\Support\UserAttentionCountsCache;
@@ -17,22 +18,31 @@ use Override;
 
 class AdminServiceProvider extends ServiceProvider
 {
+    use RegistersInstalledRuntime;
+
+    private bool $installedRuntimeBooted = false;
+
+    private bool $userMenuItemRegistered = false;
+
     #[Override]
     public function register(): void
     {
-        // Installation state can still be unavailable during app booting.
-        // Register when Filament resolves panels, before it snapshots menu keys.
+        $this->registerInstalledRuntime(NotesServiceProvider::$packageName, 'admin');
+
         $this->app->beforeResolving(PanelRegistry::class, $this->registerUserMenuItem(...));
     }
 
-    public function boot(): void
+    public function boot(): void {}
+
+    protected function bootInstalledRuntime(): void
     {
-        if (! $this->isPackageInstalled()) {
+        if ($this->installedRuntimeBooted || ! $this->isPackageInstalled()) {
             return;
         }
 
         CapellAdmin::registerExtensionPage(NotesServiceProvider::$packageName, NotesInboxPage::class);
         $this->registerUserMenuItem();
+        $this->installedRuntimeBooted = true;
     }
 
     protected function isPackageInstalled(): bool
@@ -42,7 +52,7 @@ class AdminServiceProvider extends ServiceProvider
 
     private function registerUserMenuItem(): void
     {
-        if (! $this->isPackageInstalled()) {
+        if ($this->userMenuItemRegistered || ! $this->isPackageInstalled()) {
             return;
         }
 
@@ -55,6 +65,7 @@ class AdminServiceProvider extends ServiceProvider
             badgeColor: fn (): string => $this->attentionBadgeColor(),
             sort: 70,
         );
+        $this->userMenuItemRegistered = true;
     }
 
     private function attentionBadgeCount(): int

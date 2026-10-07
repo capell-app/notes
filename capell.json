@@ -20,8 +20,8 @@
         "conflicts": []
     },
     "providers": {
-        "metadata": [],
-        "install": [],
+        "metadata": ["Capell\\Notes\\Providers\\NotesServiceProvider"],
+        "install": ["Capell\\Notes\\Providers\\ConsoleServiceProvider"],
         "runtime": ["Capell\\Notes\\Providers\\NotesServiceProvider"],
         "admin": ["Capell\\Notes\\Providers\\AdminServiceProvider"],
         "frontend": []

@@ -1,0 +1,78 @@
+{
+    "version": 3,
+    "package": "notes",
+    "scenarios": {
+        "default": {
+            "source": {
+                "ref": "origin/main",
+                "commit": "646068b2d21e233ea517c342d62bc0eca1762192",
+                "providers": {
+                    "Providers/AdminServiceProvider.php": "8677c0553d022a5a037503f4df5812be8d900d5a87ece61677d72ff7f17f9b2b",
+                    "Providers/ConsoleServiceProvider.php": "0108d2d2ec7ff02d41211efeb7d7b16d35637c7af765dde10952e8e92688b19d",
+                    "Providers/NotesServiceProvider.php": "375730ed0bbd6453bfa18140f6761b9c4c72389469b04c76e56fb5deeacf6ff8"
+                }
+            },
+            "disabledContributions": [],
+            "surfaces": {
+                "routes": [],
+                "livewire": [],
+                "filament": [
+                    "page:Capell\\Notes\\Filament\\Pages\\NotesInboxPage"
+                ],
+                "listeners": [
+                    "eloquent.deleting: Capell\\Core\\Models\\Page|static Capell\\Notes\\Support\\NotesManager(Illuminate\\Database\\Eloquent\\Model $subject):void",
+                    "eloquent.deleting: Capell\\Notes\\Models\\Note|Capell\\Notes\\Models\\Note(Capell\\Notes\\Models\\Note $note):void",
+                    "eloquent.deleting: Capell\\Tests\\Fixtures\\Models\\User|static Capell\\Notes\\Support\\NotesManager(Illuminate\\Database\\Eloquent\\Model $participant):void"
+                ],
+                "gates": [],
+                "policies": [
+                    "Capell\\Notes\\Models\\Note=Capell\\Notes\\Policies\\NotePolicy"
+                ],
+                "commands": [
+                    "capell:notes-demo",
+                    "capell:notes:send-due-reminders"
+                ],
+                "view-namespaces": ["capell-notes"],
+                "config-keys": [
+                    "capell-notes",
+                    "capell-notes.notifications",
+                    "capell-notes.notifications.channels",
+                    "capell-notes.notifications.channels.0",
+                    "capell-notes.reminders",
+                    "capell-notes.reminders.schedule_enabled"
+                ],
+                "migrations": [
+                    "2026_05_10_190862_01_create_notes_tables",
+                    "2026_07_10_000002_encrypt_note_bodies"
+                ]
+            },
+            "uninstalledSurfaces": {
+                "routes": [],
+                "livewire": [],
+                "filament": [],
+                "listeners": [],
+                "gates": [],
+                "policies": [
+                    "Capell\\Notes\\Models\\Note=Capell\\Notes\\Policies\\NotePolicy"
+                ],
+                "commands": [
+                    "capell:notes-demo",
+                    "capell:notes:send-due-reminders"
+                ],
+                "view-namespaces": ["capell-notes"],
+                "config-keys": [
+                    "capell-notes",
+                    "capell-notes.notifications",
+                    "capell-notes.notifications.channels",
+                    "capell-notes.notifications.channels.0",
+                    "capell-notes.reminders",
+                    "capell-notes.reminders.schedule_enabled"
+                ],
+                "migrations": [
+                    "2026_05_10_190862_01_create_notes_tables",
+                    "2026_07_10_000002_encrypt_note_bodies"
+                ]
+            }
+        }
+    }
+}

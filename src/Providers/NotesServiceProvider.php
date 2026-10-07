@@ -31,6 +31,7 @@ final class NotesServiceProvider extends AbstractPackageServiceProvider
 
     public static string $packageName = 'capell-app/notes';
 
+    #[Override]
     public function configurePackage(Package $package): void
     {
         $package
@@ -46,8 +47,11 @@ final class NotesServiceProvider extends AbstractPackageServiceProvider
             ]);
     }
 
+    #[Override]
     public function registeringPackage(): void
     {
+        $this->app->register(ConsoleServiceProvider::class);
+
         parent::registeringPackage();
 
         Gate::policy(Note::class, NotePolicy::class);
@@ -55,34 +59,17 @@ final class NotesServiceProvider extends AbstractPackageServiceProvider
         $this->app->scoped(UserAttentionCountsCache::class);
         $this->app->register(AdminServiceProvider::class);
 
-        $this->app->booted(function (): void {
-            if (! $this->isPackageInstalled()) {
-                return;
-            }
-
-            $this->app->tag([CreateNoteResourceHeaderActionExtender::class], ResourceHeaderActionExtender::TAG);
-        });
-    }
-
-    public function packageRegistered(): void
-    {
-        $this->app->booted(function (): void {
-            if (! $this->isPackageInstalled()) {
-                return;
-            }
-
-            $this->registerModels();
-            $this->registerDefaultSubjects();
-            $this->registerDefaultParticipants();
-            $this->registerProtectedTables();
-            $this->registerReminderSchedule();
-        });
     }
 
     #[Override]
-    protected function isPackageInstalled(): bool
+    protected function bootInstalledRuntime(): void
     {
-        return CapellCore::isPackageInstalled(self::$packageName);
+        $this->app->tag([CreateNoteResourceHeaderActionExtender::class], ResourceHeaderActionExtender::TAG);
+        $this->registerModels();
+        $this->registerDefaultSubjects();
+        $this->registerDefaultParticipants();
+        $this->registerProtectedTables();
+        $this->registerReminderSchedule();
     }
 
     private function registerModels(): self
