@@ -15,7 +15,7 @@
     "namespace": "Capell\\Notes",
     "surfaces": ["admin"],
     "dependencies": {
-        "requires": ["capell-app/admin"],
+        "requires": ["capell-app/admin", "capell-app/core"],
         "supports": [],
         "conflicts": []
     },

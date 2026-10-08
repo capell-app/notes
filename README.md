@@ -143,7 +143,7 @@ Screenshot contract: `docs/screenshots.json`.
 
 ## Install Impact
 
-- Required packages: `capell-app/admin`.
+- Required packages: `capell-app/admin`, `capell-app/core`.
 - Admin navigation: declares `admin-page: NotesAdminPageContribution`; each Filament page or resource controls its own navigation visibility.
 - Admin/editor extensions: `admin-action-extender: NotesAdminActionExtenderContribution`.
 - Permissions: `View:Note`, `Resolve:Note`, `Reopen:Note`, `CompleteAssignment:Note`; access also governed by package policies: `NotePolicy`.
@@ -157,7 +157,7 @@ Screenshot contract: `docs/screenshots.json`.
 
 ## Common Pitfalls
 
-- Keep required Capell packages on compatible v4 releases: `capell-app/admin`.
+- Keep required Capell packages on compatible v4 releases: `capell-app/admin`, `capell-app/core`.
 - Run migrations before opening package resources or public routes.
 - Review package configuration before production-like verification: `config/capell-notes.php`.
 - Keep the host Laravel scheduler running so package-registered schedules can execute: `capell:notes:send-due-reminders (everyFiveMinutes; package registered)`.
