@@ -167,7 +167,7 @@
     },
     "marketplace": {
         "summary": "Add private, assignable notes and @mentions to any Capell admin record so editors can leave context, hand off work, and never lose track of what needs attention.",
-        "description": "Notes turns Capell admin records into a collaboration surface: leave a contextual note on a page (or any opted-in record), assign it to teammates, and mention people who need to weigh in. A per-user inbox and user-menu badge surface what's assigned to you and where you've been mentioned, so nothing slips between editors. Notes are strictly admin-internal with per-note visibility (record-editors or private) and are never exposed on the public site. Built the Capell way — domain logic in Actions, polymorphic attachment to any registered subject — so it extends cleanly into your own resources.",
+        "description": "Notes turns Capell admin records into a collaboration surface: leave a contextual note on a page (or any opted-in record), assign it to teammates, and mention people who need to weigh in. A per-user inbox and user-menu badge surface what's assigned to you and where you've been mentioned, so nothing slips between editors. Notes are strictly admin-internal with per-note visibility (record-editors or private) and are never exposed on the public site. Built the Capell way, with domain logic in Actions and polymorphic attachment to any registered subject, it extends cleanly into your own resources.",
         "screenshots": [
             {
                 "path": "docs/assets/marketplace/extension-card.jpg",

@@ -6,6 +6,7 @@ use BezhanSalleh\FilamentShield\Support\Utils;
 use Capell\Admin\Facades\CapellAdmin;
 use Capell\Core\Facades\CapellCore;
 use Capell\Core\Models\Page;
+use Capell\HtmlCache\Enums\HtmlCachePermission;
 use Capell\Notes\Actions\BuildUserAttentionCountsAction;
 use Capell\Notes\Filament\Pages\NotesInboxPage;
 use Capell\Tests\Fixtures\Models\User;
@@ -17,11 +18,13 @@ use Illuminate\Support\Facades\Gate;
 use Illuminate\Testing\TestResponse;
 use Sinnbeck\DomAssertions\Asserts\AssertElement;
 use Sinnbeck\DomAssertions\Asserts\BaseAssert;
+use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Process\Process;
 
 beforeEach(function (): void {
+    Permission::findOrCreate(HtmlCachePermission::ViewCachedModelUrls->value, 'web');
     Gate::before(static fn (): bool => true);
     Role::findOrCreate(Utils::getPanelUserRoleName(), 'web');
     Filament::setCurrentPanel(Filament::getPanel('admin'));

@@ -87,7 +87,8 @@
                     "args": ["--force"]
                 },
                 "tokenPlaceholder": "{attempt-token}"
-            }
+            },
+            "expectedState": "empty"
         },
         {
             "id": "notes-attention-counts",

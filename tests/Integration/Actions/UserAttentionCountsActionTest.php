@@ -13,6 +13,10 @@ use Illuminate\Support\Facades\Gate;
 
 require_once dirname(__DIR__, 2) . '/NotesTestCase.php';
 
+beforeEach(function (): void {
+    $this->freezeTime();
+});
+
 it('counts assigned notes, mentions, and active reminders for the user', function (): void {
     Gate::before(static fn (): bool => true);
 
