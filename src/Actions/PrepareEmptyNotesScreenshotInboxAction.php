@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Capell\Notes\Actions;
 
 use Capell\Notes\Models\Note;
+use Capell\ScreenshotFixtures\FixtureState;
 use Illuminate\Support\Facades\DB;
 use RuntimeException;
 
@@ -19,10 +20,15 @@ final class PrepareEmptyNotesScreenshotInboxAction
                 && in_array(getenv('CAPELL_SCREENSHOT_FIXTURE'), ['1', 'true', 'record-state'], true)
                 && is_string($configuredPath)
                 && realpath($configuredPath) !== false
-                && realpath($configuredPath) === realpath(base_path()),
+                && realpath($configuredPath) === realpath(base_path())
+                && (realpath(base_path()) === realpath(dirname(__DIR__, 4) . '/vendor/orchestra/testbench-core/laravel')
+                    || str_starts_with((string) realpath(base_path()), dirname(__DIR__, 4) . '/tmp/testbench-skeletons/')),
             RuntimeException::class,
             'Empty Notes inbox preparation requires the explicit disposable local screenshot environment.',
         );
+
+        require_once dirname(__DIR__, 4) . '/scripts/screenshots/FixtureState.php';
+        FixtureState::boot();
 
         DB::transaction(static function (): void {
             $notes = Note::query()->get();

@@ -26,6 +26,8 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 
 $root = dirname(__DIR__, 4);
+$argv ??= [];
+
 require $root . '/vendor/autoload.php';
 
 // Testbench disables getenv loading. Populate its immutable environment before
