@@ -72,6 +72,6 @@ class AssignNoteUsersAction
             );
         });
 
-        SendNoteAssignmentNotificationsAction::run($note, $assignees, $assignedBy);
+        DB::afterCommit(fn () => SendNoteAssignmentNotificationsAction::run($note, $assignees, $assignedBy));
     }
 }

@@ -56,6 +56,7 @@ Screenshot contract: `docs/screenshots.json`.
 
 - `packages/notes/database/migrations/2026_05_10_190862_01_create_notes_tables.php`
 - `packages/notes/database/migrations/2026_07_10_000002_encrypt_note_bodies.php`
+- `packages/notes/database/migrations/2026_10_22_000001_add_note_reminder_schedule_state.php`
 
 ### Models
 
@@ -67,6 +68,7 @@ Screenshot contract: `docs/screenshots.json`.
 ### Filament classes
 
 - `CreateNoteResourceHeaderActionExtender`
+- `ReminderDateTimePicker`
 - `NotesInboxPage`
 
 ### Policies
@@ -79,6 +81,7 @@ Screenshot contract: `docs/screenshots.json`.
 - `BuildSubjectNotesAction`
 - `BuildUserAttentionCountsAction`
 - `BuildUserInboxNotesAction`
+- `CalculateNextNoteReminderDueAction`
 - `CanViewNoteAction`
 - `CompleteNoteAssignmentAction`
 - `CreateNoteAction`
@@ -90,6 +93,7 @@ Screenshot contract: `docs/screenshots.json`.
 - `ReopenNoteAction`
 - `ResolveNoteAction`
 - `ResolveNoteParticipantsAction`
+- `ResolveNoteReminderRecipientsAction`
 - `SendDueNoteReminderNotificationsAction`
 - `SendNoteAssignmentNotificationsAction`
 - `SendNoteMentionNotificationsAction`
@@ -137,7 +141,7 @@ Screenshot contract: `docs/screenshots.json`.
 
 - Required tables: `notes`, `note_assignments`, `note_mentions`, `note_reminders`.
 - Models: `Note`, `NoteAssignment`, `NoteMention`, `NoteReminder`.
-- Migration files: `2026_05_10_190862_01_create_notes_tables.php`, `2026_07_10_000002_encrypt_note_bodies.php`.
+- Migration files: `2026_05_10_190862_01_create_notes_tables.php`, `2026_07_10_000002_encrypt_note_bodies.php`, `2026_10_22_000001_add_note_reminder_schedule_state.php`.
 - Migration impact: run host migrations through the package install flow before opening package surfaces.
 - Deletion/retention behaviour: migrations declare cascade-on-delete relationships; no timed pruning or retention schedule is declared in `capell.json`.
 
@@ -175,6 +179,12 @@ Screenshot contract: `docs/screenshots.json`.
 1. Install the package: `composer require capell-app/notes`.
 2. See it working: run `php artisan capell:notes-demo`.
 3. Open the package admin surface at `/admin/notes` and confirm Notes is available.
+
+## Upgrading
+
+No manual steps between minor versions.
+
+Read [CHANGELOG.md](CHANGELOG.md) before upgrading.
 
 ## Next Steps
 

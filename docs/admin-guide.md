@@ -18,22 +18,22 @@ This guide is for teams who leave private notes inside the admin: editors flaggi
 
 ### How to assign a note and mention people
 
-1. While adding or editing a note, use **Assign to** to give it an owner. Assigned people see it in their inbox and are notified.
+1. While adding a note, use **Assign to** to give it an owner. Assigned people see it in their inbox and are notified.
 2. Use **Mention** to flag people who should be aware of the note but do not own it. Mentioned people are notified too.
 3. Save the note. The people you assigned or mentioned will find it waiting in their **Notes** inbox.
 
 ### How to set a reminder on a note
 
-1. While adding or editing a note, set **Reminder due** to the date and time you want to be nudged.
+1. Under **Assign to**, select at least one editor with record access. Select yourself for a personal reminder. Set **Reminder due** to the date and time in the chosen **Reminder timezone**.
 2. To make it repeat, choose a value under **Reminder repeats** such as **Daily**, **Weekly**, **Monthly**, or **Yearly**. Leave it on **None** for a one-off reminder.
-3. If the time should follow a particular zone, set **Reminder timezone**.
-4. Save the note. When the reminder is due, the note surfaces for follow-up.
+3. Enter a valid IANA zone, such as `Europe/London`, under **Reminder timezone**. The inbox shows the next local time and UTC instant. Delayed scheduler runs preserve the intended cadence.
+4. Save the note. Active assignees with record access receive the reminder when it is due. If it is marked unsent, review it in **Notes** and ask your administrator to restore access or update the assignment and reminder through the integration that created it. The inbox has no assignment or reminder editor; no recipient-less occurrence is counted as notified.
 
 ### How to find notes that need your attention
 
 1. Open **Notes** from the main navigation, under the **Extensions** group. It is also available from your account menu in the top corner, where a badge shows how many notes need you.
 2. The inbox gathers notes that involve you: those **Assigned to me**, your **Mentions**, items **Due today**, and anything **Overdue**.
-3. Use the **Status** filter at the top to switch between **All**, **Open**, and **Resolved** notes.
+3. Use the **Status** filter at the top to switch between **All**, **Open**, and **Resolved** notes, or select an attention filter. Use **Previous** and **Next** to reach older notes; full instructions appear on each note.
 
 ![An administrator opens the notes item in the account menu, with a badge showing notes that need attention.](screenshots/notes-user-menu-badge.png)
 
@@ -42,7 +42,7 @@ This guide is for teams who leave private notes inside the admin: editors flaggi
 ### How to resolve, reopen, and complete notes
 
 1. Open **Notes** and find the note in the inbox.
-2. When a note is dealt with, click **Resolve** to close it off.
+2. When a note is dealt with, click **Resolve** to close it off. Resolve/Reopen appear only for the author or an active assignee.
 3. If a resolved note needs more work, click **Reopen** to bring it back to open.
 4. For a note that was assigned to you, click **Complete assignment** once you have finished your part.
 
@@ -58,9 +58,11 @@ This guide is for teams who leave private notes inside the admin: editors flaggi
 
 ## Rolling out Notes (for owners)
 
+Owners must follow the [reminder deployment and rollback runbook](deployment.md) before enabling new or replacement reminders. If these are temporarily unavailable, contact the administrator responsible for the rollout.
+
 ### Turn on first
 
-- **Notes on records and the inbox.** This is the whole package: adding notes, assigning them, and clearing them from the inbox. Get your team adding notes on a few records, then introduce reminders.
+- Notes on records and the inbox. This is the whole package: adding notes, assigning them, and clearing them from the inbox. Get your team adding notes on a few records, then introduce reminders.
 
 ### Add when needed
 

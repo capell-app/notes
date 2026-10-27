@@ -4,7 +4,10 @@ declare(strict_types=1);
 
 namespace Capell\Notes\Notifications;
 
+use Capell\Notes\Filament\Pages\NotesInboxPage;
 use Capell\Notes\Models\Note;
+use Filament\Actions\Action;
+use Filament\Notifications\Notification as FilamentNotification;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -71,6 +74,17 @@ final class NoteAttentionNotification extends Notification implements ShouldQueu
      */
     public function toDatabase(object $notifiable): array
     {
-        return $this->toArray($notifiable);
+        return [
+            ...$this->toArray($notifiable),
+            ...FilamentNotification::make()
+                ->title((string) __('capell-notes::note.notification_mail.' . $this->type . '.subject'))
+                ->body((string) __('capell-notes::note.notification_mail.' . $this->type . '.line'))
+                ->actions([
+                    Action::make('openNotes')
+                        ->label(__('capell-notes::note.actions.open_notes'))
+                        ->url(NotesInboxPage::getUrl(panel: 'admin')),
+                ])
+                ->getDatabaseMessage(),
+        ];
     }
 }

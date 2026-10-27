@@ -44,6 +44,7 @@ final class NotesServiceProvider extends AbstractPackageServiceProvider
             ->hasMigrations([
                 '2026_05_10_190862_01_create_notes_tables',
                 '2026_07_10_000002_encrypt_note_bodies',
+                '2026_10_22_000001_add_note_reminder_schedule_state',
             ]);
     }
 

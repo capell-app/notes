@@ -72,6 +72,6 @@ class MentionNoteUsersAction
             );
         });
 
-        SendNoteMentionNotificationsAction::run($note, $mentions, $mentionedBy);
+        DB::afterCommit(fn () => SendNoteMentionNotificationsAction::run($note, $mentions, $mentionedBy));
     }
 }

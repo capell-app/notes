@@ -4,15 +4,83 @@ declare(strict_types=1);
 
 use Capell\Notes\Actions\CreateNoteAction;
 use Capell\Notes\Data\CreateNoteData;
+use Capell\Notes\Data\NoteReminderData;
 use Capell\Notes\Enums\NoteStatus;
 use Capell\Notes\Enums\NoteVisibility;
 use Capell\Notes\Models\Note;
+use Capell\Notes\Notifications\NoteAttentionNotification;
 use Capell\Tests\Fixtures\Models\User;
+use Carbon\CarbonImmutable;
 use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Validation\ValidationException;
 
 require_once dirname(__DIR__, 2) . '/NotesTestCase.php';
+
+it('emits no participant notifications when reminder validation rolls back creation', function (bool $hasAssignee): void {
+    Gate::before(static fn (): bool => true);
+    Notification::fake();
+    $author = User::factory()->create();
+    $recipient = User::factory()->create();
+
+    expect(fn (): mixed => CreateNoteAction::run(new CreateNoteData(
+        subject: $author,
+        author: $author,
+        body: 'A reminder which must be rejected',
+        assignees: $hasAssignee ? [$recipient] : [],
+        mentions: [$recipient],
+        reminder: new NoteReminderData(CarbonImmutable::now(), timezone: $hasAssignee ? 'Invalid/Zone' : 'UTC'),
+    )))->toThrow(ValidationException::class)
+        ->and(Note::query()->count())->toBe(0);
+
+    Notification::assertNothingSent();
+})->with(['mention without assignees' => false, 'assignment and invalid timezone' => true]);
+
+it('dispatches participant notifications only after the outer transaction commits', function (): void {
+    Gate::before(static fn (): bool => true);
+    Notification::fake();
+    $author = User::factory()->create();
+    $recipient = User::factory()->create();
+
+    DB::transaction(function () use ($author, $recipient): void {
+        $note = CreateNoteAction::run(new CreateNoteData(
+            subject: $author,
+            author: $author,
+            body: 'Commit all related work first',
+            assignees: [$recipient],
+            mentions: [$recipient],
+            reminder: new NoteReminderData(CarbonImmutable::now()),
+        ));
+        expect($note->reminder)->not->toBeNull();
+        Notification::assertNothingSent();
+    });
+
+    Notification::assertSentToTimes($recipient, NoteAttentionNotification::class, 2);
+    expect(Note::query()->count())->toBe(1);
+});
+
+it('discards participant notifications if an outer transaction rolls back a valid note', function (): void {
+    Gate::before(static fn (): bool => true);
+    Notification::fake();
+    $author = User::factory()->create();
+    $recipient = User::factory()->create();
+
+    expect(fn () => DB::transaction(function () use ($author, $recipient): void {
+        CreateNoteAction::run(new CreateNoteData(
+            subject: $author,
+            author: $author,
+            body: 'Parent workflow fails later',
+            assignees: [$recipient],
+            mentions: [$recipient],
+        ));
+        throw new RuntimeException('Parent workflow failed');
+    }))->toThrow(RuntimeException::class, 'Parent workflow failed')
+        ->and(Note::query()->count())->toBe(0);
+
+    Notification::assertNothingSent();
+});
 
 it('creates a note attached to a record with assignments and mentions', function (): void {
     Gate::before(static fn (): bool => true);
@@ -31,6 +99,7 @@ it('creates a note attached to a record with assignments and mentions', function
         mentions: [$mentioned],
     ));
     $note->refresh();
+
     $noteSubject = $note->subject;
     $noteAuthor = $note->author;
     $assignment = $note->assignments()->firstOrFail();

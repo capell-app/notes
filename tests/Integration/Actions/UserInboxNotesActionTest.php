@@ -3,6 +3,8 @@
 declare(strict_types=1);
 
 use Capell\Notes\Actions\AssignNoteUsersAction;
+use Capell\Notes\Actions\BuildSubjectNotesAction;
+use Capell\Notes\Actions\BuildUserAttentionCountsAction;
 use Capell\Notes\Actions\BuildUserInboxNotesAction;
 use Capell\Notes\Actions\CompleteNoteAssignmentAction;
 use Capell\Notes\Actions\MarkNoteMentionsReadAction;
@@ -10,6 +12,7 @@ use Capell\Notes\Actions\MentionNoteUsersAction;
 use Capell\Notes\Actions\ResolveNoteParticipantsAction;
 use Capell\Notes\Enums\NoteStatus;
 use Capell\Notes\Models\Note;
+use Capell\Notes\Models\NoteReminder;
 use Capell\Tests\Fixtures\Models\User;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Database\Eloquent\Model;
@@ -171,3 +174,45 @@ function noteModelKey(Model $model): int|string
 
     return $key;
 }
+
+it('reconciles authorised attention filters with counts over the complete assignment history', function (): void {
+    Gate::before(static fn (User $user, string $ability): ?bool => $ability === 'update' ? true : null);
+    $this->freezeTime();
+    $user = User::factory()->create();
+    $assigned = Note::factory()->count(30)->create();
+    foreach ($assigned as $note) {
+        AssignNoteUsersAction::run($note, [$user], assignedBy: $user);
+    }
+
+    $today = $assigned->firstOrFail();
+    $overdue = $assigned->last();
+    NoteReminder::factory()->for($today)->create(['due_at' => today()->addHour(), 'next_due_at' => null]);
+    NoteReminder::factory()->for($overdue)->create(['due_at' => today()->subDay(), 'next_due_at' => null]);
+    $mentioned = Note::factory()->create();
+    MentionNoteUsersAction::run($mentioned, [$user], mentionedBy: $user);
+    $counts = BuildUserAttentionCountsAction::run($user);
+    expect(BuildUserInboxNotesAction::run($user, limit: 100, attention: 'assigned'))->toHaveCount($counts->assigned)
+        ->and(BuildUserInboxNotesAction::run($user, attention: 'dueToday')->modelKeys())->toBe([$today->id])
+        ->and(BuildUserInboxNotesAction::run($user, attention: 'overdue')->modelKeys())->toBe([$overdue->id])
+        ->and(BuildUserInboxNotesAction::run($user, attention: 'mentions'))->toHaveCount($counts->mentions)
+        ->and($counts->dueToday)->toBe(1)->and($counts->overdue)->toBe(1);
+});
+
+it('fills a subject note slice after excluding private notes for other participants', function (): void {
+    Gate::before(static fn (User $user, string $ability): ?bool => $ability === 'update' ? true : null);
+    $subject = User::factory()->create();
+    $user = User::factory()->create();
+    $visible = Note::factory()->count(2)->create(['subject_type' => $subject->getMorphClass(), 'subject_id' => $subject->id]);
+    Note::factory()->private()->count(4)->create(['subject_type' => $subject->getMorphClass(), 'subject_id' => $subject->id]);
+    expect(BuildSubjectNotesAction::run($subject, $user, limit: 2)->modelKeys())->toEqualCanonicalizing($visible->modelKeys());
+});
+
+it('fills participant search results from permitted editors beyond denied candidates', function (): void {
+    $actor = User::factory()->create(['name' => 'Actor']);
+    User::factory()->count(4)->create(['name' => 'Candidate from another site']);
+    $permitted = User::factory()->count(2)->create(['name' => 'Candidate on this site']);
+    Gate::before(static fn (User $user, string $ability): ?bool => $ability === 'update'
+        ? ($user->is($actor) || $permitted->contains(fn (User $candidate): bool => $candidate->is($user))) : null);
+    expect(array_map(noteModelKey(...), ResolveNoteParticipantsAction::run($actor, $actor, search: 'Candidate', limit: 2)))
+        ->toEqualCanonicalizing($permitted->modelKeys());
+});

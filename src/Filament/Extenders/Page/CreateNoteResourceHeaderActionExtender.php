@@ -11,10 +11,10 @@ use Capell\Notes\Data\CreateNoteData;
 use Capell\Notes\Data\NoteReminderData;
 use Capell\Notes\Enums\NoteReminderRecurrence;
 use Capell\Notes\Enums\NoteVisibility;
+use Capell\Notes\Filament\Forms\Components\ReminderDateTimePicker;
 use Capell\Notes\Support\NotesManager;
 use Carbon\CarbonImmutable;
 use Filament\Actions\Action;
-use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
@@ -22,15 +22,19 @@ use Filament\Notifications\Notification;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Validator;
+use Override;
 
 final class CreateNoteResourceHeaderActionExtender implements ResourceHeaderActionExtender
 {
+    #[Override]
     public function supports(string $pageClass): bool
     {
         return resolve(NotesManager::class)->supportsResourcePage($pageClass);
     }
 
     /** @return array<int, Action> */
+    #[Override]
     public function actions(): array
     {
         return [
@@ -50,6 +54,7 @@ final class CreateNoteResourceHeaderActionExtender implements ResourceHeaderActi
                         ->required(),
                     Select::make('assignee_ids')
                         ->label(__('capell-notes::note.fields.assignees'))
+                        ->helperText(__('capell-notes::note.reminder_recipients'))
                         ->multiple()
                         ->searchable()
                         ->getSearchResultsUsing(fn (string $search, Model $record): array => $this->searchUsers($record, $search))
@@ -60,7 +65,7 @@ final class CreateNoteResourceHeaderActionExtender implements ResourceHeaderActi
                         ->searchable()
                         ->getSearchResultsUsing(fn (string $search, Model $record): array => $this->searchUsers($record, $search))
                         ->getOptionLabelsUsing(fn (array $values, Model $record): array => $this->userLabelsForIds($record, $values)),
-                    DateTimePicker::make('reminder_due_at')
+                    ReminderDateTimePicker::make('reminder_due_at')
                         ->label(__('capell-notes::note.fields.reminder_due_at'))
                         ->seconds(false)
                         ->native(false),
@@ -71,7 +76,9 @@ final class CreateNoteResourceHeaderActionExtender implements ResourceHeaderActi
                     TextInput::make('reminder_timezone')
                         ->label(__('capell-notes::note.fields.reminder_timezone'))
                         ->default((string) config('app.timezone', 'UTC'))
-                        ->maxLength(64),
+                        ->maxLength(64)
+                        ->requiredWith('reminder_due_at')
+                        ->rules(['timezone:all']),
                 ])
                 ->modalSubmitActionLabel(__('capell-notes::note.actions.create'))
                 ->authorize(fn (Model $record): bool => $this->canCreateFor($record))
@@ -118,10 +125,13 @@ final class CreateNoteResourceHeaderActionExtender implements ResourceHeaderActi
             return null;
         }
 
+        $timezone = $this->stringValue($data['reminder_timezone'] ?? config('app.timezone', 'UTC'), 'UTC');
+        Validator::make(['reminder_timezone' => $timezone], ['reminder_timezone' => ['required', 'timezone:all']])->validate();
+
         return new NoteReminderData(
-            dueAt: CarbonImmutable::parse($this->stringValue($data['reminder_due_at'])),
+            dueAt: CarbonImmutable::parse($this->stringValue($data['reminder_due_at']), $timezone),
             recurrence: NoteReminderRecurrence::tryFrom($this->stringValue($data['reminder_recurrence'] ?? null)) ?? NoteReminderRecurrence::None,
-            timezone: $this->stringValue($data['reminder_timezone'] ?? config('app.timezone', 'UTC'), 'UTC'),
+            timezone: $timezone,
         );
     }
 

@@ -67,6 +67,8 @@ class NotesTestCase extends AbstractTestCase
     {
         parent::getEnvironmentSetUp($app);
 
+        config(['capell-notes.reminders.timezone_schedules_enabled' => true]);
+
         CapellCore::forcePackageInstalled(AdminServiceProvider::$packageName);
         CapellCore::forcePackageInstalled(NotesServiceProvider::$packageName);
     }

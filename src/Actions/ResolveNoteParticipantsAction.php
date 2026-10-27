@@ -52,9 +52,9 @@ final class ResolveNoteParticipantsAction
                         ->orWhere('email', 'like', '%' . $search . '%');
                 });
             })
-            ->limit(max(1, min($limit, 100)))
-            ->get()
+            ->lazy(100)
             ->filter(fn (Model $participant): bool => Gate::forUser($participant)->allows('update', $subject))
+            ->take(max(1, min($limit, 100)))
             ->values()
             ->all());
     }

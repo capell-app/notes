@@ -174,3 +174,25 @@ it('continues creating dependent tables when the notes table already exists', fu
 
     $migration->down();
 });
+
+it('adds scheduling state idempotently without reinterpreting legacy reminder data', function (): void {
+    $note = Note::factory()->create();
+    $reminderId = DB::table('note_reminders')->insertGetId([
+        'note_id' => $note->id, 'due_at' => '2026-07-01 09:00:00',
+        'next_due_at' => '2026-07-02 11:00:00', 'timezone' => 'America/New_York',
+        'last_notified_at' => '2026-07-01 11:00:00',
+    ]);
+    $migration = include dirname(__DIR__, 3) . '/database/migrations/2026_10_22_000001_add_note_reminder_schedule_state.php';
+    $migration->down();
+    $migration->down();
+    $migration->up();
+    $migration->up();
+
+    $row = DB::table('note_reminders')->find($reminderId);
+    throw_unless($row instanceof stdClass, LogicException::class);
+    expect($row->schedule_version)->toBe(1)
+        ->and($row->due_at)->toBe('2026-07-01 09:00:00')
+        ->and($row->next_due_at)->toBe('2026-07-02 11:00:00')
+        ->and($row->last_notified_at)->toBe('2026-07-01 11:00:00')
+        ->and($row->delivery_failed_at)->toBeNull();
+});

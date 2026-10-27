@@ -6,6 +6,7 @@ return [
     'actions' => [
         'complete_assignment' => 'Complete assignment',
         'create' => 'Add note',
+        'open_notes' => 'Open Notes',
         'reopen' => 'Reopen',
         'resolve' => 'Resolve',
     ],
@@ -24,6 +25,10 @@ return [
     'filters' => [
         'all' => 'All',
         'status' => 'Status',
+        'assigned' => 'Assigned to me',
+        'mentions' => 'Unread mentions',
+        'dueToday' => 'Due today',
+        'overdue' => 'Overdue',
     ],
     'inbox_title' => 'Notes',
     'labels' => [
@@ -48,13 +53,23 @@ return [
             'line' => 'You have been mentioned in a Capell note.',
             'subject' => 'You were mentioned in a Capell note',
         ],
+        'reminder_unsent' => [
+            'line' => 'A note reminder could not be sent because no active assignee has record access. Review it in Notes, then ask your administrator to restore access or update the assignment and reminder through the integration that created it.',
+            'subject' => 'A Capell note reminder needs attention',
+        ],
         'reminder' => [
             'line' => 'A Capell note reminder is due.',
             'subject' => 'A Capell note reminder is due',
         ],
     ],
     'overdue' => 'Overdue',
-    'recent_notes' => 'Recent notes',
+    'reminder_recipients' => 'Reminders notify active assignees with record access. Assign yourself for a personal reminder.',
+    'reminder_unsent' => 'Reminder unsent: no eligible assignee. Ask your administrator to restore record access or update the assignment and reminder through the integration that created it.',
+    'next_reminder' => 'Next reminder: :local (:utc UTC).',
+    'pagination' => 'Notes pages',
+    'previous' => 'Previous',
+    'next' => 'Next',
+    'recent_notes' => 'Notes history',
     'recurrence' => [
         'daily' => 'Daily',
         'monthly' => 'Monthly',
@@ -71,6 +86,8 @@ return [
     'validation' => [
         'body_max' => 'Keep the note to :max characters or fewer.',
         'body_required' => 'Enter a note before saving.',
+        'reminder_recipient_required' => 'Assign at least one editor with record access to receive the reminder. You can assign yourself.',
+        'reminders_unavailable' => 'New or replacement reminders are temporarily unavailable. Contact your administrator.',
     ],
     'visibility' => [
         'private' => 'Private',

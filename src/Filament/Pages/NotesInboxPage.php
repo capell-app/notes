@@ -6,6 +6,7 @@ namespace Capell\Notes\Filament\Pages;
 
 use BackedEnum;
 use Capell\Notes\Actions\BuildUserInboxNotesAction;
+use Capell\Notes\Actions\CanViewNoteAction;
 use Capell\Notes\Actions\CompleteNoteAssignmentAction;
 use Capell\Notes\Actions\MarkNoteMentionsReadAction;
 use Capell\Notes\Actions\ReopenNoteAction;
@@ -13,18 +14,23 @@ use Capell\Notes\Actions\ResolveNoteAction;
 use Capell\Notes\Data\UserAttentionCountData;
 use Capell\Notes\Enums\NoteStatus;
 use Capell\Notes\Models\Note;
-use Capell\Notes\Models\NoteAssignment;
 use Capell\Notes\Support\UserAttentionCountsCache;
 use Filament\Pages\Page;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Gate;
 use Override;
 
 final class NotesInboxPage extends Page
 {
     public string $statusFilter = 'all';
+
+    public string $attentionFilter = 'all';
+
+    public int $inboxPage = 1;
+
+    public bool $hasMoreNotes = false;
 
     /** @var array{assigned: int, dueToday: int, overdue: int, mentions: int}|null */
     public ?array $initialCounts = null;
@@ -66,7 +72,7 @@ final class NotesInboxPage extends Page
             'mentions' => $counts->mentions,
         ];
 
-        MarkNoteMentionsReadAction::run($user, $this->inboxNotes());
+        $this->markDisplayedMentionsRead();
     }
 
     #[Override]
@@ -106,10 +112,16 @@ final class NotesInboxPage extends Page
             return new Collection;
         }
 
-        return BuildUserInboxNotesAction::run(
+        $notes = BuildUserInboxNotesAction::run(
             user: $user,
             status: $this->selectedStatus(),
+            limit: 26,
+            offset: (max(1, $this->inboxPage) - 1) * 25,
+            attention: $this->attentionFilter,
         );
+        $this->hasMoreNotes = $notes->count() > 25;
+
+        return new Collection($notes->take(25)->all());
     }
 
     public function setStatusFilter(string $status): void
@@ -119,10 +131,11 @@ final class NotesInboxPage extends Page
         }
 
         $this->statusFilter = $status;
+        $this->inboxPage = 1;
         $user = $this->user();
 
         if ($user instanceof Model) {
-            MarkNoteMentionsReadAction::run($user, $this->inboxNotes());
+            $this->markDisplayedMentionsRead();
         }
     }
 
@@ -206,31 +219,50 @@ final class NotesInboxPage extends Page
         return (string) __('capell-notes::note.status.' . $status->value);
     }
 
-    public function excerpt(Note $note): string
+    public function nextPage(): void
     {
-        return Str::limit($note->body, 220);
+        $this->inboxNotes();
+        if ($this->hasMoreNotes) {
+            $this->inboxPage++;
+            $this->markDisplayedMentionsRead();
+        }
+    }
+
+    public function previousPage(): void
+    {
+        $this->inboxPage = max(1, $this->inboxPage - 1);
+        $this->markDisplayedMentionsRead();
+    }
+
+    public function setAttentionFilter(string $attention): void
+    {
+        if (! in_array($attention, ['all', 'assigned', 'mentions', 'dueToday', 'overdue'], true)) {
+            return;
+        }
+
+        $this->attentionFilter = $attention;
+        $this->inboxPage = 1;
+        $this->markDisplayedMentionsRead();
+    }
+
+    public function canManageNote(string $ability, Note $note): bool
+    {
+        $user = $this->user();
+
+        return $user instanceof Model && Gate::forUser($user)->allows($ability, $note);
     }
 
     public function hasIncompleteAssignmentForCurrentUser(Note $note): bool
     {
+        return $this->canManageNote('completeAssignment', $note);
+    }
+
+    private function markDisplayedMentionsRead(): void
+    {
         $user = $this->user();
-
-        if (! $user instanceof Model) {
-            return false;
+        if ($user instanceof Model && $this->attentionFilter !== 'mentions') {
+            MarkNoteMentionsReadAction::run($user, $this->inboxNotes());
         }
-
-        $userKey = $user->getKey();
-
-        if (! is_scalar($userKey)) {
-            return false;
-        }
-
-        return $note->assignments->contains(
-            static fn (mixed $assignment): bool => $assignment instanceof NoteAssignment
-                && $assignment->completed_at === null
-                && $assignment->assignee_type === $user->getMorphClass()
-                && (string) $assignment->assignee_id === (string) $userKey,
-        );
     }
 
     private function selectedStatus(): ?NoteStatus
@@ -284,8 +316,15 @@ final class NotesInboxPage extends Page
 
     private function noteVisibleToCurrentUser(int $noteId): ?Note
     {
-        /** @var Note|null $note */
-        $note = $this->inboxNotes()->firstWhere('id', $noteId);
+        $user = $this->user();
+        if (! $user instanceof Model) {
+            return null;
+        }
+
+        $note = Note::query()->with(['assignments', 'mentions', 'subject'])->find($noteId);
+        if (! $note instanceof Note || ! CanViewNoteAction::run($note, $user)) {
+            return null;
+        }
 
         return $note;
     }

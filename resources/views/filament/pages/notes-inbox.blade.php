@@ -84,6 +84,18 @@
             </x-filament::button>
         </div>
 
+        <div class="mb-4 flex flex-wrap gap-2">
+            @foreach (['all', 'assigned', 'mentions', 'dueToday', 'overdue'] as $attention)
+                <x-filament::button
+                    :color="$this->attentionFilter === $attention ? 'primary' : 'gray'"
+                    size="sm"
+                    wire:click="setAttentionFilter('{{ $attention }}')"
+                >
+                    {{ __('capell-notes::note.filters.' . $attention) }}
+                </x-filament::button>
+            @endforeach
+        </div>
+
         @if ($notes->isEmpty())
             <div
                 class="rounded-lg border border-dashed border-gray-300 p-6 text-sm text-gray-500 dark:border-gray-700 dark:text-gray-400"
@@ -110,7 +122,7 @@
                             </span>
                         </div>
 
-                        <p class="text-sm leading-6 text-gray-950 dark:text-white">{{ $this->excerpt($note) }}</p>
+                        <p class="whitespace-pre-wrap break-words text-sm leading-6 text-gray-950 dark:text-white">{{ $note->body }}</p>
 
                         <div
                             class="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-gray-500 dark:text-gray-400"
@@ -132,8 +144,17 @@
                             @endif
                         </div>
 
+                        @if ($note->reminder?->delivery_failed_at !== null)
+                            <p role="status">{{ __('capell-notes::note.reminder_unsent') }}</p>
+                        @endif
+                        @if ($note->reminder?->next_due_at !== null)
+                            <p class="text-sm">{{ __('capell-notes::note.next_reminder', [
+                                'local' => $note->reminder->next_due_at->setTimezone($note->reminder->schedule_version >= 2 ? $note->reminder->timezone : config('app.timezone', 'UTC'))->format('Y-m-d H:i T'),
+                                'utc' => $note->reminder->next_due_at->utc()->format('Y-m-d H:i'),
+                            ]) }}</p>
+                        @endif
                         <div class="flex flex-wrap items-center gap-2">
-                            @if ($note->status === NoteStatus::Resolved)
+                            @if ($note->status === NoteStatus::Resolved && $this->canManageNote('reopen', $note))
                                 <x-filament::button
                                     color="gray"
                                     size="xs"
@@ -141,7 +162,7 @@
                                 >
                                     {{ __('capell-notes::note.actions.reopen') }}
                                 </x-filament::button>
-                            @else
+                            @elseif ($note->status !== NoteStatus::Resolved && $this->canManageNote('resolve', $note))
                                 <x-filament::button
                                     color="gray"
                                     size="xs"
@@ -165,5 +186,20 @@
                 @endforeach
             </div>
         @endif
+        <nav
+            class="mt-4 flex gap-2"
+            aria-label="{{ __('capell-notes::note.pagination') }}"
+        >
+            <x-filament::button
+                wire:click="previousPage"
+                :disabled="$this->inboxPage <= 1"
+                >{{ __('capell-notes::note.previous') }}</x-filament::button
+            >
+            <x-filament::button
+                wire:click="nextPage"
+                :disabled="! $this->hasMoreNotes"
+                >{{ __('capell-notes::note.next') }}</x-filament::button
+            >
+        </nav>
     </x-filament::section>
 </x-filament-panels::page>

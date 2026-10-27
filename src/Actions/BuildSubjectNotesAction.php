@@ -36,11 +36,11 @@ final class BuildSubjectNotesAction
             ->when($status instanceof NoteStatus, fn (Builder $query): Builder => $query->where('status', $status))
             ->latest('updated_at')
             ->latest('id')
-            ->limit($limit)
-            ->get();
+            ->lazy(100);
 
-        return $notes
+        return new Collection($notes
             ->filter(fn (Note $note): bool => CanViewNoteAction::run($note, $user))
-            ->values();
+            ->take(max(1, $limit))
+            ->values()->all());
     }
 }

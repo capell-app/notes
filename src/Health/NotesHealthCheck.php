@@ -69,7 +69,7 @@ final class NotesHealthCheck implements ChecksExtensionHealth
         $missingTables = $this->missingTables();
 
         return new DoctorCheckResultData(
-            label: 'Notes storage tables',
+            label: 'Notes: database tables present',
             passed: $missingTables === [],
             message: $missingTables === []
                 ? 'All notes, assignment, mention, and reminder tables are present.'
@@ -77,6 +77,7 @@ final class NotesHealthCheck implements ChecksExtensionHealth
             remediation: $missingTables === []
                 ? null
                 : 'Run the Capell migrations to create the notes storage tables.',
+            id: 'legacy.notes.storage.tables',
         );
     }
 
@@ -88,7 +89,7 @@ final class NotesHealthCheck implements ChecksExtensionHealth
         $unregisteredAliases = $this->unregisteredMorphAliases();
 
         return new DoctorCheckResultData(
-            label: 'Notes model morph aliases',
+            label: 'Notes: saved records recognised',
             passed: $unregisteredAliases === [],
             message: $unregisteredAliases === []
                 ? 'Note, assignment, mention, and reminder models are registered in the morph map.'
@@ -96,6 +97,7 @@ final class NotesHealthCheck implements ChecksExtensionHealth
             remediation: $unregisteredAliases === []
                 ? null
                 : 'Ensure NotesServiceProvider registers the notes models in the morph map.',
+            id: 'legacy.notes.model.morph.aliases',
         );
     }
 
