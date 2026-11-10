@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Capell\Notes\Models;
 
+use Capell\Core\Concerns\HasCapellTable;
 use Capell\Notes\Database\Factories\NoteAssignmentFactory;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -25,6 +26,8 @@ use Override;
  */
 class NoteAssignment extends Model
 {
+    use HasCapellTable;
+
     /** @use HasFactory<NoteAssignmentFactory> */
     use HasFactory;
 

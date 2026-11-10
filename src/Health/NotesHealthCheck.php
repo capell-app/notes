@@ -6,6 +6,7 @@ namespace Capell\Notes\Health;
 
 use Capell\Core\Contracts\Extensions\ChecksExtensionHealth;
 use Capell\Core\Data\Diagnostics\DoctorCheckResultData;
+use Capell\Core\Support\TableName;
 use Capell\Notes\Models\Note;
 use Capell\Notes\Models\NoteAssignment;
 use Capell\Notes\Models\NoteMention;
@@ -107,7 +108,7 @@ final class NotesHealthCheck implements ChecksExtensionHealth
     public function missingTables(): array
     {
         return array_values(array_filter(
-            self::REQUIRED_TABLE_NAMES,
+            array_map(TableName::resolve(...), self::REQUIRED_TABLE_NAMES),
             static fn (string $tableName): bool => ! Schema::hasTable($tableName),
         ));
     }

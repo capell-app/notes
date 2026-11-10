@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Capell\Notes\Models;
 
+use Capell\Core\Concerns\HasCapellTable;
 use Capell\Notes\Casts\NoteReminderInstant;
 use Capell\Notes\Database\Factories\NoteReminderFactory;
 use Capell\Notes\Enums\NoteReminderRecurrence;
@@ -31,6 +32,8 @@ use Override;
  */
 class NoteReminder extends Model
 {
+    use HasCapellTable;
+
     /** @use HasFactory<NoteReminderFactory> */
     use HasFactory;
 

@@ -9,6 +9,7 @@ use Capell\Admin\Filament\Resources\Pages\Pages\EditPage;
 use Capell\Core\Facades\CapellCore;
 use Capell\Core\Models\Page;
 use Capell\Core\Support\Packages\AbstractPackageServiceProvider;
+use Capell\Core\Support\TableName;
 use Capell\Notes\Console\DemoCommand;
 use Capell\Notes\Console\SendDueNoteRemindersCommand;
 use Capell\Notes\Filament\Extenders\Page\CreateNoteResourceHeaderActionExtender;
@@ -90,10 +91,10 @@ final class NotesServiceProvider extends AbstractPackageServiceProvider
 
     private function registerProtectedTables(): self
     {
-        CapellCore::registerProtectedTable('notes');
-        CapellCore::registerProtectedTable('note_assignments');
-        CapellCore::registerProtectedTable('note_mentions');
-        CapellCore::registerProtectedTable('note_reminders');
+        CapellCore::registerProtectedTable(TableName::resolve('notes'));
+        CapellCore::registerProtectedTable(TableName::resolve('note_assignments'));
+        CapellCore::registerProtectedTable(TableName::resolve('note_mentions'));
+        CapellCore::registerProtectedTable(TableName::resolve('note_reminders'));
 
         return $this;
     }

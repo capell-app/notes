@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Capell\Notes\Models;
 
+use Capell\Core\Concerns\HasCapellTable;
 use Capell\Notes\Database\Factories\NoteFactory;
 use Capell\Notes\Enums\NoteStatus;
 use Capell\Notes\Enums\NoteVisibility;
@@ -31,6 +32,8 @@ use Override;
  */
 class Note extends Model
 {
+    use HasCapellTable;
+
     /** @use HasFactory<NoteFactory> */
     use HasFactory;
 

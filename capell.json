@@ -20,7 +20,10 @@
         "conflicts": []
     },
     "providers": {
-        "metadata": ["Capell\\Notes\\Providers\\NotesServiceProvider"],
+        "metadata": [
+            "Capell\\Notes\\Providers\\NotesServiceProvider",
+            "Capell\\Notes\\Providers\\MigrationMetadataServiceProvider"
+        ],
         "install": ["Capell\\Notes\\Providers\\ConsoleServiceProvider"],
         "runtime": ["Capell\\Notes\\Providers\\NotesServiceProvider"],
         "admin": ["Capell\\Notes\\Providers\\AdminServiceProvider"],
@@ -168,6 +171,22 @@
     "marketplace": {
         "summary": "Add private, assignable notes and @mentions to any Capell admin record so editors can leave context, hand off work, and never lose track of what needs attention.",
         "description": "Notes turns Capell admin records into a collaboration surface: leave a contextual note on a page (or any opted-in record), assign it to teammates, and mention people who need to weigh in. A per-user inbox and user-menu badge surface what's assigned to you and where you've been mentioned, so nothing slips between editors. Notes are strictly admin-internal with per-note visibility (record-editors or private) and are never exposed on the public site. Built the Capell way, with domain logic in Actions and polymorphic attachment to any registered subject, it extends cleanly into your own resources.",
+        "problem": "Our editors lose handover context when discussions happen away from the record.",
+        "outcome": "Admin records have private notes for coordinating follow-up.",
+        "faq": [
+            {
+                "question": "Who can see record notes?",
+                "answer": "Notes are private admin records and are not exposed on the public site."
+            },
+            {
+                "question": "Can colleagues take ownership?",
+                "answer": "Admin users can assign colleagues, mention people and set reminders on notes."
+            },
+            {
+                "question": "Where is outstanding follow-up collected?",
+                "answer": "Admin users can work through notes needing attention in the Notes inbox."
+            }
+        ],
         "screenshots": [
             {
                 "path": "docs/assets/marketplace/extension-card.jpg",

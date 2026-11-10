@@ -45,4 +45,4 @@ Only active assignees who still have subject access receive reminder notificatio
 
 The note body is encrypted at rest with the application key. Subject, author, assignee and mention model references, statuses, reminder dates/timezones, and notification type/note ID remain plaintext operational metadata; database notification payloads do not copy the note body.
 
-Notes does not register a Privacy Center exporter or eraser. Treat notes as internal records that may contain personal or commercially sensitive information, restrict subject edit access accordingly, and include the Notes tables and backups in the owning retention/subject-request process.
+Notes does not register a Privacy Centre exporter or eraser. Treat notes as internal records that may contain personal or commercially sensitive information, restrict subject edit access accordingly, and include the Notes tables and backups in the owning retention/subject-request process.

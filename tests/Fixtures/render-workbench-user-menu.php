@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use BezhanSalleh\FilamentShield\Support\Utils;
+use Capell\Admin\Support\AdminRouteProvenance;
 use Capell\Core\Models\Page;
 use Capell\Tests\Fixtures\Models\User;
 use Illuminate\Contracts\Console\Kernel as ConsoleKernel;
@@ -102,7 +103,11 @@ try {
     auth()->setUser($user);
 
     if (($argv[4] ?? '') === '--fail-request') {
-        $app->make(Router::class)->get('/admin/notes', static fn (): never => throw new RuntimeException('Workbench request failed.'));
+        // Core refuses an unattributed route under a panel path with a 503, so declare this
+        // injected failure route as the host's own to let its exception reach the JSON boundary.
+        AdminRouteProvenance::host(static function () use ($app): void {
+            $app->make(Router::class)->get('/admin/notes', static fn (): never => throw new RuntimeException('Workbench request failed.'));
+        });
     }
 
     $response = $kernel->handle(Request::create('http://127.0.0.1:8247/admin/notes'));
