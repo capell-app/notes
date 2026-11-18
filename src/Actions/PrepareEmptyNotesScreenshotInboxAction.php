@@ -21,13 +21,11 @@ final class PrepareEmptyNotesScreenshotInboxAction
                 && is_string($configuredPath)
                 && realpath($configuredPath) !== false
                 && realpath($configuredPath) === realpath(base_path())
-                && (realpath(base_path()) === realpath((str_contains(__DIR__, '/vendor/capell-app/') ? dirname(__DIR__, 5) : dirname(__DIR__, 4)) . '/vendor/orchestra/testbench-core/laravel')
-                    || str_starts_with((string) realpath(base_path()), (str_contains(__DIR__, '/vendor/capell-app/') ? dirname(__DIR__, 5) : dirname(__DIR__, 4)) . '/tmp/testbench-skeletons/')),
+                && (class_exists(FixtureState::class) && FixtureState::isDisposableApplication(realpath(base_path()))),
             RuntimeException::class,
             'Empty Notes inbox preparation requires the explicit disposable local screenshot environment.',
         );
 
-        require_once (str_contains(__DIR__, '/vendor/capell-app/') ? dirname(__DIR__, 5) : dirname(__DIR__, 4)) . '/scripts/screenshots/FixtureState.php';
         FixtureState::boot();
 
         DB::transaction(static function (): void {

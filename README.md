@@ -2,28 +2,26 @@
 
 <!-- prettier-ignore-start -->
 
-## What It Does
+Leave a colleague a note on a page and it stays with that page instead of sitting in a chat thread. Add note is a button in the header of the page edit screen. You write the note, then pick who is responsible and who should be told. Anyone you pick must be able to edit that page, and note text is encrypted in the database.
 
-Notes adds private record notes with assignments, mentions, reminders, completion state, and an inbox for work needing attention.
+The author can resolve or reopen a note. Whoever a note is assigned to can mark their own part complete, and can resolve or reopen the note until they do. In a standard install, notes work on pages only, a note is a single message with no replies, and a saved note can't be edited.
+
+A colleague who opens their account menu sees Notes with a count of what needs their attention. The Notes page under Website lists what is assigned to them, where they are mentioned, and what is open or resolved.
 
 - **Price and availability:** Check current availability and price on the [Capell Marketplace listing](https://capell.app/extensions/notes).
 - **Licence:** Check the licence terms on the [Capell Marketplace listing](https://capell.app/extensions/notes).
 - **Requires:** `PHP ^8.4`, `capell-app/admin ^1.0.66`, `capell-app/core ^1.0.75`.
 - **Install:** `composer require capell-app/notes`.
 
-Admin users can add a note from supported records, assign colleagues, mention people, set reminders, and work through their Notes inbox.
-
-## Who It Is For
-
-**For developers:** Note creation, visibility, assignment, reminders, and notifications are split into Actions behind a reusable Notes manager.
-
-**For teams:** Editors can coordinate follow-up beside the record being discussed without exposing internal notes on the public site.
-
 ## Quick Start
 
 1. Install the package: `composer require capell-app/notes`.
 2. See it working: run `php artisan capell:notes-demo`.
 3. Open the package admin surface at `/admin/notes` and confirm Notes is available.
+
+## For Developers
+
+Note creation, visibility, assignment, reminders, and notifications are split into Actions behind a reusable Notes manager.
 
 ## Configure
 

@@ -1,0 +1,76 @@
+[
+    {
+        "claim": "Leave a colleague a note on a page and it stays with that page instead of sitting in a chat thread.",
+        "evidence": ["src/Models/Note.php", "src/Actions/CreateNoteAction.php"]
+    },
+    {
+        "claim": "Add note is a button in the header of the page edit screen.",
+        "evidence": [
+            "src/Filament/Extenders/Page/CreateNoteResourceHeaderActionExtender.php",
+            "resources/lang/en/note.php",
+            "src/Providers/NotesServiceProvider.php"
+        ]
+    },
+    {
+        "claim": "You write the note, then pick who is responsible and who should be told.",
+        "evidence": [
+            "src/Filament/Extenders/Page/CreateNoteResourceHeaderActionExtender.php",
+            "src/Actions/AssignNoteUsersAction.php",
+            "src/Actions/MentionNoteUsersAction.php"
+        ]
+    },
+    {
+        "claim": "Anyone you pick must be able to edit that page.",
+        "evidence": [
+            "src/Actions/CreateNoteAction.php",
+            "src/Actions/ResolveNoteParticipantsAction.php"
+        ]
+    },
+    {
+        "claim": "Note text is encrypted in the database.",
+        "evidence": [
+            "src/Models/Note.php",
+            "database/migrations/2026_07_10_000002_encrypt_note_bodies.php"
+        ]
+    },
+    {
+        "claim": "The author can resolve or reopen a note. Whoever a note is assigned to can mark their own part complete, and can resolve or reopen the note until they do.",
+        "evidence": [
+            "src/Policies/NotePolicy.php",
+            "src/Actions/ResolveNoteAction.php",
+            "src/Actions/ReopenNoteAction.php",
+            "src/Actions/CompleteNoteAssignmentAction.php",
+            "resources/views/filament/pages/notes-inbox.blade.php"
+        ]
+    },
+    {
+        "claim": "In a standard install, notes work on pages only.",
+        "evidence": [
+            "src/Providers/NotesServiceProvider.php",
+            "src/Support/NotesManager.php"
+        ]
+    },
+    {
+        "claim": "A note is a single message with no replies, and a saved note can't be edited.",
+        "evidence": [
+            "src/Models/Note.php",
+            "resources/views/filament/pages/notes-inbox.blade.php"
+        ]
+    },
+    {
+        "claim": "A colleague who opens their account menu sees Notes with a count of what needs their attention.",
+        "evidence": [
+            "src/Providers/AdminServiceProvider.php",
+            "src/Support/UserAttentionCountsCache.php",
+            "src/Data/UserAttentionCountData.php"
+        ]
+    },
+    {
+        "claim": "The Notes page under Website lists what is assigned to them, where they are mentioned, and what is open or resolved.",
+        "evidence": [
+            "src/Filament/Pages/NotesInboxPage.php",
+            "src/Actions/BuildUserInboxNotesAction.php",
+            "resources/views/filament/pages/notes-inbox.blade.php"
+        ]
+    }
+]

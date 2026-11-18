@@ -1,6 +1,6 @@
 {
     "name": "capell-app/notes",
-    "description": "Private, assignable notes and @mentions for any Capell admin record",
+    "description": "Assignable notes on pages for Capell editors, with an inbox and account menu count.",
     "keywords": [
         "capell",
         "notes",

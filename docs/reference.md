@@ -6,7 +6,7 @@ Developer reference for `capell-app/notes`. Start with the [README](../README.md
 
 ## Package Details
 
-Notes is an **Available**, **Schema-owning** Capell package in the **Capell Engagement & CRM** product group. It ships as `capell-app/notes` and extends these surfaces: admin.
+Notes is an **Available** Capell package in the **Capell Engagement & CRM** product group. It ships as `capell-app/notes` and extends these surfaces: admin.
 
 - Status: Available
 - Tier: free

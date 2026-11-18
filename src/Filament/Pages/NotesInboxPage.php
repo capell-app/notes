@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Capell\Notes\Filament\Pages;
 
 use BackedEnum;
+use Capell\Admin\Enums\NavigationGroupEnum;
 use Capell\Notes\Actions\BuildUserInboxNotesAction;
 use Capell\Notes\Actions\CanViewNoteAction;
 use Capell\Notes\Actions\CompleteNoteAssignmentAction;
@@ -50,9 +51,9 @@ final class NotesInboxPage extends Page
     }
 
     #[Override]
-    public static function getNavigationGroup(): string
+    public static function getNavigationGroup(): NavigationGroupEnum
     {
-        return (string) __('capell-admin::navigation.group_extensions');
+        return NavigationGroupEnum::Website;
     }
 
     public function mount(): void

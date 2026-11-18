@@ -6,7 +6,7 @@
     "kind": "package",
     "capellApiVersion": "^1.0",
     "version": "1.0.0",
-    "description": "Add private, assignable notes and @mentions to any Capell admin record so editors can leave context, hand off work, and never lose track of what needs attention.",
+    "description": "Leave notes on pages, assign them to colleagues and track them in an inbox with a count in the account menu.",
     "product": {
         "group": "Capell Engagement & CRM",
         "tier": "free",
@@ -169,49 +169,53 @@
         "privateDocsRequested": false
     },
     "marketplace": {
-        "summary": "Add private, assignable notes and @mentions to any Capell admin record so editors can leave context, hand off work, and never lose track of what needs attention.",
-        "description": "Notes turns Capell admin records into a collaboration surface: leave a contextual note on a page (or any opted-in record), assign it to teammates, and mention people who need to weigh in. A per-user inbox and user-menu badge surface what's assigned to you and where you've been mentioned, so nothing slips between editors. Notes are strictly admin-internal with per-note visibility (record-editors or private) and are never exposed on the public site. Built the Capell way, with domain logic in Actions and polymorphic attachment to any registered subject, it extends cleanly into your own resources.",
-        "problem": "Our editors lose handover context when discussions happen away from the record.",
-        "outcome": "Admin records have private notes for coordinating follow-up.",
+        "summary": "Notes on pages for editors, with assignees, people to keep in the loop and an inbox.",
+        "description": "Add a note from the page edit screen, assign it to a colleague and flag others who should know. Track open and resolved notes in an inbox, and see a count in your account menu. Note text is encrypted in the database.",
+        "problem": "Editors lose the context of handovers when talk happens away from the page.",
+        "outcome": "Handover notes stay attached to the page, with an inbox for whoever is responsible.",
         "faq": [
             {
-                "question": "Who can see record notes?",
-                "answer": "Notes are private admin records and are not exposed on the public site."
+                "question": "Can I leave notes on things other than pages?",
+                "answer": "Not in a standard install. Notes work on pages only, unless another package registers its own records and edit screens with Notes."
             },
             {
-                "question": "Can colleagues take ownership?",
-                "answer": "Admin users can assign colleagues, mention people and set reminders on notes."
+                "question": "Can colleagues reply to a note, or can I edit one I saved?",
+                "answer": "No to both. A note is a single message with no replies, and a saved note can't be edited, so add a new note instead."
             },
             {
-                "question": "Where is outstanding follow-up collected?",
-                "answer": "Admin users can work through notes needing attention in the Notes inbox."
+                "question": "Who can read a note?",
+                "answer": "With Record editors visibility, anyone who can edit that page can read it. With Private, only the author, the people assigned and the people mentioned can. Notes never show on the public site."
+            },
+            {
+                "question": "Can a note remind someone later?",
+                "answer": "Only after your developer turns reminders on, and until then a note saved with a reminder date is refused. Once on, a reminder can repeat and reaches the people assigned as an admin notification, as long as background jobs and the scheduler are running."
             }
         ],
         "screenshots": [
             {
                 "path": "docs/assets/marketplace/extension-card.jpg",
-                "alt": "Notes extension preview image",
-                "caption": "Notes extension preview"
+                "alt": "Marketplace card titled Notes with two Notes inbox screens, light and dark, beside the words Note, Assign and Resolve.",
+                "caption": "The Marketplace card for Notes, which keeps private notes and follow-ups with pages."
             },
             {
                 "path": "docs/screenshots/notes-inbox-page.png",
-                "alt": "Notes inbox with assigned notes, mentions, and lifecycle controls",
-                "caption": "Review assigned notes, mentions, reminders, and open lifecycle actions from the Capell admin inbox."
+                "alt": "Notes page with counts for assigned to me, mentions, due today and overdue above a list of resolved and open notes.",
+                "caption": "See what is assigned to you, where you are mentioned and what is open or resolved."
             },
             {
                 "path": "docs/screenshots/notes-user-menu-badge.png",
-                "alt": "Opened Capell admin user menu showing the Notes attention badge",
-                "caption": "Editors see assigned notes, unread mentions, and overdue reminders from the Capell admin user menu."
+                "alt": "Admin account menu open with a Notes entry showing a red count of 4, above the Notes page.",
+                "caption": "The account menu shows how many notes need your attention."
             },
             {
                 "path": "docs/screenshots/notes-record-add-note-modal.png",
-                "alt": "Record-level Add note modal on a Capell page edit screen",
-                "caption": "Leave contextual record-level notes with visibility, assignment, mention, and reminder fields from the page edit workflow."
+                "alt": "Add note dialog over a page edit screen with fields for the note, visibility, assignee, mention and reminder.",
+                "caption": "Write the note, then choose who is responsible for it and who should be told."
             },
             {
                 "path": "docs/screenshots/notes-empty-inbox.png",
-                "alt": "Empty Notes inbox state",
-                "caption": "A quiet empty state keeps the Notes inbox clear when no collaboration items need attention."
+                "alt": "Notes page with every count at zero and the message No notes match this view.",
+                "caption": "With nothing assigned or open, the Notes page is empty and says so."
             }
         ],
         "categories": ["admin", "collaboration"]
