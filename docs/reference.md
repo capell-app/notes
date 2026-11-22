@@ -33,6 +33,7 @@ Notes is an **Available** Capell package in the **Capell Engagement & CRM** prod
 - `packages/notes/database/migrations/2026_05_10_190862_01_create_notes_tables.php`
 - `packages/notes/database/migrations/2026_07_10_000002_encrypt_note_bodies.php`
 - `packages/notes/database/migrations/2026_10_22_000001_add_note_reminder_schedule_state.php`
+- `packages/notes/database/migrations/2026_11_20_000001_create_note_revisions_table.php`
 
 ### Models
 
@@ -40,6 +41,7 @@ Notes is an **Available** Capell package in the **Capell Engagement & CRM** prod
 - `NoteAssignment`
 - `NoteMention`
 - `NoteReminder`
+- `NoteRevision`
 
 ### Filament classes
 
@@ -73,6 +75,7 @@ Notes is an **Available** Capell package in the **Capell Engagement & CRM** prod
 - `SendDueNoteReminderNotificationsAction`
 - `SendNoteAssignmentNotificationsAction`
 - `SendNoteMentionNotificationsAction`
+- `UpdateNoteBodyAction`
 - `UpsertNoteReminderAction`
 
 ### Data objects
@@ -115,9 +118,9 @@ Notes is an **Available** Capell package in the **Capell Engagement & CRM** prod
 
 ## Data Model
 
-- Required tables: `notes`, `note_assignments`, `note_mentions`, `note_reminders`.
-- Models: `Note`, `NoteAssignment`, `NoteMention`, `NoteReminder`.
-- Migration files: `2026_05_10_190862_01_create_notes_tables.php`, `2026_07_10_000002_encrypt_note_bodies.php`, `2026_10_22_000001_add_note_reminder_schedule_state.php`.
+- Required tables: `notes`, `note_assignments`, `note_mentions`, `note_reminders`, `note_revisions`.
+- Models: `Note`, `NoteAssignment`, `NoteMention`, `NoteReminder`, `NoteRevision`.
+- Migration files: `2026_05_10_190862_01_create_notes_tables.php`, `2026_07_10_000002_encrypt_note_bodies.php`, `2026_10_22_000001_add_note_reminder_schedule_state.php`, `2026_11_20_000001_create_note_revisions_table.php`.
 - Migration impact: run host migrations through the package install flow before opening package surfaces.
 - Deletion/retention behaviour: migrations declare cascade-on-delete relationships; no timed pruning or retention schedule is declared in `capell.json`.
 

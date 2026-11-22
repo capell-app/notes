@@ -122,7 +122,53 @@
                             </span>
                         </div>
 
-                        <p class="whitespace-pre-wrap break-words text-sm leading-6 text-gray-950 dark:text-white">{{ $note->body }}</p>
+                        @if ($this->editingNoteId === $note->id)
+                            <form
+                                wire:submit="saveEditing"
+                                class="space-y-2"
+                            >
+                                <label
+                                    for="note-edit-{{ $note->id }}"
+                                    class="sr-only"
+                                >
+                                    {{ __('capell-notes::note.edit_label') }}
+                                </label>
+                                <textarea
+                                    id="note-edit-{{ $note->id }}"
+                                    wire:model="editingBody"
+                                    rows="4"
+                                    class="block w-full rounded-lg border border-gray-300 bg-white p-2 text-sm text-gray-950 dark:border-gray-700 dark:bg-gray-900 dark:text-white"
+                                    @error('editingBody') aria-invalid="true" aria-describedby="note-edit-{{ $note->id }}-error" @enderror
+                                ></textarea>
+                                @error('editingBody')
+                                    <p
+                                        id="note-edit-{{ $note->id }}-error"
+                                        role="alert"
+                                        class="text-sm text-danger-600 dark:text-danger-400"
+                                    >
+                                        {{ $message }}
+                                    </p>
+                                @enderror
+
+                                <div class="flex gap-2">
+                                    <x-filament::button
+                                        type="submit"
+                                        size="xs"
+                                    >
+                                        {{ __('capell-notes::note.actions.save_edit') }}
+                                    </x-filament::button>
+                                    <x-filament::button
+                                        color="gray"
+                                        size="xs"
+                                        wire:click="cancelEditing"
+                                    >
+                                        {{ __('capell-notes::note.actions.cancel_edit') }}
+                                    </x-filament::button>
+                                </div>
+                            </form>
+                        @else
+                            <p class="whitespace-pre-wrap break-words text-sm leading-6 text-gray-950 dark:text-white">{{ $note->body }}</p>
+                        @endif
 
                         <div
                             class="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-gray-500 dark:text-gray-400"
@@ -172,6 +218,27 @@
                                 </x-filament::button>
                             @endif
 
+                            @if ($this->editingNoteId !== $note->id && $this->canManageNote('edit', $note))
+                                <x-filament::button
+                                    color="gray"
+                                    size="xs"
+                                    wire:click="startEditing({{ $note->id }})"
+                                >
+                                    {{ __('capell-notes::note.actions.edit') }}
+                                </x-filament::button>
+                            @endif
+
+                            @if ($note->revisions_count > 0)
+                                <x-filament::button
+                                    color="gray"
+                                    size="xs"
+                                    wire:click="toggleHistory({{ $note->id }})"
+                                    :aria-expanded="$this->historyNoteId === $note->id ? 'true' : 'false'"
+                                >
+                                    {{ $this->historyNoteId === $note->id ? __('capell-notes::note.actions.hide_history') : __('capell-notes::note.actions.show_history') }}
+                                </x-filament::button>
+                            @endif
+
                             @if ($this->hasIncompleteAssignmentForCurrentUser($note))
                                 <x-filament::button
                                     color="gray"
@@ -182,6 +249,31 @@
                                 </x-filament::button>
                             @endif
                         </div>
+
+                        @if ($this->historyNoteId === $note->id)
+                            <section
+                                aria-label="{{ __('capell-notes::note.history.heading') }}"
+                                class="space-y-2 rounded-lg bg-gray-50 p-3 dark:bg-gray-900"
+                            >
+                                <h3 class="text-sm font-semibold">
+                                    {{ __('capell-notes::note.history.heading') }}
+                                </h3>
+                                @foreach ($this->revisionsFor($note) as $revision)
+                                    <div
+                                        class="space-y-1 border-t border-gray-200 pt-2 text-sm dark:border-gray-800"
+                                    >
+                                        <p class="text-xs text-gray-500 dark:text-gray-400">
+                                            {{ __('capell-notes::note.history.edited_by', ['user' => $this->userLabel($revision->editedBy)]) }}
+                                            <time
+                                                datetime="{{ $revision->created_at?->toIso8601String() }}"
+                                                >{{ $revision->created_at?->format('Y-m-d H:i') }}</time
+                                            >
+                                        </p>
+                                        <p class="whitespace-pre-wrap break-words">{{ $revision->body }}</p>
+                                    </div>
+                                @endforeach
+                            </section>
+                        @endif
                     </article>
                 @endforeach
             </div>

@@ -49,7 +49,8 @@
                 "Capell\\Notes\\Models\\Note",
                 "Capell\\Notes\\Models\\NoteAssignment",
                 "Capell\\Notes\\Models\\NoteMention",
-                "Capell\\Notes\\Models\\NoteReminder"
+                "Capell\\Notes\\Models\\NoteReminder",
+                "Capell\\Notes\\Models\\NoteRevision"
             ]
         },
         {
@@ -84,7 +85,8 @@
             "notes",
             "note_assignments",
             "note_mentions",
-            "note_reminders"
+            "note_reminders",
+            "note_revisions"
         ]
     },
     "commands": {
@@ -115,7 +117,10 @@
             "throttledRoutes": []
         },
         "sensitiveData": {
-            "encryptedFields": ["Capell\\Notes\\Models\\Note::$body"],
+            "encryptedFields": [
+                "Capell\\Notes\\Models\\Note::$body",
+                "Capell\\Notes\\Models\\NoteRevision::$body"
+            ],
             "hashedTokenFields": [],
             "redactedOutputClasses": [],
             "plaintextJustifications": []
@@ -179,8 +184,8 @@
                 "answer": "Not in a standard install. Notes work on pages only, unless another package registers its own records and edit screens with Notes."
             },
             {
-                "question": "Can colleagues reply to a note, or can I edit one I saved?",
-                "answer": "No to both. A note is a single message with no replies, and a saved note can't be edited, so add a new note instead."
+                "question": "Can I edit a note I saved?",
+                "answer": "Yes. Open Notes and choose Edit on a note you wrote. Anyone who can see the note can see its previous wording in History. Notes are single messages and do not take replies."
             },
             {
                 "question": "Who can read a note?",

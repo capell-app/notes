@@ -5,6 +5,7 @@ declare(strict_types=1);
 use Capell\Notes\Actions\AssignNoteUsersAction;
 use Capell\Notes\Actions\BuildUserAttentionCountsAction;
 use Capell\Notes\Actions\MentionNoteUsersAction;
+use Capell\Notes\Actions\UpdateNoteBodyAction;
 use Capell\Notes\Enums\NoteStatus;
 use Capell\Notes\Filament\Pages\NotesInboxPage;
 use Capell\Notes\Models\Note;
@@ -226,3 +227,103 @@ it('shows the effective reminder instant and an actionable unsent state to its a
         ->assertSee('2026-07-01 13:00 UTC')
         ->assertSee((string) __('capell-notes::note.reminder_unsent'));
 })->with([2, 3]);
+
+it('lets the author edit a note from the inbox and records the previous body as history', function (): void {
+    // Bug caught: the edit action existed with no way to reach it, so authors could not correct a note.
+    Gate::before(static fn (User $actor, string $ability): ?bool => $ability === 'update' ? true : null);
+    $author = User::factory()->create(['name' => 'Edith Author']);
+    $note = Note::factory()->create([
+        'author_type' => $author->getMorphClass(), 'author_id' => $author->id, 'body' => 'Original wording',
+    ]);
+    test()->actingAs($author);
+
+    Livewire::test(NotesInboxPage::class)
+        ->assertSee('wire:click="startEditing(' . $note->id . ')"', false)
+        ->assertDontSee((string) __('capell-notes::note.actions.show_history'))
+        ->call('startEditing', $note->id)
+        ->assertSet('editingBody', 'Original wording')
+        ->set('editingBody', 'Corrected wording')
+        ->call('saveEditing')
+        ->assertHasNoErrors()
+        ->assertSet('editingNoteId', null)
+        ->assertSee('Corrected wording')
+        ->assertSee((string) __('capell-notes::note.actions.show_history'))
+        ->call('toggleHistory', $note->id)
+        ->assertSee('Original wording')
+        ->assertSee('Edith Author');
+
+    expect($note->refresh()->body)->toBe('Corrected wording')
+        ->and($note->revisions()->pluck('body')->all())->toBe(['Original wording']);
+});
+
+it('rejects an empty edit without touching the note', function (): void {
+    // Bug caught: saving a blank body would silently keep the old text and close the form.
+    Gate::before(static fn (User $actor, string $ability): ?bool => $ability === 'update' ? true : null);
+    $author = User::factory()->create();
+    $note = Note::factory()->create([
+        'author_type' => $author->getMorphClass(), 'author_id' => $author->id, 'body' => 'Keep me',
+    ]);
+    test()->actingAs($author);
+
+    Livewire::test(NotesInboxPage::class)
+        ->call('startEditing', $note->id)
+        ->set('editingBody', '   ')
+        ->call('saveEditing')
+        ->assertHasErrors(['editingBody'])
+        ->assertSet('editingNoteId', $note->id);
+
+    expect($note->refresh()->body)->toBe('Keep me')
+        ->and($note->revisions()->count())->toBe(0);
+});
+
+it('forbids a participant who did not write the note from editing it', function (): void {
+    // Bug caught: any viewer could rewrite someone else's note through a forged Livewire call.
+    Gate::before(static fn (User $actor, string $ability): ?bool => $ability === 'update' ? true : null);
+    $viewer = User::factory()->create();
+    $note = Note::factory()->create(['body' => 'Not yours']);
+    MentionNoteUsersAction::run($note, [$viewer], mentionedBy: $note->author);
+    test()->actingAs($viewer);
+
+    Livewire::test(NotesInboxPage::class)
+        ->assertSee('Not yours')
+        ->assertDontSee('wire:click="startEditing(' . $note->id . ')"', false)
+        ->call('startEditing', $note->id)->assertForbidden();
+
+    $component = Livewire::test(NotesInboxPage::class)
+        ->set('editingNoteId', $note->id)
+        ->set('editingBody', 'Hijacked')
+        ->call('saveEditing')->assertForbidden();
+
+    expect($note->refresh()->body)->toBe('Not yours')
+        ->and($note->revisions()->count())->toBe(0);
+    expect($component)->not->toBeNull();
+});
+
+it('shows edit history only to users who may view the note', function (): void {
+    // Bug caught: revision text of a private note leaking to someone who cannot see the note itself.
+    Gate::before(static fn (User $actor, string $ability): ?bool => $ability === 'update' ? true : null);
+    $author = User::factory()->create();
+    $stranger = User::factory()->create();
+    $note = Note::factory()->private()->create([
+        'author_type' => $author->getMorphClass(), 'author_id' => $author->id, 'body' => 'Private first draft',
+    ]);
+    UpdateNoteBodyAction::run($note, 'Private second draft', $author);
+
+    test()->actingAs($stranger);
+    Livewire::test(NotesInboxPage::class)
+        ->call('toggleHistory', $note->id)
+        ->assertSet('historyNoteId', null)
+        ->assertDontSee('Private first draft');
+
+    $page = Livewire::test(NotesInboxPage::class)->instance();
+    throw_unless($page instanceof NotesInboxPage, LogicException::class);
+    expect($page->revisionsFor($note->refresh()))->toHaveCount(0);
+
+    test()->actingAs($author);
+    $page = Livewire::test(NotesInboxPage::class)
+        ->call('toggleHistory', $note->id)
+        ->assertSee('Private first draft')
+        ->instance();
+    throw_unless($page instanceof NotesInboxPage, LogicException::class);
+    expect($page->revisionsFor($note))->toHaveCount(1);
+});

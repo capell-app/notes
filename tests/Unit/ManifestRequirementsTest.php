@@ -19,6 +19,7 @@ use Capell\Notes\Models\Note;
 use Capell\Notes\Models\NoteAssignment;
 use Capell\Notes\Models\NoteMention;
 use Capell\Notes\Models\NoteReminder;
+use Capell\Notes\Models\NoteRevision;
 
 require_once dirname(__DIR__) . '/NotesTestCase.php';
 
@@ -68,6 +69,7 @@ it('declares implemented notes package contributions', function (): void {
             NoteAssignment::class,
             NoteMention::class,
             NoteReminder::class,
+            NoteRevision::class,
         ])
         ->and($scheduledJob['command'])->toBe('capell:notes:send-due-reminders')
         ->and(data_get($manifest, 'commands.demo'))->toBe('capell:notes-demo')
@@ -99,5 +101,6 @@ it('declares the notes storage tables required by package health checks', functi
         'note_assignments',
         'note_mentions',
         'note_reminders',
+        'note_revisions',
     ]);
 });

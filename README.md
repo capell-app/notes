@@ -4,18 +4,18 @@
 
 Leave a colleague a note on a page and it stays with that page instead of sitting in a chat thread. Add note is a button in the header of the page edit screen. You write the note, then pick who is responsible and who should be told. Anyone you pick must be able to edit that page, and note text is encrypted in the database.
 
-The author can resolve or reopen a note. Whoever a note is assigned to can mark their own part complete, and can resolve or reopen the note until they do. In a standard install, notes work on pages only, a note is a single message with no replies, and a saved note can't be edited.
+The author can edit, resolve or reopen a note. Anyone who can see the note can also see its edit history. Whoever a note is assigned to can mark their own part complete, and can resolve or reopen the note until they do. In a standard install, notes work on pages only. Each note is a single message with no replies.
 
 A colleague who opens their account menu sees Notes with a count of what needs their attention. The Notes page under Website lists what is assigned to them, where they are mentioned, and what is open or resolved.
 
-- **Price and availability:** Check current availability and price on the [Capell Marketplace listing](https://capell.app/extensions/notes).
-- **Licence:** Check the licence terms on the [Capell Marketplace listing](https://capell.app/extensions/notes).
-- **Requires:** `PHP ^8.4`, `capell-app/admin ^1.0.66`, `capell-app/core ^1.0.75`.
-- **Install:** `composer require capell-app/notes`.
+- **Price and availability:** Check current availability and price on the [Capell Marketplace listing](https://capell.app/marketplace/extensions/notes).
+- **Licence:** Check the licence terms on the [Capell Marketplace listing](https://capell.app/marketplace/extensions/notes).
+- **Requires:** `PHP ^8.4`, `capell-app/admin ^1.0.78`, `capell-app/core ^1.0.75`.
+- **Install:** `composer require capell-app/notes:@beta`.
 
 ## Quick Start
 
-1. Install the package: `composer require capell-app/notes`.
+1. Install the package: `composer require capell-app/notes:@beta`.
 2. See it working: run `php artisan capell:notes-demo`.
 3. Open the package admin surface at `/admin/notes` and confirm Notes is available.
 
@@ -30,7 +30,7 @@ Note creation, visibility, assignment, reminders, and notifications are split in
 
 ## Limits And Pitfalls
 
-- Install the required Capell packages at the versions in `composer.json`: `capell-app/admin ^1.0.66`, `capell-app/core ^1.0.75`.
+- Install the required Capell packages at the versions in `composer.json`: `capell-app/admin ^1.0.78`, `capell-app/core ^1.0.75`.
 - Run migrations before opening package resources or public routes.
 - Keep the host Laravel scheduler running so package-registered schedules can execute: `capell:notes:send-due-reminders (everyFiveMinutes; package registered)`.
 

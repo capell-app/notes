@@ -17,6 +17,7 @@ use Capell\Notes\Models\Note;
 use Capell\Notes\Models\NoteAssignment;
 use Capell\Notes\Models\NoteMention;
 use Capell\Notes\Models\NoteReminder;
+use Capell\Notes\Models\NoteRevision;
 use Capell\Notes\Policies\NotePolicy;
 use Capell\Notes\Support\NotesManager;
 use Capell\Notes\Support\UserAttentionCountsCache;
@@ -46,6 +47,7 @@ final class NotesServiceProvider extends AbstractPackageServiceProvider
                 '2026_05_10_190862_01_create_notes_tables',
                 '2026_07_10_000002_encrypt_note_bodies',
                 '2026_10_22_000001_add_note_reminder_schedule_state',
+                '2026_11_20_000001_create_note_revisions_table',
             ]);
     }
 
@@ -81,6 +83,7 @@ final class NotesServiceProvider extends AbstractPackageServiceProvider
             NoteAssignment::class,
             NoteMention::class,
             NoteReminder::class,
+            NoteRevision::class,
         ];
 
         $this->surface()->models($models);
@@ -95,6 +98,7 @@ final class NotesServiceProvider extends AbstractPackageServiceProvider
         CapellCore::registerProtectedTable(TableName::resolve('note_assignments'));
         CapellCore::registerProtectedTable(TableName::resolve('note_mentions'));
         CapellCore::registerProtectedTable(TableName::resolve('note_reminders'));
+        CapellCore::registerProtectedTable(TableName::resolve('note_revisions'));
 
         return $this;
     }

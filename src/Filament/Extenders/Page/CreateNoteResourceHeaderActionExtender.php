@@ -68,17 +68,20 @@ final class CreateNoteResourceHeaderActionExtender implements ResourceHeaderActi
                     ReminderDateTimePicker::make('reminder_due_at')
                         ->label(__('capell-notes::note.fields.reminder_due_at'))
                         ->seconds(false)
-                        ->native(false),
+                        ->native(false)
+                        ->visible(fn (): bool => $this->remindersAvailable()),
                     Select::make('reminder_recurrence')
                         ->label(__('capell-notes::note.fields.reminder_recurrence'))
                         ->options($this->recurrenceOptions())
-                        ->default(NoteReminderRecurrence::None->value),
+                        ->default(NoteReminderRecurrence::None->value)
+                        ->visible(fn (): bool => $this->remindersAvailable()),
                     TextInput::make('reminder_timezone')
                         ->label(__('capell-notes::note.fields.reminder_timezone'))
                         ->default((string) config('app.timezone', 'UTC'))
                         ->maxLength(64)
                         ->requiredWith('reminder_due_at')
-                        ->rules(['timezone:all']),
+                        ->rules(['timezone:all'])
+                        ->visible(fn (): bool => $this->remindersAvailable()),
                 ])
                 ->modalSubmitActionLabel(__('capell-notes::note.actions.create'))
                 ->authorize(fn (Model $record): bool => $this->canCreateFor($record))
@@ -107,6 +110,15 @@ final class CreateNoteResourceHeaderActionExtender implements ResourceHeaderActi
         ];
     }
 
+    /**
+     * Reminder fields are offered only while the schedule rollout flag allows new reminders,
+     * so a note never fails to save because of a field the form should not have shown.
+     */
+    private function remindersAvailable(): bool
+    {
+        return config('capell-notes.reminders.timezone_schedules_enabled', false) === true;
+    }
+
     private function canCreateFor(Model $record): bool
     {
         if (! CreateNoteAction::canCreateForSubject($record)) {
@@ -121,7 +133,7 @@ final class CreateNoteResourceHeaderActionExtender implements ResourceHeaderActi
      */
     private function reminderData(array $data): ?NoteReminderData
     {
-        if (! isset($data['reminder_due_at']) || $data['reminder_due_at'] === '') {
+        if (! $this->remindersAvailable() || ! isset($data['reminder_due_at']) || $data['reminder_due_at'] === '') {
             return null;
         }
 

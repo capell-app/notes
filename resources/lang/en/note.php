@@ -5,13 +5,19 @@ declare(strict_types=1);
 return [
     'actions' => [
         'complete_assignment' => 'Complete assignment',
+        'cancel_edit' => 'Cancel',
         'create' => 'Add note',
+        'edit' => 'Edit',
+        'hide_history' => 'Hide history',
+        'save_edit' => 'Save changes',
+        'show_history' => 'History',
         'open_notes' => 'Open Notes',
         'reopen' => 'Reopen',
         'resolve' => 'Resolve',
     ],
     'assigned_to_me' => 'Assigned to me',
     'due_today' => 'Due today',
+    'edit_label' => 'Edit note',
     'empty_inbox' => 'No notes match this view.',
     'fields' => [
         'assignees' => 'Assign to',
@@ -29,6 +35,10 @@ return [
         'mentions' => 'Unread mentions',
         'dueToday' => 'Due today',
         'overdue' => 'Overdue',
+    ],
+    'history' => [
+        'edited_by' => 'Edited by :user',
+        'heading' => 'Edit history',
     ],
     'inbox_title' => 'Notes',
     'labels' => [

@@ -11,6 +11,7 @@ use Capell\Notes\Models\Note;
 use Capell\Notes\Models\NoteAssignment;
 use Capell\Notes\Models\NoteMention;
 use Capell\Notes\Models\NoteReminder;
+use Capell\Notes\Models\NoteRevision;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Collection;
@@ -26,6 +27,7 @@ final class NotesHealthCheck implements ChecksExtensionHealth
         'note_assignment' => NoteAssignment::class,
         'note_mention' => NoteMention::class,
         'note_reminder' => NoteReminder::class,
+        'note_revision' => NoteRevision::class,
     ];
 
     /**
@@ -36,6 +38,7 @@ final class NotesHealthCheck implements ChecksExtensionHealth
         'note_assignments',
         'note_mentions',
         'note_reminders',
+        'note_revisions',
     ];
 
     public static function compatibleCapellApiVersion(): string

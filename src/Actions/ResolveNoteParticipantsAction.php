@@ -20,6 +20,9 @@ final class ResolveNoteParticipantsAction
     use AsFake;
     use AsObject;
 
+    /** Most rows read for a policy check that cannot run in SQL. */
+    private const int MAX_POLICY_CANDIDATES = 500;
+
     /**
      * @param  iterable<int|string>  $ids
      * @return list<Model>
@@ -53,6 +56,8 @@ final class ResolveNoteParticipantsAction
                 });
             })
             ->lazy(100)
+            // The per-user policy cannot run in SQL, so the candidates it reads are capped.
+            ->take(self::MAX_POLICY_CANDIDATES)
             ->filter(fn (Model $participant): bool => Gate::forUser($participant)->allows('update', $subject))
             ->take(max(1, min($limit, 100)))
             ->values()

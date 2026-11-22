@@ -20,6 +20,16 @@ final class NotePolicy
         return $this->canManageLifecycle($user, $note);
     }
 
+    public function edit(Model $user, Note $note): bool
+    {
+        $userKey = $user->getKey();
+
+        return CanViewNoteAction::run($note, $user)
+            && $note->author_type === $user->getMorphClass()
+            && (is_int($userKey) || is_string($userKey))
+            && $note->author_id === $userKey;
+    }
+
     public function reopen(Model $user, Note $note): bool
     {
         return $this->canManageLifecycle($user, $note);

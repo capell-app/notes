@@ -21,6 +21,9 @@ final class BuildUserInboxNotesAction
     use AsFake;
     use AsObject;
 
+    /** Most rows read for a policy check that cannot run in SQL. */
+    private const int MAX_POLICY_CANDIDATES = 500;
+
     /**
      * @return Collection<int, Note>
      */
@@ -34,6 +37,7 @@ final class BuildUserInboxNotesAction
                 'subject',
                 'reminder',
             ])
+            ->withCount('revisions')
             ->when($status instanceof NoteStatus, fn (Builder $query): Builder => $query->where('status', $status))
             ->where(function (Builder $query) use ($user): void {
                 $query
@@ -66,6 +70,8 @@ final class BuildUserInboxNotesAction
             ->latest('updated_at')
             ->latest('id')
             ->lazy(100)
+            // The subject policy cannot run in SQL, so the candidates it reads are capped.
+            ->take(self::MAX_POLICY_CANDIDATES)
             ->filter(fn (Note $note): bool => CanViewNoteAction::run($note, $user))
             ->skip(max(0, $offset))
             ->take(max(1, $limit));

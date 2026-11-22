@@ -16,6 +16,7 @@ use Capell\Notes\Models\NoteReminder;
 use Capell\Tests\Fixtures\Models\User;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 
 require_once dirname(__DIR__, 2) . '/NotesTestCase.php';
@@ -205,6 +206,31 @@ it('fills a subject note slice after excluding private notes for other participa
     $visible = Note::factory()->count(2)->create(['subject_type' => $subject->getMorphClass(), 'subject_id' => $subject->id]);
     Note::factory()->private()->count(4)->create(['subject_type' => $subject->getMorphClass(), 'subject_id' => $subject->id]);
     expect(BuildSubjectNotesAction::run($subject, $user, limit: 2)->modelKeys())->toEqualCanonicalizing($visible->modelKeys());
+});
+
+it('reads one page of subject notes when many newer private notes belong to other people', function (): void {
+    Gate::before(static fn (User $user, string $ability): ?bool => $ability === 'update' ? true : null);
+    $subject = User::factory()->create();
+    $user = User::factory()->create();
+    $visible = Note::factory()->count(2)->create(['subject_type' => $subject->getMorphClass(), 'subject_id' => $subject->id, 'updated_at' => now()->subYear()]);
+    Note::factory()->private()->count(120)->create(['subject_type' => $subject->getMorphClass(), 'subject_id' => $subject->id]);
+    DB::enableQueryLog();
+
+    $notes = BuildSubjectNotesAction::run($subject, $user, limit: 2);
+
+    $table = (new Note)->getTable();
+    $noteReads = collect(DB::getQueryLog())->filter(fn (array $query): bool => str_starts_with((string) $query['query'], sprintf('select * from "%s" where', $table)));
+
+    expect($notes->modelKeys())->toEqualCanonicalizing($visible->modelKeys())
+        ->and($noteReads)->toHaveCount(1);
+});
+
+it('returns no subject notes when the user cannot update the subject', function (): void {
+    Gate::before(static fn (User $user, string $ability): ?bool => $ability === 'update' ? false : null);
+    $subject = User::factory()->create();
+    Note::factory()->create(['subject_type' => $subject->getMorphClass(), 'subject_id' => $subject->id]);
+
+    expect(BuildSubjectNotesAction::run($subject, User::factory()->create()))->toBeEmpty();
 });
 
 it('fills participant search results from permitted editors beyond denied candidates', function (): void {

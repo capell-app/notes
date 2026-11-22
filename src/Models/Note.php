@@ -85,6 +85,16 @@ class Note extends Model
     }
 
     /**
+     * Earlier bodies of this note, newest edit first.
+     *
+     * @return HasMany<NoteRevision, $this>
+     */
+    public function revisions(): HasMany
+    {
+        return $this->hasMany(NoteRevision::class)->latest('id');
+    }
+
+    /**
      * @return HasOne<NoteReminder, $this>
      */
     public function reminder(): HasOne
@@ -99,6 +109,7 @@ class Note extends Model
             $note->assignments()->delete();
             $note->mentions()->delete();
             $note->reminder()->delete();
+            $note->revisions()->delete();
         });
     }
 

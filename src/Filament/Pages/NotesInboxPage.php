@@ -9,12 +9,15 @@ use Capell\Admin\Enums\NavigationGroupEnum;
 use Capell\Notes\Actions\BuildUserInboxNotesAction;
 use Capell\Notes\Actions\CanViewNoteAction;
 use Capell\Notes\Actions\CompleteNoteAssignmentAction;
+use Capell\Notes\Actions\CreateNoteAction;
 use Capell\Notes\Actions\MarkNoteMentionsReadAction;
 use Capell\Notes\Actions\ReopenNoteAction;
 use Capell\Notes\Actions\ResolveNoteAction;
+use Capell\Notes\Actions\UpdateNoteBodyAction;
 use Capell\Notes\Data\UserAttentionCountData;
 use Capell\Notes\Enums\NoteStatus;
 use Capell\Notes\Models\Note;
+use Capell\Notes\Models\NoteRevision;
 use Capell\Notes\Support\UserAttentionCountsCache;
 use Filament\Pages\Page;
 use Filament\Support\Icons\Heroicon;
@@ -32,6 +35,12 @@ final class NotesInboxPage extends Page
     public int $inboxPage = 1;
 
     public bool $hasMoreNotes = false;
+
+    public ?int $editingNoteId = null;
+
+    public string $editingBody = '';
+
+    public ?int $historyNoteId = null;
 
     /** @var array{assigned: int, dueToday: int, overdue: int, mentions: int}|null */
     public ?array $initialCounts = null;
@@ -177,6 +186,81 @@ final class NotesInboxPage extends Page
 
         CompleteNoteAssignmentAction::run($note, $user);
         $this->forgetAttentionCounts();
+    }
+
+    public function startEditing(int $noteId): void
+    {
+        $user = $this->user();
+        $note = $this->noteVisibleToCurrentUser($noteId);
+
+        if (! $user instanceof Model || ! $note instanceof Note) {
+            return;
+        }
+
+        Gate::forUser($user)->authorize('edit', $note);
+
+        $this->editingNoteId = $note->id;
+        $this->editingBody = $note->body;
+        $this->resetErrorBag('editingBody');
+    }
+
+    public function cancelEditing(): void
+    {
+        $this->editingNoteId = null;
+        $this->editingBody = '';
+        $this->resetErrorBag('editingBody');
+    }
+
+    public function saveEditing(): void
+    {
+        $user = $this->user();
+        $note = $this->editingNoteId === null ? null : $this->noteVisibleToCurrentUser($this->editingNoteId);
+
+        if (! $user instanceof Model || ! $note instanceof Note) {
+            return;
+        }
+
+        Gate::forUser($user)->authorize('edit', $note);
+
+        $this->validate(
+            ['editingBody' => ['required', 'string', 'max:' . CreateNoteAction::MAX_BODY_LENGTH]],
+            [
+                'editingBody.required' => (string) __('capell-notes::note.validation.body_required'),
+                'editingBody.max' => (string) __('capell-notes::note.validation.body_max', ['max' => CreateNoteAction::MAX_BODY_LENGTH]),
+            ],
+        );
+
+        UpdateNoteBodyAction::run($note, $this->editingBody, $user);
+        $this->cancelEditing();
+    }
+
+    public function toggleHistory(int $noteId): void
+    {
+        if ($this->historyNoteId === $noteId) {
+            $this->historyNoteId = null;
+
+            return;
+        }
+
+        if ($this->noteVisibleToCurrentUser($noteId) instanceof Note) {
+            $this->historyNoteId = $noteId;
+        }
+    }
+
+    /**
+     * Earlier bodies of a note, newest edit first. Empty unless the current user may view the note.
+     *
+     * @return Collection<int, NoteRevision>
+     */
+    public function revisionsFor(Note $note): Collection
+    {
+        $user = $this->user();
+
+        if (! $user instanceof Model || ! CanViewNoteAction::run($note, $user)) {
+            return new Collection;
+        }
+
+        return $note->revisions()->with('editedBy')->limit(50)->get();
     }
 
     public function userLabel(?Model $user): string

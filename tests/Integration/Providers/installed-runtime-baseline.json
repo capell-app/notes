@@ -4,13 +4,13 @@
     "scenarios": {
         "default": {
             "source": {
-                "ref": "c92ce184be4d91c372f35ca125ea25f6c1308599",
-                "commit": "c92ce184be4d91c372f35ca125ea25f6c1308599",
+                "ref": "HEAD",
+                "commit": "28e7f4047a23b100a9c801723194f97f7ceec742",
                 "providers": {
                     "Providers/AdminServiceProvider.php": "335f74e8cae1459953a8b79438845bfe335f1e717574d75ce40619bf5de512d8",
                     "Providers/ConsoleServiceProvider.php": "ff4052882cf651e65b490285be0dc2af250729e065d4ee10eef221ba50a26aa5",
-                    "Providers/MigrationMetadataServiceProvider.php": "bedf653c34f79f74cf4cba669c8382e35b6a7ad689abafc2ed4432f1a582d83a",
-                    "Providers/NotesServiceProvider.php": "4f7acbf25f902959760293b3a1784ca66d5c5e9bb766b47317820b05237e2df7"
+                    "Providers/MigrationMetadataServiceProvider.php": "e8b682ca046b819ca3002e733fffca5dc0b27f37cd05aab977161ae5d839b50b",
+                    "Providers/NotesServiceProvider.php": "48ab60e79034cc4306e9d033d1892b4ecbc82e9f193ee9f09a80d8bc44dedc37"
                 },
                 "configure": null
             },
@@ -92,7 +92,7 @@
                     "eloquent.deleting: Capell\\Notes\\Models\\Note": [
                         [
                             "<package>/src/Models/Note.php",
-                            "Capell\\Notes\\Models\\Note(Capell\\Notes\\Models\\Note $note):void source=a3a98a3c0f152d6f4e24152750bb4bd8",
+                            "Capell\\Notes\\Models\\Note(Capell\\Notes\\Models\\Note $note):void source=3c6aa03badad2771337a76302288c057",
                             []
                         ]
                     ],
@@ -131,17 +131,20 @@
                     "Note": "Capell\\Notes\\Models\\Note",
                     "NoteAssignment": "Capell\\Notes\\Models\\NoteAssignment",
                     "NoteMention": "Capell\\Notes\\Models\\NoteMention",
-                    "NoteReminder": "Capell\\Notes\\Models\\NoteReminder"
+                    "NoteReminder": "Capell\\Notes\\Models\\NoteReminder",
+                    "NoteRevision": "Capell\\Notes\\Models\\NoteRevision"
                 },
                 "morphs": {
                     "Capell\\Notes\\Models\\Note": "Capell\\Notes\\Models\\Note",
                     "Capell\\Notes\\Models\\NoteAssignment": "Capell\\Notes\\Models\\NoteAssignment",
                     "Capell\\Notes\\Models\\NoteMention": "Capell\\Notes\\Models\\NoteMention",
                     "Capell\\Notes\\Models\\NoteReminder": "Capell\\Notes\\Models\\NoteReminder",
+                    "Capell\\Notes\\Models\\NoteRevision": "Capell\\Notes\\Models\\NoteRevision",
                     "note": "Capell\\Notes\\Models\\Note",
                     "note_assignment": "Capell\\Notes\\Models\\NoteAssignment",
                     "note_mention": "Capell\\Notes\\Models\\NoteMention",
-                    "note_reminder": "Capell\\Notes\\Models\\NoteReminder"
+                    "note_reminder": "Capell\\Notes\\Models\\NoteReminder",
+                    "note_revision": "Capell\\Notes\\Models\\NoteRevision"
                 },
                 "policies": {
                     "Capell\\Notes\\Models\\Note": "Capell\\Notes\\Policies\\NotePolicy"
@@ -150,13 +153,15 @@
                     "notes",
                     "note_assignments",
                     "note_mentions",
-                    "note_reminders"
+                    "note_reminders",
+                    "note_revisions"
                 ],
                 "protected-tables": [
                     "notes",
                     "note_assignments",
                     "note_mentions",
-                    "note_reminders"
+                    "note_reminders",
+                    "note_revisions"
                 ],
                 "receipt-emissions": [
                     [
@@ -193,6 +198,14 @@
                     ],
                     [
                         "model",
+                        "model:Capell\\Notes\\Models\\NoteRevision",
+                        "Capell\\Notes\\Models\\NoteRevision",
+                        "Capell\\Core\\Support\\CapellCoreManager",
+                        "runtime",
+                        "context"
+                    ],
+                    [
+                        "model",
                         "model:Capell\\Notes\\Models\\Note",
                         "Capell\\Notes\\Models\\Note",
                         "Capell\\Core\\Support\\CapellCoreManager",
@@ -219,6 +232,14 @@
                         "model",
                         "model:Capell\\Notes\\Models\\NoteReminder",
                         "Capell\\Notes\\Models\\NoteReminder",
+                        "Capell\\Core\\Support\\CapellCoreManager",
+                        "runtime",
+                        "context"
+                    ],
+                    [
+                        "model",
+                        "model:Capell\\Notes\\Models\\NoteRevision",
+                        "Capell\\Notes\\Models\\NoteRevision",
                         "Capell\\Core\\Support\\CapellCoreManager",
                         "runtime",
                         "context"
@@ -275,6 +296,11 @@
                             "model",
                             "model:Capell\\Notes\\Models\\NoteReminder",
                             "Capell\\Notes\\Models\\NoteReminder"
+                        ],
+                        [
+                            "model",
+                            "model:Capell\\Notes\\Models\\NoteRevision",
+                            "Capell\\Notes\\Models\\NoteRevision"
                         ]
                     ]
                 },
@@ -348,7 +374,8 @@
                             "Note": "Capell\\Notes\\Models\\Note",
                             "NoteAssignment": "Capell\\Notes\\Models\\NoteAssignment",
                             "NoteMention": "Capell\\Notes\\Models\\NoteMention",
-                            "NoteReminder": "Capell\\Notes\\Models\\NoteReminder"
+                            "NoteReminder": "Capell\\Notes\\Models\\NoteReminder",
+                            "NoteRevision": "Capell\\Notes\\Models\\NoteRevision"
                         }
                     },
                     "Capell\\Core\\Support\\Migration\\MigrationRootRegistry": {
@@ -362,6 +389,9 @@
                                             "note_assignments",
                                             "note_mentions",
                                             "note_reminders"
+                                        ],
+                                        "2026_11_20_000001_create_note_revisions_table": [
+                                            "note_revisions"
                                         ]
                                     }
                                 }
@@ -459,6 +489,9 @@
                                             "note_assignments",
                                             "note_mentions",
                                             "note_reminders"
+                                        ],
+                                        "2026_11_20_000001_create_note_revisions_table": [
+                                            "note_revisions"
                                         ]
                                     }
                                 }

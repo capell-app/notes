@@ -10,6 +10,7 @@ use Capell\Notes\Filament\Extenders\Page\CreateNoteResourceHeaderActionExtender;
 use Capell\Notes\Models\Note;
 use Capell\Notes\Support\NotesManager;
 use Capell\Tests\Fixtures\Models\User;
+use Filament\Forms\Components\Field;
 use Filament\Forms\Components\Select;
 use Filament\Schemas\Concerns\InteractsWithSchemas;
 use Filament\Schemas\Contracts\HasSchemas;
@@ -191,3 +192,36 @@ it('searches and restores only permitted assignees through the real form selecto
             ->and($component->getOptionLabels())->toBe([$permitted->id => $permitted->name]);
     }
 });
+
+it('offers reminder fields only while new reminders are allowed and saves the note without them otherwise', function (bool $enabled): void {
+    config(['capell-notes.reminders.timezone_schedules_enabled' => $enabled]);
+    Gate::before(static fn (): bool => true);
+    $author = User::factory()->create();
+    test()->actingAs($author);
+    $host = new class extends Component implements HasSchemas
+    {
+        use InteractsWithSchemas;
+
+        /** @var array<string, mixed> */
+        public array $formData = [];
+    };
+    $action = (new CreateNoteResourceHeaderActionExtender)->actions()[0]->record($author);
+    $schema = $action->getSchema(Schema::make($host)->model($author)->statePath('formData'));
+    throw_unless($schema instanceof Schema, LogicException::class);
+    $visible = collect($schema->getComponents())
+        ->filter(fn ($component): bool => $component instanceof Field && $component->isVisible())
+        ->map(fn (Field $component): string => $component->getName())
+        ->all();
+
+    expect(in_array('reminder_due_at', $visible, true))->toBe($enabled)
+        ->and(in_array('reminder_timezone', $visible, true))->toBe($enabled);
+
+    // A submission that still carries reminder values must not roll the note back while reminders are off.
+    $action->evaluate($action->getActionFunction(), ['record' => $author, 'data' => [
+        'body' => 'Follow up', 'visibility' => NoteVisibility::Private->value,
+        'assignee_ids' => [$author->id], 'reminder_due_at' => '2026-07-01 09:00:00', 'reminder_timezone' => 'UTC',
+    ]]);
+
+    expect(Note::query()->count())->toBe(1)
+        ->and(Note::query()->firstOrFail()->reminder !== null)->toBe($enabled);
+})->with([[true], [false]]);

@@ -1,4 +1,12 @@
 {
+    "create_note_revisions_table": {
+        "names": [
+            "2026_11_20_000001_create_note_revisions_table"
+        ],
+        "sha256": [
+            "195c8f3082ee87e031d31e1916b6e902b732221820f2c610d6113f409ff29bc2"
+        ]
+    },
     "create_notes_tables": {
         "names": [
             "2026_05_10_190862_01_create_notes_tables"

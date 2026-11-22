@@ -51,10 +51,19 @@
         ]
     },
     {
-        "claim": "A note is a single message with no replies, and a saved note can't be edited.",
+        "claim": "Each note is a single message with no replies.",
         "evidence": [
             "src/Models/Note.php",
             "resources/views/filament/pages/notes-inbox.blade.php"
+        ]
+    },
+    {
+        "claim": "The author can edit a note, and anyone who can see the note can see its edit history.",
+        "evidence": [
+            "src/Policies/NotePolicy.php",
+            "src/Actions/UpdateNoteBodyAction.php",
+            "src/Filament/Pages/NotesInboxPage.php",
+            "tests/Feature/Filament/NotesInboxPageTest.php"
         ]
     },
     {
