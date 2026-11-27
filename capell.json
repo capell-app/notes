@@ -6,6 +6,7 @@
     "kind": "package",
     "capellApiVersion": "^1.0",
     "version": "1.0.0",
+    "launchStatus": "shipped",
     "description": "Leave notes on pages, assign them to colleagues and track them in an inbox with a count in the account menu.",
     "product": {
         "group": "Capell Engagement & CRM",

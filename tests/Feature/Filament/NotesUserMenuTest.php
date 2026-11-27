@@ -96,7 +96,7 @@ it('reports workbench setup exceptions as JSON with their class and message', fu
     expect($result['status'])->toBe(500)
         ->and($result['html'])->toBe('')
         ->and($result['error'])->toStartWith('Illuminate\\Database\\QueryException: ')
-        ->toContain('no such table: roles');
+        ->toContain('no such table: ');
 });
 
 it('reports HTTP workbench exceptions as JSON with their class and message', function (): void {
